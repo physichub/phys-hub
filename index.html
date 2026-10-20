@@ -76,13 +76,13 @@
             <p class="text-lg text-slate-400">Выберите класс, чтобы открыть темы, понятные объяснения и формулы.</p>
         </div>
 
-        <!-- Кнопки выбора класса -->
+        <!-- Кнопки выбора класса с добавленными ID -->
         <div class="flex flex-wrap justify-center gap-3 mb-12" id="class-buttons">
-            <button onclick="loadClass(7)" class="class-btn px-6 py-3 rounded-full font-semibold text-sm transition-all duration-300 bg-white/5 border border-white/10 hover:bg-brand-blue/20 hover:border-brand-blue/50 text-slate-300">7 класс</button>
-            <button onclick="loadClass(8)" class="class-btn px-6 py-3 rounded-full font-semibold text-sm transition-all duration-300 bg-white/5 border border-white/10 hover:bg-brand-blue/20 hover:border-brand-blue/50 text-slate-300">8 класс</button>
-            <button onclick="loadClass(9)" class="class-btn px-6 py-3 rounded-full font-semibold text-sm transition-all duration-300 bg-white/5 border border-white/10 hover:bg-brand-blue/20 hover:border-brand-blue/50 text-slate-300">9 класс</button>
-            <button onclick="loadClass(10)" class="class-btn px-6 py-3 rounded-full font-semibold text-sm transition-all duration-300 bg-white/5 border border-white/10 hover:bg-brand-blue/20 hover:border-brand-blue/50 text-slate-300">10 класс</button>
-            <button onclick="loadClass(11)" class="class-btn px-6 py-3 rounded-full font-semibold text-sm transition-all duration-300 bg-white/5 border border-white/10 hover:bg-brand-blue/20 hover:border-brand-blue/50 text-slate-300">11 класс</button>
+            <button id="btn-7" onclick="loadClass(7)" class="class-btn px-6 py-3 rounded-full font-semibold text-sm transition-all duration-300 bg-white/5 border border-white/10 hover:bg-brand-blue/20 hover:border-brand-blue/50 text-slate-300">7 класс</button>
+            <button id="btn-8" onclick="loadClass(8)" class="class-btn px-6 py-3 rounded-full font-semibold text-sm transition-all duration-300 bg-white/5 border border-white/10 hover:bg-brand-blue/20 hover:border-brand-blue/50 text-slate-300">8 класс</button>
+            <button id="btn-9" onclick="loadClass(9)" class="class-btn px-6 py-3 rounded-full font-semibold text-sm transition-all duration-300 bg-white/5 border border-white/10 hover:bg-brand-blue/20 hover:border-brand-blue/50 text-slate-300">9 класс</button>
+            <button id="btn-10" onclick="loadClass(10)" class="class-btn px-6 py-3 rounded-full font-semibold text-sm transition-all duration-300 bg-white/5 border border-white/10 hover:bg-brand-blue/20 hover:border-brand-blue/50 text-slate-300">10 класс</button>
+            <button id="btn-11" onclick="loadClass(11)" class="class-btn px-6 py-3 rounded-full font-semibold text-sm transition-all duration-300 bg-white/5 border border-white/10 hover:bg-brand-blue/20 hover:border-brand-blue/50 text-slate-300">11 класс</button>
         </div>
 
         <!-- Контейнер для вывода тем -->
@@ -208,20 +208,24 @@
 
         // Функция отрисовки контента
         function loadClass(grade) {
-            // 1. Обновляем стили кнопок (выделяем активную)
+            // 1. Сбрасываем стили у всех кнопок
             document.querySelectorAll('.class-btn').forEach(btn => {
-                btn.classList.remove('bg-brand-blue', 'text-white', 'border-brand-blue');
+                btn.classList.remove('bg-brand-blue', 'text-white', 'border-brand-blue', 'shadow-[0_0_15px_rgba(14,165,233,0.5)]');
                 btn.classList.add('bg-white/5', 'text-slate-300', 'border-white/10');
             });
-            const clickedBtn = document.querySelector(`.class-btn[onclick="loadClass(${grade})"]`);
-            clickedBtn.classList.remove('bg-white/5', 'text-slate-300', 'border-white/10');
-            clickedBtn.classList.add('bg-brand-blue', 'text-white', 'border-brand-blue', 'shadow-[0_0_15px_rgba(14,165,233,0.5)]');
+            
+            // 2. Выделяем нажатую кнопку (теперь ищем по надежному ID)
+            const clickedBtn = document.getElementById('btn-' + grade);
+            if (clickedBtn) {
+                clickedBtn.classList.remove('bg-white/5', 'text-slate-300', 'border-white/10');
+                clickedBtn.classList.add('bg-brand-blue', 'text-white', 'border-brand-blue', 'shadow-[0_0_15px_rgba(14,165,233,0.5)]');
+            }
 
-            // 2. Получаем данные для класса
+            // 3. Получаем данные для класса
             const data = physicsData[grade];
             const contentArea = document.getElementById('content-area');
             
-            // 3. Формируем HTML
+            // 4. Формируем HTML карточек
             let html = `
                 <div class="fade-in mb-8">
                     <h2 class="text-3xl font-bold text-white border-b border-white/10 pb-4 inline-block pr-10">${data.title}</h2>
@@ -230,7 +234,6 @@
             `;
 
             data.topics.forEach((topic, index) => {
-                // Добавляем задержку анимации для каждой карточки
                 const delay = index * 0.1; 
                 html += `
                     <div class="glass-card rounded-2xl p-6 fade-in" style="animation-delay: ${delay}s">
@@ -258,12 +261,9 @@
 
             html += `</div>`;
             
-            // Вставляем сгенерированный HTML
+            // 5. Вставляем HTML на страницу
             contentArea.innerHTML = html;
         }
-
-        // Загрузить 7 класс по умолчанию при открытии (по желанию)
-        // loadClass(7);
     </script>
 </body>
 </html>
