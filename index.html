@@ -73,11 +73,18 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
         
         #model-3d-container {
-            width: 100%; height: 220px; display: flex; justify-content: center; align-items: center; pointer-events: none; position: relative;
+            width: 100%; display: flex; justify-content: center; align-items: center; pointer-events: none; position: relative;
+            height: 220px;
         }
+        @media (min-width: 768px) { #model-3d-container { height: 350px; } }
+        @media (min-width: 1024px) { #model-3d-container { height: 450px; } }
+
         #model-3d-container::before {
             content: ''; position: absolute; width: 150px; height: 150px;
             background: rgba(14, 165, 233, 0.2); filter: blur(40px); border-radius: 50%; z-index: -1;
+        }
+        @media (min-width: 1024px) {
+            #model-3d-container::before { width: 300px; height: 300px; filter: blur(70px); }
         }
     </style>
 </head>
@@ -86,99 +93,100 @@
     <div id="particles-js"></div>
     <div id="mouse-glow"></div>
 
-    <!-- НАВИГАЦИЯ: Логотип работает как кнопка ДОМОЙ -->
-    <nav class="w-full p-6 flex justify-between items-center relative z-50">
-        <div class="flex items-center gap-2 cursor-pointer group" onclick="goHome()">
-            <svg class="w-8 h-8 text-brand-blue drop-shadow-[0_0_10px_rgba(14,165,233,0.8)] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
-            <span class="text-2xl font-bold tracking-tight text-white drop-shadow-md group-hover:text-brand-blue transition-colors">Phys<span class="text-brand-blue group-hover:text-white transition-colors">Hub</span></span>
+    <!-- НАВИГАЦИЯ -->
+    <nav class="w-full p-6 md:p-10 flex justify-between items-center relative z-50">
+        <div class="flex items-center gap-2 md:gap-4 cursor-pointer group" onclick="goHome()">
+            <svg class="w-8 h-8 md:w-12 md:h-12 text-brand-blue drop-shadow-[0_0_10px_rgba(14,165,233,0.8)] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
+            <span class="text-2xl md:text-4xl font-bold tracking-tight text-white drop-shadow-md group-hover:text-brand-blue transition-colors">Phys<span class="text-brand-blue group-hover:text-white transition-colors">Hub</span></span>
         </div>
     </nav>
 
-    <!-- ВЕРХНИЙ БЛОК: Заголовок, поиск, классы -->
-    <header class="container mx-auto px-6 pt-2 pb-4 relative z-10">
-        <div class="text-center max-w-3xl mx-auto mb-8 relative">
-            <p class="font-mono text-sm italic text-slate-400 opacity-80 absolute -top-6 left-1/2 transform -translate-x-1/2">by sahar²¹</p>
-            <h1 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
+    <!-- ВЕРХНИЙ БЛОК -->
+    <header class="container mx-auto px-6 md:px-12 pt-2 md:pt-6 pb-4 relative z-10">
+        <div class="text-center max-w-3xl md:max-w-5xl mx-auto mb-8 md:mb-16 relative">
+            <p class="font-mono text-sm md:text-lg italic text-slate-400 opacity-80 absolute -top-6 md:-top-10 left-1/2 transform -translate-x-1/2">by sahar²¹</p>
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-4 md:mb-8 tracking-tight text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)] leading-tight">
                 Школьный курс <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 drop-shadow-[0_0_15px_rgba(14,165,233,0.5)]">Физики</span>
             </h1>
         </div>
 
-        <div class="max-w-md mx-auto mb-8 relative z-20 transition-transform duration-300 hover:scale-[1.02]">
-            <input type="text" id="search-input" placeholder="Поиск по темам и формулам..." class="w-full bg-black/40 border border-white/20 rounded-full py-3 px-6 text-white placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue backdrop-blur-lg shadow-[0_5px_15px_-5px_rgba(0,0,0,0.5)] transition-all text-sm font-medium">
-            <svg class="w-5 h-5 absolute right-5 top-3 text-brand-blue opacity-70 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <!-- УВЕЛИЧЕННАЯ СТРОКА ПОИСКА -->
+        <div class="max-w-md md:max-w-2xl lg:max-w-3xl mx-auto mb-8 md:mb-16 relative z-20 transition-transform duration-300 hover:scale-[1.02]">
+            <input type="text" id="search-input" placeholder="Поиск по темам и формулам..." class="w-full bg-black/40 border border-white/20 rounded-full py-3 px-6 md:py-5 md:px-10 text-white placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue backdrop-blur-lg shadow-[0_5px_15px_-5px_rgba(0,0,0,0.5)] transition-all text-sm md:text-xl font-medium">
+            <svg class="w-5 h-5 md:w-8 md:h-8 absolute right-5 md:right-8 top-3 md:top-4 lg:top-5 text-brand-blue opacity-70 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
 
-        <div class="flex flex-wrap justify-center gap-3 mb-2 relative z-20">
-            <button id="btn-7" onclick="loadClass(7)" class="class-btn px-5 py-2 rounded-full font-semibold text-sm transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">7 класс</button>
-            <button id="btn-8" onclick="loadClass(8)" class="class-btn px-5 py-2 rounded-full font-semibold text-sm transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">8 класс</button>
-            <button id="btn-9" onclick="loadClass(9)" class="class-btn px-5 py-2 rounded-full font-semibold text-sm transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">9 класс</button>
-            <button id="btn-10" onclick="loadClass(10)" class="class-btn px-5 py-2 rounded-full font-semibold text-sm transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">10 класс</button>
-            <button id="btn-11" onclick="loadClass(11)" class="class-btn px-5 py-2 rounded-full font-semibold text-sm transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">11 класс</button>
+        <!-- КНОПКИ КЛАССОВ -->
+        <div class="flex flex-wrap justify-center gap-3 md:gap-5 mb-4 md:mb-8 relative z-20">
+            <button id="btn-7" onclick="loadClass(7)" class="class-btn px-5 py-2 md:px-8 md:py-4 rounded-full font-semibold text-sm md:text-xl transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">7 класс</button>
+            <button id="btn-8" onclick="loadClass(8)" class="class-btn px-5 py-2 md:px-8 md:py-4 rounded-full font-semibold text-sm md:text-xl transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">8 класс</button>
+            <button id="btn-9" onclick="loadClass(9)" class="class-btn px-5 py-2 md:px-8 md:py-4 rounded-full font-semibold text-sm md:text-xl transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">9 класс</button>
+            <button id="btn-10" onclick="loadClass(10)" class="class-btn px-5 py-2 md:px-8 md:py-4 rounded-full font-semibold text-sm md:text-xl transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">10 класс</button>
+            <button id="btn-11" onclick="loadClass(11)" class="class-btn px-5 py-2 md:px-8 md:py-4 rounded-full font-semibold text-sm md:text-xl transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">11 класс</button>
         </div>
     </header>
 
     <!-- 3D МОДЕЛЬ -->
     <div id="model-3d-container" class="drop-shadow-[0_0_25px_rgba(14,165,233,0.6)] relative z-10"></div>
 
-    <!-- ОСНОВНОЙ КОНТЕНТ (Секции переключаются) -->
-    <main class="container mx-auto px-6 pb-20 relative z-10">
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <main class="container mx-auto px-6 md:px-12 pb-20 relative z-10">
         
-        <!-- СЕКЦИЯ: ГЛАВНОЕ МЕНЮ (ПО УМОЛЧАНИЮ) -->
-        <div id="welcome-section" class="max-w-5xl mx-auto block">
-            <div class="glass-card vanilla-tilt-card rounded-2xl p-8 fade-in mb-8">
+        <!-- СЕКЦИЯ: ГЛАВНОЕ МЕНЮ -->
+        <div id="welcome-section" class="max-w-5xl lg:max-w-7xl mx-auto block">
+            <div class="glass-card vanilla-tilt-card rounded-2xl p-8 md:p-14 fade-in mb-8 md:mb-16">
                 <div class="glass-card-inner">
-                    <h2 class="text-3xl font-bold text-white mb-4 drop-shadow-md">Добро пожаловать в справочник!</h2>
-                    <p class="text-lg text-slate-300 mb-6 leading-relaxed">
+                    <h2 class="text-3xl md:text-5xl font-bold text-white mb-4 md:mb-8 drop-shadow-md">Добро пожаловать в справочник!</h2>
+                    <p class="text-lg md:text-2xl text-slate-300 mb-6 md:mb-10 leading-relaxed">
                         Интерактивный путеводитель по ключевым терминам, законам и формулам школьного курса физики.
                     </p>
                     
-                    <div class="bg-gradient-to-r from-brand-blue/20 to-transparent p-4 rounded-xl border-l-4 border-brand-blue mb-8 shadow-inner" style="transform: translateZ(25px);">
-                        <h4 class="text-brand-blue font-bold text-sm uppercase tracking-wider mb-1">💡 А знаете ли вы?</h4>
-                        <p id="fact-text" class="text-slate-200 text-sm italic">«Свет от Солнца до Земли летит 8 минут 20 секунд.»</p>
+                    <div class="bg-gradient-to-r from-brand-blue/20 to-transparent p-4 md:p-8 rounded-xl border-l-4 border-brand-blue mb-8 md:mb-12 shadow-inner" style="transform: translateZ(25px);">
+                        <h4 class="text-brand-blue font-bold text-sm md:text-xl uppercase tracking-wider mb-2">💡 А знаете ли вы?</h4>
+                        <p id="fact-text" class="text-slate-200 text-sm md:text-xl italic leading-relaxed">«Свет от Солнца до Земли летит 8 минут 20 секунд.»</p>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-brand-blue shadow-inner" style="transform: translateZ(20px);">
-                            <h3 class="text-white font-bold mb-2">📚 База знаний</h3>
-                            <p class="text-xs text-slate-400">Формулы, определения и законы школьной программы.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
+                        <div class="bg-black/30 p-5 md:p-8 rounded-xl border border-white/5 border-l-2 border-l-brand-blue shadow-inner" style="transform: translateZ(20px);">
+                            <h3 class="text-white font-bold mb-2 md:mb-4 md:text-2xl">📚 База знаний</h3>
+                            <p class="text-xs md:text-base text-slate-400">Формулы, определения и законы школьной программы.</p>
                         </div>
-                        <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-emerald-500 shadow-inner" style="transform: translateZ(20px);">
-                            <h3 class="text-white font-bold mb-2">💡 Решебник</h3>
-                            <p class="text-xs text-slate-400">К каждой теме написан пример задачи «Дано - Решение - Ответ».</p>
+                        <div class="bg-black/30 p-5 md:p-8 rounded-xl border border-white/5 border-l-2 border-l-emerald-500 shadow-inner" style="transform: translateZ(20px);">
+                            <h3 class="text-white font-bold mb-2 md:mb-4 md:text-2xl">💡 Решебник</h3>
+                            <p class="text-xs md:text-base text-slate-400">К каждой теме написан пример задачи «Дано - Решение - Ответ».</p>
                         </div>
-                        <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-purple-500 shadow-inner" style="transform: translateZ(20px);">
-                            <h3 class="text-white font-bold mb-2">🧊 3D Модели</h3>
-                            <p class="text-xs text-slate-400">Интерактивные голограммы реагируют на вашу мышку или палец.</p>
+                        <div class="bg-black/30 p-5 md:p-8 rounded-xl border border-white/5 border-l-2 border-l-purple-500 shadow-inner" style="transform: translateZ(20px);">
+                            <h3 class="text-white font-bold mb-2 md:mb-4 md:text-2xl">🧊 3D Модели</h3>
+                            <p class="text-xs md:text-base text-slate-400">Интерактивные голограммы реагируют на вашу мышку или палец.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- КНОПКА ТЕСТА НА ГЛАВНОЙ -->
-            <div class="text-center mt-12 fade-in" style="animation-delay: 0.2s;">
-                <h3 class="text-2xl font-bold text-white mb-4 drop-shadow-md">Проверь свои знания!</h3>
-                <p class="text-slate-400 mb-6">Пройди большой тест из 12 вопросов по всем разделам физики.</p>
-                <button onclick="startQuizScreen()" class="px-10 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-extrabold text-lg rounded-full shadow-[0_0_20px_rgba(16,185,129,0.5)] hover:scale-105 hover:shadow-[0_0_30px_rgba(16,185,129,0.8)] transition-all">
+            <div class="text-center mt-12 md:mt-24 fade-in" style="animation-delay: 0.2s;">
+                <h3 class="text-2xl md:text-4xl font-bold text-white mb-4 md:mb-6 drop-shadow-md">Проверь свои знания!</h3>
+                <p class="text-slate-400 mb-6 md:mb-10 md:text-xl">Пройди большой тест из 12 вопросов по всем разделам физики.</p>
+                <button onclick="startQuizScreen()" class="px-10 py-4 md:px-16 md:py-6 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-extrabold text-lg md:text-3xl rounded-full shadow-[0_0_20px_rgba(16,185,129,0.5)] md:shadow-[0_0_40px_rgba(16,185,129,0.4)] hover:scale-105 transition-all">
                     🎯 ПРОЙТИ ТЕСТ
                 </button>
             </div>
         </div>
 
         <!-- СЕКЦИЯ: ТЕСТ (12 ВОПРОСОВ) -->
-        <div id="quiz-section" class="max-w-3xl mx-auto hidden">
-            <div class="glass-card rounded-2xl p-6 md:p-8 fade-in border-t-4 border-t-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
-                <div class="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
-                    <h3 class="text-2xl font-bold text-white flex items-center gap-3"><span class="text-3xl">🧠</span> Блиц-тест</h3>
-                    <button onclick="goHome()" class="text-sm text-slate-400 hover:text-white transition-colors">✕ Закрыть</button>
+        <div id="quiz-section" class="max-w-3xl md:max-w-5xl mx-auto hidden">
+            <div class="glass-card rounded-2xl p-6 md:p-12 fade-in border-t-4 border-t-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+                <div class="flex items-center justify-between mb-6 md:mb-10 border-b border-white/10 pb-4 md:pb-8">
+                    <h3 class="text-2xl md:text-4xl font-bold text-white flex items-center gap-3"><span class="text-3xl md:text-5xl">🧠</span> Блиц-тест</h3>
+                    <button onclick="goHome()" class="text-sm md:text-xl text-slate-400 hover:text-white transition-colors">✕ Закрыть</button>
                 </div>
-                <div id="quiz-content" class="min-h-[250px] flex flex-col justify-center">
+                <div id="quiz-content" class="min-h-[250px] md:min-h-[400px] flex flex-col justify-center">
                     <!-- Сюда JS вставляет вопросы -->
                 </div>
             </div>
         </div>
 
         <!-- СЕКЦИЯ: ТЕМЫ И КАРТОЧКИ (Справочник) -->
-        <div id="content-section" class="max-w-5xl mx-auto hidden">
+        <div id="content-section" class="max-w-5xl md:max-w-7xl mx-auto hidden">
             <!-- Сюда JS вставляет карточки -->
         </div>
 
@@ -195,7 +203,7 @@
             glow.style.opacity = '1'; glow.style.left = e.touches[0].clientX + 'px'; glow.style.top = e.touches[0].clientY + 'px';
         });
 
-        // БАЗА ДАННЫХ ФИЗИКИ (МАКСИМАЛЬНО ПОЛНАЯ)
+        // БАЗА ДАННЫХ ФИЗИКИ
         const physicsData = {
             7: {
                 title: "7 класс: Механика и давление",
@@ -315,7 +323,10 @@
             camera.position.z = 6;
             
             renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-            renderer.setSize(220, 220);
+            
+            // Адаптивный размер 3D модели для ПК и Телефонов
+            const size = window.innerWidth >= 1024 ? 450 : (window.innerWidth >= 768 ? 350 : 220);
+            renderer.setSize(size, size);
             container.appendChild(renderer.domElement);
 
             const light = new THREE.PointLight(0x0ea5e9, 2, 100);
@@ -329,6 +340,14 @@
             });
             animate3D();
         }
+
+        // Обновление размера 3D при повороте экрана
+        window.addEventListener('resize', () => {
+            if(renderer) {
+                const size = window.innerWidth >= 1024 ? 450 : (window.innerWidth >= 768 ? 350 : 220);
+                renderer.setSize(size, size);
+            }
+        });
 
         function animate3D() {
             requestAnimationFrame(animate3D);
@@ -346,14 +365,17 @@
             }
 
             let geometry;
-            if (grade === 'main') geometry = new THREE.IcosahedronGeometry(2, 0); 
-            else if (grade === 'search') geometry = new THREE.OctahedronGeometry(2, 0);
-            else if (grade === 'quiz') geometry = new THREE.DodecahedronGeometry(1.8, 0); 
-            else if (grade === 7) geometry = new THREE.BoxGeometry(2.2, 2.2, 2.2); 
-            else if (grade === 8) geometry = new THREE.TorusGeometry(1.4, 0.5, 16, 50); 
-            else if (grade === 9) geometry = new THREE.ConeGeometry(1.8, 2.8, 16); 
-            else if (grade === 10) geometry = new THREE.SphereGeometry(1.8, 16, 16); 
-            else if (grade === 11) geometry = new THREE.TorusKnotGeometry(1.1, 0.35, 64, 16); 
+            // Адаптивный скейл моделей
+            const scale = window.innerWidth >= 1024 ? 1.5 : (window.innerWidth >= 768 ? 1.3 : 1);
+
+            if (grade === 'main') geometry = new THREE.IcosahedronGeometry(2 * scale, 0); 
+            else if (grade === 'search') geometry = new THREE.OctahedronGeometry(2 * scale, 0);
+            else if (grade === 'quiz') geometry = new THREE.DodecahedronGeometry(1.8 * scale, 0); 
+            else if (grade === 7) geometry = new THREE.BoxGeometry(2.2 * scale, 2.2 * scale, 2.2 * scale); 
+            else if (grade === 8) geometry = new THREE.TorusGeometry(1.4 * scale, 0.5 * scale, 16, 50); 
+            else if (grade === 9) geometry = new THREE.ConeGeometry(1.8 * scale, 2.8 * scale, 16); 
+            else if (grade === 10) geometry = new THREE.SphereGeometry(1.8 * scale, 16, 16); 
+            else if (grade === 11) geometry = new THREE.TorusKnotGeometry(1.1 * scale, 0.35 * scale, 64, 16); 
 
             const material = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, wireframe: true, emissive: 0x0ea5e9, emissiveIntensity: 0.8 });
             currentMesh = new THREE.Mesh(geometry, material);
@@ -410,20 +432,20 @@
             const q = quizData[currentQuizIndex];
             let optionsHtml = '';
             q.options.forEach((opt, idx) => {
-                optionsHtml += `<button id="quiz-btn-${idx}" onclick="selectQuizAnswer(${idx})" class="w-full text-left px-5 py-3 bg-black/40 border border-white/10 rounded-xl hover:bg-brand-blue/20 transition-all text-slate-200 font-medium">${opt}</button>`;
+                optionsHtml += `<button id="quiz-btn-${idx}" onclick="selectQuizAnswer(${idx})" class="w-full text-left px-5 py-3 md:py-4 md:px-8 md:text-xl bg-black/40 border border-white/10 rounded-xl hover:bg-brand-blue/20 transition-all text-slate-200 font-medium">${opt}</button>`;
             });
 
             document.getElementById('quiz-content').innerHTML = `
-                <div class="mb-4 flex justify-between items-center text-sm text-brand-blue font-bold">
+                <div class="mb-4 flex justify-between items-center text-sm md:text-lg text-brand-blue font-bold">
                     <span>Вопрос ${currentQuizIndex + 1} из ${quizData.length}</span>
                     <span>Счет: ${quizScore}</span>
                 </div>
-                <h4 class="text-xl text-white font-semibold mb-6">${q.q}</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+                <h4 class="text-xl md:text-4xl text-white font-semibold mb-6 md:mb-10 leading-tight">${q.q}</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 mb-6">
                     ${optionsHtml}
                 </div>
-                <div id="quiz-next-container" class="hidden text-right fade-in">
-                    <button onclick="nextQuizQuestion()" class="px-6 py-2 bg-emerald-500 text-white font-bold rounded-lg shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:bg-emerald-400 transition-colors">Далее ➔</button>
+                <div id="quiz-next-container" class="hidden text-right fade-in mt-6 md:mt-10">
+                    <button onclick="nextQuizQuestion()" class="px-6 py-2 md:px-10 md:py-4 bg-emerald-500 text-white font-bold md:text-2xl rounded-lg md:rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:bg-emerald-400 transition-colors">Далее ➔</button>
                 </div>
             `;
         }
@@ -463,12 +485,12 @@
             else { message = "Кажется, пора открыть учебник Перышкина... Учи теорию!"; emoji = "😅"; }
 
             document.getElementById('quiz-content').innerHTML = `
-                <div class="text-center py-6 fade-in">
-                    <div class="text-6xl mb-4">${emoji}</div>
-                    <h4 class="text-2xl text-white font-bold mb-2">Тест завершен!</h4>
-                    <p class="text-xl text-brand-blue font-bold mb-4">Твой результат: ${quizScore} из 12</p>
-                    <p class="text-slate-300 mb-8">${message}</p>
-                    <button onclick="goHome()" class="px-6 py-2 border border-brand-blue text-brand-blue font-bold rounded-lg hover:bg-brand-blue hover:text-white transition-colors">Вернуться на главную</button>
+                <div class="text-center py-6 md:py-12 fade-in">
+                    <div class="text-6xl md:text-8xl mb-6">${emoji}</div>
+                    <h4 class="text-2xl md:text-5xl text-white font-bold mb-4">Тест завершен!</h4>
+                    <p class="text-xl md:text-3xl text-brand-blue font-bold mb-6">Твой результат: ${quizScore} из 12</p>
+                    <p class="text-slate-300 md:text-xl mb-10">${message}</p>
+                    <button onclick="goHome()" class="px-8 py-3 md:px-12 md:py-5 border-2 border-brand-blue text-brand-blue md:text-xl font-bold rounded-xl hover:bg-brand-blue hover:text-white transition-colors">Вернуться на главную</button>
                 </div>
             `;
         }
@@ -493,7 +515,7 @@
             spawn3DModel(grade);
 
             const data = physicsData[grade];
-            let html = `<div class="fade-in mb-6 text-center md:text-left"><h2 class="text-2xl font-bold text-white border-b border-white/10 pb-3 inline-block drop-shadow-md">${data.title}</h2></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6">`;
+            let html = `<div class="fade-in mb-6 md:mb-10 text-center md:text-left"><h2 class="text-2xl md:text-5xl font-bold text-white border-b border-white/10 pb-3 md:pb-6 inline-block drop-shadow-md">${data.title}</h2></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10">`;
             html += generateCardsHtml(data.topics);
             html += `</div>`;
             
@@ -530,11 +552,11 @@
             }
 
             if (results.length === 0) {
-                secContent.innerHTML = `<div class="text-center text-slate-400 py-10 bg-black/20 rounded-xl backdrop-blur-md border border-white/5 fade-in">По запросу «<span class="text-white">${query}</span>» ничего не найдено.</div>`;
+                secContent.innerHTML = `<div class="text-center text-slate-400 py-10 md:py-20 md:text-2xl bg-black/20 rounded-xl backdrop-blur-md border border-white/5 fade-in">По запросу «<span class="text-white">${query}</span>» ничего не найдено.</div>`;
                 return;
             }
 
-            let html = `<div class="fade-in mb-6 text-center md:text-left"><h2 class="text-2xl font-bold text-white border-b border-white/10 pb-3 inline-block drop-shadow-md">Результаты поиска: ${results.length}</h2></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6">`;
+            let html = `<div class="fade-in mb-6 md:mb-10 text-center md:text-left"><h2 class="text-2xl md:text-4xl font-bold text-white border-b border-white/10 pb-3 md:pb-6 inline-block drop-shadow-md">Результаты поиска: ${results.length}</h2></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10">`;
             html += generateCardsHtml(results);
             html += `</div>`;
             
@@ -548,29 +570,31 @@
                 let exampleHtml = '';
                 if (topic.example) {
                     exampleHtml = `
-                        <div class="example-box mt-4 p-3 rounded-lg shadow-inner">
-                            <h4 class="text-xs text-emerald-400 font-bold mb-2 uppercase flex items-center gap-1">Пример решения</h4>
-                            <div class="flex flex-col gap-1 text-xs font-mono text-slate-300">
+                        <div class="example-box mt-4 md:mt-8 p-3 md:p-6 rounded-lg md:rounded-xl shadow-inner">
+                            <h4 class="text-xs md:text-base text-emerald-400 font-bold mb-2 md:mb-4 uppercase flex items-center gap-1 md:gap-2">Пример решения</h4>
+                            <div class="flex flex-col gap-1 md:gap-3 text-xs md:text-lg font-mono text-slate-300">
                                 <p><span class="text-slate-500">Дано:</span> ${topic.example.dano}</p>
                                 <p><span class="text-slate-500">Реш:</span> ${topic.example.sol}</p>
-                                <p class="text-brand-blue font-bold bg-brand-blue/20 inline-block px-2 py-1 rounded w-max mt-1">Ответ: ${topic.example.ans}</p>
+                                <p class="text-brand-blue font-bold bg-brand-blue/20 inline-block px-2 py-1 md:px-4 md:py-2 rounded w-max mt-1 md:mt-2 text-sm md:text-xl">Ответ: ${topic.example.ans}</p>
                             </div>
                         </div>`;
                 }
-                let badgeHtml = topic.gradeBadge ? `<span class="absolute top-4 right-4 bg-brand-blue/20 text-brand-blue text-[10px] font-bold px-2 py-1 rounded border border-brand-blue/30 drop-shadow-md" style="transform: translateZ(20px);">${topic.gradeBadge}</span>` : '';
+                
+                let badgeHtml = topic.gradeBadge ? `<span class="absolute top-4 right-4 bg-brand-blue/20 text-brand-blue text-[10px] md:text-sm font-bold px-2 py-1 md:px-4 md:py-2 rounded border border-brand-blue/30 drop-shadow-md" style="transform: translateZ(20px);">${topic.gradeBadge}</span>` : '';
+
                 html += `
-                    <div class="glass-card vanilla-tilt-card rounded-2xl p-5 fade-in flex flex-col justify-between" style="animation-delay: ${index * 0.05}s">
+                    <div class="glass-card vanilla-tilt-card rounded-2xl p-5 md:p-8 fade-in flex flex-col justify-between" style="animation-delay: ${index * 0.05}s">
                         ${badgeHtml}
                         <div class="glass-card-inner">
-                            <div class="flex items-center gap-3 mb-3 pr-16">
-                                <div class="w-8 h-8 rounded-full bg-brand-blue/20 flex items-center justify-center text-brand-blue font-bold shadow-[0_0_15px_rgba(14,165,233,0.3)] shrink-0">${index + 1}</div>
-                                <h3 class="text-lg font-bold text-white drop-shadow-md leading-tight">${topic.name}</h3>
+                            <div class="flex items-center gap-3 md:gap-5 mb-3 md:mb-6 pr-16 md:pr-24">
+                                <div class="w-8 h-8 md:w-14 md:h-14 rounded-full bg-brand-blue/20 flex items-center justify-center text-brand-blue font-bold shadow-[0_0_15px_rgba(14,165,233,0.3)] shrink-0 md:text-2xl">${index + 1}</div>
+                                <h3 class="text-lg md:text-3xl font-bold text-white drop-shadow-md leading-tight">${topic.name}</h3>
                             </div>
-                            <p class="text-slate-300 mb-4 text-sm drop-shadow-sm leading-relaxed">${topic.desc}</p>
-                            <div class="formula-box p-3 rounded-lg">
-                                <span class="text-[10px] text-brand-blue font-bold uppercase mb-1 block tracking-wider">Формула</span>
-                                <code class="font-mono text-lg text-emerald-400 block mb-2 drop-shadow-[0_0_8px_rgba(16,185,129,0.4)]">${topic.formula}</code>
-                                <p class="font-mono text-[11px] text-slate-400 border-t border-white/10 pt-2 leading-snug">${topic.vars}</p>
+                            <p class="text-slate-300 mb-4 md:mb-8 text-sm md:text-xl drop-shadow-sm leading-relaxed">${topic.desc}</p>
+                            <div class="formula-box p-3 md:p-6 rounded-lg md:rounded-xl">
+                                <span class="text-[10px] md:text-sm text-brand-blue font-bold uppercase mb-1 md:mb-3 block tracking-wider">Формула</span>
+                                <code class="font-mono text-lg md:text-4xl text-emerald-400 block mb-2 md:mb-4 drop-shadow-[0_0_8px_rgba(16,185,129,0.4)]">${topic.formula}</code>
+                                <p class="font-mono text-[11px] md:text-base text-slate-400 border-t border-white/10 pt-2 md:pt-4 leading-snug">${topic.vars}</p>
                             </div>
                         </div>
                         ${exampleHtml}
