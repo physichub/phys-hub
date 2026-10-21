@@ -106,13 +106,40 @@
 
         <!-- Контейнер для вывода тем -->
         <div id="content-area" class="max-w-5xl mx-auto relative z-10">
-            <div class="text-center text-slate-400 py-10 bg-black/20 rounded-xl backdrop-blur-md border border-white/5">Выберите класс для загрузки материалов и 3D-модели.</div>
+            <!-- Главная страница по умолчанию -->
+            <div class="glass-card vanilla-tilt-card rounded-2xl p-8 fade-in">
+                <div class="glass-card-inner">
+                    <h2 class="text-3xl font-bold text-white mb-4 drop-shadow-md">Добро пожаловать в справочник!</h2>
+                    <p class="text-lg text-slate-300 mb-8 leading-relaxed">
+                        <span class="text-brand-blue font-bold font-mono text-xl tracking-wide uppercase">Физика</span> — это фундаментальная наука о природе. Она изучает простейшие и вместе с тем наиболее общие законы материального мира, структуру и движение материи.
+                    </p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-brand-blue shadow-inner" style="transform: translateZ(20px);">
+                            <h3 class="text-white font-bold mb-2">📚 5 лет программы</h3>
+                            <p class="text-sm text-slate-400">Собраны все ключевые формулы и законы с 7 по 11 класс.</p>
+                        </div>
+                        <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-emerald-500 shadow-inner" style="transform: translateZ(20px);">
+                            <h3 class="text-white font-bold mb-2">💡 Примеры задач</h3>
+                            <p class="text-sm text-slate-400">Понятные примеры с оформлением «Дано - Решение - Ответ».</p>
+                        </div>
+                        <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-purple-500 shadow-inner" style="transform: translateZ(20px);">
+                            <h3 class="text-white font-bold mb-2">🧊 3D Визуализация</h3>
+                            <p class="text-sm text-slate-400">Вращающиеся голограммы и интерактивные эффекты.</p>
+                        </div>
+                    </div>
+                    
+                    <p class="mt-8 text-center text-emerald-400 font-semibold animate-pulse tracking-wide" style="transform: translateZ(10px);">
+                        👆 Выберите нужный класс в меню выше, чтобы начать!
+                    </p>
+                </div>
+            </div>
         </div>
     </main>
 
     <!-- Скрипты -->
     <script>
-        // ПОЛНАЯ БАЗА ДАННЫХ
+        // БАЗА ДАННЫХ
         const physicsData = {
             7: {
                 title: "7 класс: Основы механики, силы и давление",
@@ -151,7 +178,7 @@
                     { name: "Второй закон Ньютона", desc: "Ускорение прямо пропорционально силе и обратно пропорционально массе.", formula: "F = m · a", vars: "F — равнодействующая сила, m — масса, a — ускорение", example: { dano: "m = 5 кг<br>a = 2 м/с²", sol: "F = m · a<br>F = 5 · 2", ans: "10 Н" } },
                     { name: "Третий закон Ньютона", desc: "Тела действуют друг на друга с силами, равными по модулю и противоположными по направлению.", formula: "F₁ = -F₂", vars: "F₁ — сила действия первого тела, F₂ — второго", example: { dano: "Земля притягивает яблоко с силой 2 Н.", sol: "По 3-му закону Ньютона яблоко притягивает Землю с такой же силой.", ans: "2 Н" } },
                     { name: "Свободное падение тел", desc: "Движение под действием только силы тяжести.", formula: "h = (g · t²) / 2", vars: "h — высота, g — ускорение свободного падения, t — время", example: { dano: "t = 3 с<br>v_0 = 0 м/с<br>g ≈ 10 м/с²", sol: "h = (10 · 3²) / 2<br>h = 90 / 2", ans: "45 м" } },
-                    { name: "Ускорение свободного падения", desc: "Ускорение, придаваемое гравитацией планеты.", formula: "g = G · M / R²", vars: "G — гравитационная постоянная, M — масса планеты, R — радиус планеты", example: { dano: "Тело на поверхности Земли.", sol: "Подставляем массу и радиус Земли в формулу, получаем табличное значение.", ans: "≈ 9.8 м/с²" } },
+                    { name: "Ускорение свободного падения", desc: "Ускорение, придаваемое гравитацией планеты.", formula: "g = G · M / R²", vars: "G — гравитационная постоянная, M — масса планеты, R — радиус планеты", example: { dano: "Тело на поверхности Земли.", sol: "Подставляем массу и радиус Земли в формулу.", ans: "≈ 9.8 м/с²" } },
                     { name: "Динамика криволинейного движения", desc: "Центростремительная сила заставляет тело двигаться по окружности.", formula: "F_ц = m · v² / R", vars: "F_ц — центростремительная сила, m — масса, v — скорость, R — радиус", example: { dano: "m = 1000 кг<br>v = 10 м/с<br>R = 50 м", sol: "F_ц = 1000 · (10²) / 50<br>F_ц = 100 000 / 50", ans: "2000 Н" } },
                     { name: "Импульс тела", desc: "Векторная мера механического движения.", formula: "p = m · v", vars: "p — импульс (кг·м/с), m — масса, v — скорость", example: { dano: "m = 1500 кг<br>v = 20 м/с", sol: "p = m · v<br>p = 1500 · 20", ans: "30000 кг·м/с" } },
                     { name: "Закон сохранения импульса", desc: "Суммарный импульс замкнутой системы тел остается постоянным.", formula: "m₁v₁ + m₂v₂ = m₁v₁' + m₂v₂'", vars: "До знака равно — импульсы до взаимодействия, после — импульсы после.", example: { dano: "Мяч 1 кг (v=2) догоняет мяч 2 кг (v=0). Неупругий удар.", sol: "m₁v₁ + 0 = (m₁+m₂)v'<br>1·2 = (1+2)v'<br>v' = 2 / 3 м/с", ans: "0.67 м/с" } },
@@ -232,7 +259,8 @@
             }
 
             let geometry;
-            if (grade === 7) geometry = new THREE.BoxGeometry(2.5, 2.5, 2.5); // Куб
+            if (grade === 'main') geometry = new THREE.IcosahedronGeometry(2, 0); // Икосаэдр для главной страницы
+            else if (grade === 7) geometry = new THREE.BoxGeometry(2.5, 2.5, 2.5); // Куб
             else if (grade === 8) geometry = new THREE.TorusGeometry(1.5, 0.6, 16, 50); // Тор
             else if (grade === 9) geometry = new THREE.ConeGeometry(2, 3, 16); // Конус
             else if (grade === 10) geometry = new THREE.SphereGeometry(2, 16, 16); // Сфера
@@ -246,7 +274,19 @@
             scene.add(currentMesh);
         }
 
-        // --- ЛОГИКА ОТРИСОВКИ ---
+        // --- ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ ---
+        window.addEventListener('DOMContentLoaded', () => {
+            // Спавним 3D модель для главной страницы
+            spawn3DModel('main');
+            // Включаем 3D наклон для приветственной карточки
+            setTimeout(() => {
+                VanillaTilt.init(document.querySelectorAll(".vanilla-tilt-card"), {
+                    max: 5, speed: 400, glare: true, "max-glare": 0.1, scale: 1.01
+                });
+            }, 100);
+        });
+
+        // --- ЛОГИКА ОТРИСОВКИ ТЕМ ---
         function loadClass(grade) {
             document.querySelectorAll('.class-btn').forEach(btn => {
                 btn.classList.remove('bg-brand-blue', 'text-white', 'shadow-[0_0_20px_rgba(14,165,233,0.8)]');
