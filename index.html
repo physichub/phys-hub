@@ -3,7 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Физика | Школьный курс</title>
+    
+    <!-- Название, которое будет видно в поиске -->
+    <title>PhysHub | Школьный 3D-справочник по физике</title>
+    
+    <!-- Описание сайта для Google и Яндекса -->
+    <meta name="description" content="PhysHub — это интерактивный справочник по физике для 7-11 классов. Все главные формулы, законы Ньютона, термодинамика, примеры решения задач и 3D-визуализация.">
+    <!-- Ключевые слова, по которым вас будут искать -->
+    <meta name="keywords" content="physhub, физика, справочник по физике, формулы по физике, физика 7 класс, физика 8 класс, физика 9 класс, физика 10 класс, физика 11 класс, ОГЭ физика, ЕГЭ физика, решение задач">
+    <meta name="author" content="sahar21">
+    <meta name="robots" content="index, follow">
     
     <!-- Шрифты -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -110,13 +119,11 @@
             </h1>
         </div>
 
-        <!-- УВЕЛИЧЕННАЯ СТРОКА ПОИСКА -->
         <div class="max-w-md md:max-w-2xl lg:max-w-3xl mx-auto mb-8 md:mb-16 relative z-20 transition-transform duration-300 hover:scale-[1.02]">
             <input type="text" id="search-input" placeholder="Поиск по темам и формулам..." class="w-full bg-black/40 border border-white/20 rounded-full py-3 px-6 md:py-5 md:px-10 text-white placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue backdrop-blur-lg shadow-[0_5px_15px_-5px_rgba(0,0,0,0.5)] transition-all text-sm md:text-xl font-medium">
             <svg class="w-5 h-5 md:w-8 md:h-8 absolute right-5 md:right-8 top-3 md:top-4 lg:top-5 text-brand-blue opacity-70 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
 
-        <!-- КНОПКИ КЛАССОВ -->
         <div class="flex flex-wrap justify-center gap-3 md:gap-5 mb-4 md:mb-8 relative z-20">
             <button id="btn-7" onclick="loadClass(7)" class="class-btn px-5 py-2 md:px-8 md:py-4 rounded-full font-semibold text-sm md:text-xl transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">7 класс</button>
             <button id="btn-8" onclick="loadClass(8)" class="class-btn px-5 py-2 md:px-8 md:py-4 rounded-full font-semibold text-sm md:text-xl transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">8 класс</button>
@@ -293,14 +300,6 @@
             { q: "Чему равна энергия фотона (кванта света)?", options: ["E = mc²", "E = mgh", "E = hν", "E = mv²/2"], ans: 2 }
         ];
 
-        const physicsFacts = [
-            "Самая низкая возможная температура во Вселенной — абсолютный нуль (−273.15 °C).",
-            "Свет от Солнца до Земли летит примерно 8 минут и 20 секунд.",
-            "Если удалить пустое пространство внутри атомов из каждого человека, человечество поместится в кубике сахара.",
-            "Вода может кипеть и замерзать одновременно. Это состояние называется «тройной точкой».",
-            "Молния нагревает воздух вокруг себя до 30 000 °C — это в 5 раз горячее поверхности Солнца!"
-        ];
-
         // --- ЛОГИКА 3D ФОНА ---
         particlesJS("particles-js", {
             "particles": {
@@ -324,7 +323,6 @@
             
             renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
             
-            // Адаптивный размер 3D модели для ПК и Телефонов
             const size = window.innerWidth >= 1024 ? 450 : (window.innerWidth >= 768 ? 350 : 220);
             renderer.setSize(size, size);
             container.appendChild(renderer.domElement);
@@ -341,7 +339,6 @@
             animate3D();
         }
 
-        // Обновление размера 3D при повороте экрана
         window.addEventListener('resize', () => {
             if(renderer) {
                 const size = window.innerWidth >= 1024 ? 450 : (window.innerWidth >= 768 ? 350 : 220);
@@ -365,7 +362,6 @@
             }
 
             let geometry;
-            // Адаптивный скейл моделей
             const scale = window.innerWidth >= 1024 ? 1.5 : (window.innerWidth >= 768 ? 1.3 : 1);
 
             if (grade === 'main') geometry = new THREE.IcosahedronGeometry(2 * scale, 0); 
@@ -409,7 +405,7 @@
             setTimeout(() => VanillaTilt.init(document.querySelectorAll(".vanilla-tilt-card"), { max: 5, speed: 400, glare: true, "max-glare": 0.1, scale: 1.01 }), 100);
         });
 
-        // --- ЛОГИКА ТЕСТА (12 ВОПРОСОВ) ---
+        // --- ЛОГИКА ТЕСТА ---
         let currentQuizIndex = 0;
         let quizScore = 0;
         let quizAnswered = false;
@@ -482,7 +478,7 @@
             if (quizScore === 12) { message = "Идеально! Да ты же новый Эйнштейн!"; emoji = "🏆"; }
             else if (quizScore >= 9) { message = "Отличный результат! Пятерка по физике обеспечена."; emoji = "🌟"; }
             else if (quizScore >= 5) { message = "Неплохо, но есть повод повторить формулы в нашем справочнике."; emoji = "📚"; }
-            else { message = "Кажется, пора открыть учебник Перышкина... Учи теорию!"; emoji = "😅"; }
+            else { message = "Кажется, пора открыть наш справочник... Учи теорию!"; emoji = "😅"; }
 
             document.getElementById('quiz-content').innerHTML = `
                 <div class="text-center py-6 md:py-12 fade-in">
@@ -495,7 +491,7 @@
             `;
         }
 
-        // --- ЛОГИКА ОТРИСОВКИ ТЕМ ПО КЛАССАМ ---
+        // --- ЛОГИКА ОТРИСОВКИ ТЕМ ---
         function loadClass(grade) {
             document.getElementById('search-input').value = ''; 
             document.querySelectorAll('.class-btn').forEach(btn => {
