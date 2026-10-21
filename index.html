@@ -51,6 +51,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             transform-style: preserve-3d;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
         }
         
         .glass-card-inner { transform: translateZ(30px); }
@@ -92,6 +93,12 @@
             </h1>
         </div>
 
+        <!-- СТРОКА ПОИСКА -->
+        <div class="max-w-2xl mx-auto mb-10 relative z-20">
+            <input type="text" id="search-input" placeholder="Поиск по темам, объяснениям и формулам..." class="w-full bg-black/30 border border-white/20 rounded-full py-4 px-8 text-white placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue backdrop-blur-md shadow-[0_10px_25px_-5px_rgba(0,0,0,0.5)] transition-all text-lg">
+            <svg class="w-6 h-6 absolute right-6 top-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+
         <!-- Кнопки выбора класса -->
         <div class="flex flex-wrap justify-center gap-3 mb-6 relative z-20">
             <button id="btn-7" onclick="loadClass(7)" class="class-btn px-6 py-3 rounded-full font-semibold text-sm transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">7 класс</button>
@@ -105,41 +112,14 @@
         <div id="model-3d-container" class="drop-shadow-[0_0_25px_rgba(14,165,233,0.6)]"></div>
 
         <!-- Контейнер для вывода тем -->
-        <div id="content-area" class="max-w-5xl mx-auto relative z-10">
-            <!-- Главная страница по умолчанию -->
-            <div class="glass-card vanilla-tilt-card rounded-2xl p-8 fade-in">
-                <div class="glass-card-inner">
-                    <h2 class="text-3xl font-bold text-white mb-4 drop-shadow-md">Добро пожаловать в справочник!</h2>
-                    <p class="text-lg text-slate-300 mb-8 leading-relaxed">
-                        <span class="text-brand-blue font-bold font-mono text-xl tracking-wide uppercase">Физика</span> — это фундаментальная наука о природе. Она изучает простейшие и вместе с тем наиболее общие законы материального мира, структуру и движение материи.
-                    </p>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-brand-blue shadow-inner" style="transform: translateZ(20px);">
-                            <h3 class="text-white font-bold mb-2">📚 5 лет программы</h3>
-                            <p class="text-sm text-slate-400">Собраны все ключевые формулы и законы с 7 по 11 класс.</p>
-                        </div>
-                        <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-emerald-500 shadow-inner" style="transform: translateZ(20px);">
-                            <h3 class="text-white font-bold mb-2">💡 Примеры задач</h3>
-                            <p class="text-sm text-slate-400">Понятные примеры с оформлением «Дано - Решение - Ответ».</p>
-                        </div>
-                        <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-purple-500 shadow-inner" style="transform: translateZ(20px);">
-                            <h3 class="text-white font-bold mb-2">🧊 3D Визуализация</h3>
-                            <p class="text-sm text-slate-400">Вращающиеся голограммы и интерактивные эффекты.</p>
-                        </div>
-                    </div>
-                    
-                    <p class="mt-8 text-center text-emerald-400 font-semibold animate-pulse tracking-wide" style="transform: translateZ(10px);">
-                        👆 Выберите нужный класс в меню выше, чтобы начать!
-                    </p>
-                </div>
-            </div>
+        <div id="content-area" class="max-w-5xl mx-auto relative z-10 pb-10">
+            <!-- Здесь генерируется контент -->
         </div>
     </main>
 
     <!-- Скрипты -->
     <script>
-        // БАЗА ДАННЫХ
+        // ПОЛНАЯ БАЗА ДАННЫХ
         const physicsData = {
             7: {
                 title: "7 класс: Основы механики, силы и давление",
@@ -259,7 +239,8 @@
             }
 
             let geometry;
-            if (grade === 'main') geometry = new THREE.IcosahedronGeometry(2, 0); // Икосаэдр для главной страницы
+            if (grade === 'main') geometry = new THREE.IcosahedronGeometry(2, 0); // Икосаэдр для главной
+            else if (grade === 'search') geometry = new THREE.OctahedronGeometry(2, 0); // Октаэдр для поиска
             else if (grade === 7) geometry = new THREE.BoxGeometry(2.5, 2.5, 2.5); // Куб
             else if (grade === 8) geometry = new THREE.TorusGeometry(1.5, 0.6, 16, 50); // Тор
             else if (grade === 9) geometry = new THREE.ConeGeometry(2, 3, 16); // Конус
@@ -274,20 +255,48 @@
             scene.add(currentMesh);
         }
 
-        // --- ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ СТРАНИЦЫ ---
-        window.addEventListener('DOMContentLoaded', () => {
-            // Спавним 3D модель для главной страницы
+        // --- ЛОГИКА ГЛАВНОГО ЭКРАНА ---
+        function renderWelcomeScreen() {
             spawn3DModel('main');
-            // Включаем 3D наклон для приветственной карточки
+            const contentArea = document.getElementById('content-area');
+            contentArea.innerHTML = `
+                <div class="glass-card vanilla-tilt-card rounded-2xl p-8 fade-in">
+                    <div class="glass-card-inner">
+                        <h2 class="text-3xl font-bold text-white mb-4 drop-shadow-md">Добро пожаловать в справочник!</h2>
+                        <p class="text-lg text-slate-300 mb-8 leading-relaxed">
+                            <span class="text-brand-blue font-bold font-mono text-xl tracking-wide uppercase">Физика</span> — это фундаментальная наука о природе. Она изучает простейшие и вместе с тем наиболее общие законы материального мира, структуру и движение материи.
+                        </p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-brand-blue shadow-inner" style="transform: translateZ(20px);">
+                                <h3 class="text-white font-bold mb-2">📚 5 лет программы</h3>
+                                <p class="text-sm text-slate-400">Собраны все ключевые формулы и законы с 7 по 11 класс.</p>
+                            </div>
+                            <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-emerald-500 shadow-inner" style="transform: translateZ(20px);">
+                                <h3 class="text-white font-bold mb-2">💡 Примеры задач</h3>
+                                <p class="text-sm text-slate-400">Понятные примеры с оформлением «Дано - Решение - Ответ».</p>
+                            </div>
+                            <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-purple-500 shadow-inner" style="transform: translateZ(20px);">
+                                <h3 class="text-white font-bold mb-2">🧊 3D Визуализация</h3>
+                                <p class="text-sm text-slate-400">Вращающиеся голограммы и интерактивные эффекты.</p>
+                            </div>
+                        </div>
+                        <p class="mt-8 text-center text-emerald-400 font-semibold animate-pulse tracking-wide" style="transform: translateZ(10px);">
+                            👆 Введите запрос в поиск или выберите класс, чтобы начать!
+                        </p>
+                    </div>
+                </div>
+            `;
             setTimeout(() => {
-                VanillaTilt.init(document.querySelectorAll(".vanilla-tilt-card"), {
-                    max: 5, speed: 400, glare: true, "max-glare": 0.1, scale: 1.01
-                });
+                VanillaTilt.init(document.querySelectorAll(".vanilla-tilt-card"), { max: 5, speed: 400, glare: true, "max-glare": 0.1, scale: 1.01 });
             }, 100);
-        });
+        }
 
-        // --- ЛОГИКА ОТРИСОВКИ ТЕМ ---
+        window.addEventListener('DOMContentLoaded', renderWelcomeScreen);
+
+        // --- ЛОГИКА ОТРИСОВКИ ТЕМ ПО КЛАССАМ ---
         function loadClass(grade) {
+            document.getElementById('search-input').value = ''; // Очищаем поиск при клике на класс
+
             document.querySelectorAll('.class-btn').forEach(btn => {
                 btn.classList.remove('bg-brand-blue', 'text-white', 'shadow-[0_0_20px_rgba(14,165,233,0.8)]');
                 btn.classList.add('bg-white/5', 'text-slate-300');
@@ -301,10 +310,60 @@
             spawn3DModel(grade);
 
             const data = physicsData[grade];
-            const contentArea = document.getElementById('content-area');
-            let html = `<div class="fade-in mb-8 text-center md:text-left"><h2 class="text-3xl font-bold text-white border-b border-white/10 pb-4 inline-block drop-shadow-md">${data.title}</h2></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-10">`;
+            let html = `<div class="fade-in mb-8 text-center md:text-left"><h2 class="text-3xl font-bold text-white border-b border-white/10 pb-4 inline-block drop-shadow-md">${data.title}</h2></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8">`;
+            html += generateCardsHtml(data.topics);
+            html += `</div>`;
+            
+            document.getElementById('content-area').innerHTML = html;
+            setTimeout(() => VanillaTilt.init(document.querySelectorAll(".vanilla-tilt-card"), { max: 8, speed: 400, glare: true, "max-glare": 0.2, scale: 1.02 }), 100);
+        }
 
-            data.topics.forEach((topic, index) => {
+        // --- ЛОГИКА ПОИСКА ---
+        document.getElementById('search-input').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase().trim();
+            
+            // Сбрасываем активные кнопки классов
+            document.querySelectorAll('.class-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-blue', 'text-white', 'shadow-[0_0_20px_rgba(14,165,233,0.8)]');
+                btn.classList.add('bg-white/5', 'text-slate-300');
+            });
+
+            if (query.length === 0) {
+                renderWelcomeScreen();
+                return;
+            }
+
+            spawn3DModel('search'); // Специальная модель для поиска
+
+            let results = [];
+            for (let grade in physicsData) {
+                physicsData[grade].topics.forEach(topic => {
+                    if (topic.name.toLowerCase().includes(query) || 
+                        topic.desc.toLowerCase().includes(query) || 
+                        topic.formula.toLowerCase().includes(query)) {
+                        results.push({ ...topic, gradeBadge: grade + " класс" });
+                    }
+                });
+            }
+
+            const contentArea = document.getElementById('content-area');
+            if (results.length === 0) {
+                contentArea.innerHTML = `<div class="text-center text-slate-400 py-10 bg-black/20 rounded-xl backdrop-blur-md border border-white/5 fade-in">По запросу «<span class="text-white">${query}</span>» ничего не найдено. Попробуйте изменить запрос.</div>`;
+                return;
+            }
+
+            let html = `<div class="fade-in mb-8 text-center md:text-left"><h2 class="text-3xl font-bold text-white border-b border-white/10 pb-4 inline-block drop-shadow-md">Результаты поиска: ${results.length}</h2></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8">`;
+            html += generateCardsHtml(results);
+            html += `</div>`;
+            
+            contentArea.innerHTML = html;
+            setTimeout(() => VanillaTilt.init(document.querySelectorAll(".vanilla-tilt-card"), { max: 8, speed: 400, glare: true, "max-glare": 0.2, scale: 1.02 }), 100);
+        });
+
+        // Вспомогательная функция для генерации HTML карточек
+        function generateCardsHtml(topics) {
+            let html = '';
+            topics.forEach((topic, index) => {
                 let exampleHtml = '';
                 if (topic.example) {
                     exampleHtml = `
@@ -317,10 +376,15 @@
                             </div>
                         </div>`;
                 }
+                
+                // Если карточка из поиска, добавляем бейдж класса
+                let badgeHtml = topic.gradeBadge ? `<span class="absolute top-4 right-4 bg-brand-blue/20 text-brand-blue text-xs font-bold px-3 py-1 rounded-full border border-brand-blue/30 drop-shadow-md" style="transform: translateZ(20px);">${topic.gradeBadge}</span>` : '';
+
                 html += `
                     <div class="glass-card vanilla-tilt-card rounded-2xl p-6 fade-in flex flex-col justify-between" style="animation-delay: ${index * 0.1}s">
+                        ${badgeHtml}
                         <div class="glass-card-inner">
-                            <div class="flex items-center gap-3 mb-4">
+                            <div class="flex items-center gap-3 mb-4 pr-20">
                                 <div class="w-10 h-10 rounded-full bg-brand-blue/20 flex items-center justify-center text-brand-blue font-bold shadow-[0_0_15px_rgba(14,165,233,0.3)] shrink-0">${index + 1}</div>
                                 <h3 class="text-xl font-bold text-white drop-shadow-md">${topic.name}</h3>
                             </div>
@@ -334,14 +398,7 @@
                         ${exampleHtml}
                     </div>`;
             });
-            html += `</div>`;
-            contentArea.innerHTML = html;
-
-            setTimeout(() => {
-                VanillaTilt.init(document.querySelectorAll(".vanilla-tilt-card"), {
-                    max: 8, speed: 400, glare: true, "max-glare": 0.2, scale: 1.02
-                });
-            }, 100);
+            return html;
         }
     </script>
 </body>
