@@ -38,11 +38,19 @@
         }
     </script>
     <style>
-        body { background-color: #0f172a; color: #f8fafc; margin: 0; padding: 0; }
+        body { background-color: #0f172a; color: #f8fafc; margin: 0; padding: 0; overflow-x: hidden; }
         
         #particles-js {
-            position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -1;
+            position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -2;
             background: radial-gradient(ellipse at top right, #1e293b, #0f172a, #000000);
+        }
+
+        /* Свечение за курсором */
+        #mouse-glow {
+            position: fixed; top: 0; left: 0; width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(14,165,233,0.15) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%; pointer-events: none; z-index: -1;
+            transform: translate(-50%, -50%); transition: opacity 0.3s ease; opacity: 0;
         }
 
         .glass-card {
@@ -65,16 +73,21 @@
         .fade-in { animation: fadeIn 0.4s ease-in-out forwards; opacity: 0; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
         
-        /* Контейнер для 3D моделей */
+        /* Контейнер для 3D моделей с неоновым свечением сзади */
         #model-3d-container {
-            width: 100%; height: 250px; display: flex; justify-content: center; align-items: center; pointer-events: none;
+            width: 100%; height: 220px; display: flex; justify-content: center; align-items: center; pointer-events: none; position: relative;
+        }
+        #model-3d-container::before {
+            content: ''; position: absolute; width: 150px; height: 150px;
+            background: rgba(14, 165, 233, 0.2); filter: blur(40px); border-radius: 50%; z-index: -1;
         }
     </style>
 </head>
-<body class="min-h-screen overflow-x-hidden selection:bg-brand-blue selection:text-white">
+<body class="min-h-screen overflow-x-hidden selection:bg-brand-blue selection:text-white relative">
 
-    <!-- 3D ФОН -->
+    <!-- 3D ФОН и Свечение курсора -->
     <div id="particles-js"></div>
+    <div id="mouse-glow"></div>
 
     <!-- Навигация -->
     <nav class="w-full p-6 flex justify-between items-center relative z-50">
@@ -85,27 +98,27 @@
     </nav>
 
     <!-- Главный экран -->
-    <main class="container mx-auto px-6 pt-10 pb-20 relative z-10">
-        <div class="text-center max-w-3xl mx-auto mb-10 relative">
-            <p class="font-mono text-sm italic text-slate-400 opacity-80 absolute -top-8 left-1/2 transform -translate-x-1/2">by sahar²¹</p>
-            <h1 class="text-5xl md:text-6xl font-extrabold mb-6 tracking-tight text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
+    <main class="container mx-auto px-6 pt-6 pb-20 relative z-10">
+        <div class="text-center max-w-3xl mx-auto mb-8 relative">
+            <p class="font-mono text-sm italic text-slate-400 opacity-80 absolute -top-6 left-1/2 transform -translate-x-1/2">by sahar²¹</p>
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
                 Школьный курс <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 drop-shadow-[0_0_15px_rgba(14,165,233,0.5)]">Физики</span>
             </h1>
         </div>
 
-        <!-- СТРОКА ПОИСКА -->
-        <div class="max-w-2xl mx-auto mb-10 relative z-20">
-            <input type="text" id="search-input" placeholder="Поиск по темам, объяснениям и формулам..." class="w-full bg-black/30 border border-white/20 rounded-full py-4 px-8 text-white placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue backdrop-blur-md shadow-[0_10px_25px_-5px_rgba(0,0,0,0.5)] transition-all text-lg">
-            <svg class="w-6 h-6 absolute right-6 top-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <!-- УМЕНЬШЕННАЯ СТРОКА ПОИСКА -->
+        <div class="max-w-md mx-auto mb-8 relative z-20 transition-transform duration-300 hover:scale-[1.02]">
+            <input type="text" id="search-input" placeholder="Поиск тем и формул..." class="w-full bg-black/40 border border-white/20 rounded-full py-3 px-6 text-white placeholder-slate-400 focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue backdrop-blur-lg shadow-[0_5px_15px_-5px_rgba(0,0,0,0.5)] transition-all text-sm font-medium">
+            <svg class="w-5 h-5 absolute right-5 top-3 text-brand-blue opacity-70 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
 
         <!-- Кнопки выбора класса -->
-        <div class="flex flex-wrap justify-center gap-3 mb-6 relative z-20">
-            <button id="btn-7" onclick="loadClass(7)" class="class-btn px-6 py-3 rounded-full font-semibold text-sm transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">7 класс</button>
-            <button id="btn-8" onclick="loadClass(8)" class="class-btn px-6 py-3 rounded-full font-semibold text-sm transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">8 класс</button>
-            <button id="btn-9" onclick="loadClass(9)" class="class-btn px-6 py-3 rounded-full font-semibold text-sm transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">9 класс</button>
-            <button id="btn-10" onclick="loadClass(10)" class="class-btn px-6 py-3 rounded-full font-semibold text-sm transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">10 класс</button>
-            <button id="btn-11" onclick="loadClass(11)" class="class-btn px-6 py-3 rounded-full font-semibold text-sm transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">11 класс</button>
+        <div class="flex flex-wrap justify-center gap-3 mb-4 relative z-20">
+            <button id="btn-7" onclick="loadClass(7)" class="class-btn px-5 py-2 rounded-full font-semibold text-sm transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">7 класс</button>
+            <button id="btn-8" onclick="loadClass(8)" class="class-btn px-5 py-2 rounded-full font-semibold text-sm transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">8 класс</button>
+            <button id="btn-9" onclick="loadClass(9)" class="class-btn px-5 py-2 rounded-full font-semibold text-sm transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">9 класс</button>
+            <button id="btn-10" onclick="loadClass(10)" class="class-btn px-5 py-2 rounded-full font-semibold text-sm transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">10 класс</button>
+            <button id="btn-11" onclick="loadClass(11)" class="class-btn px-5 py-2 rounded-full font-semibold text-sm transition-all bg-white/5 border border-white/10 hover:bg-brand-blue hover:text-white text-slate-300 shadow-lg">11 класс</button>
         </div>
 
         <!-- Контейнер для 3D Голограммы -->
@@ -119,71 +132,95 @@
 
     <!-- Скрипты -->
     <script>
+        // --- МАГИЧЕСКОЕ СВЕЧЕНИЕ КУРСОРА ---
+        const glow = document.getElementById('mouse-glow');
+        document.addEventListener('mousemove', (e) => {
+            glow.style.opacity = '1';
+            glow.style.left = e.clientX + 'px';
+            glow.style.top = e.clientY + 'px';
+        });
+        document.addEventListener('mouseleave', () => glow.style.opacity = '0');
+        // Для телефонов
+        document.addEventListener('touchmove', (e) => {
+            glow.style.opacity = '1';
+            glow.style.left = e.touches[0].clientX + 'px';
+            glow.style.top = e.touches[0].clientY + 'px';
+        });
+
+        // ФАКТЫ ПО ФИЗИКЕ ДЛЯ ГЛАВНОЙ СТРАНИЦЫ
+        const physicsFacts = [
+            "Свет от Солнца до Земли летит примерно 8 минут и 20 секунд. Если Солнце погаснет, мы узнаем об этом только через 8 минут.",
+            "Вода может кипеть и замерзать одновременно. Это состояние называется «тройной точкой» воды.",
+            "Самая низкая возможная температура во Вселенной — абсолютный нуль (−273.15 °C). При ней атомы перестают двигаться.",
+            "Если удалить всё пустое пространство внутри атомов из каждого человека на Земле, всё человечество поместится в объеме кубика сахара.",
+            "День на Венере длится дольше, чем её год. Она вращается вокруг своей оси медленнее, чем вокруг Солнца."
+        ];
+
         // ПОЛНАЯ БАЗА ДАННЫХ
         const physicsData = {
             7: {
-                title: "7 класс: Основы механики, силы и давление",
+                title: "7 класс: Механика",
                 topics: [
-                    { name: "Плотность вещества", desc: "Показывает, какая масса вещества содержится в единице объема.", formula: "ρ = m / V", vars: "ρ — плотность, m — масса, V — объем", example: { dano: "m = 400 кг<br>V = 0.5 м³", sol: "ρ = m / V<br>ρ = 400 / 0.5 = 800", ans: "800 кг/м³" } },
-                    { name: "Инерция", desc: "Явление сохранения скорости тела при отсутствии действия на него других тел.", formula: "v = const (если F = 0)", vars: "v — скорость, F — равнодействующая сила", example: { dano: "Автомобиль едет по прямой.<br>Двигатель выключен.<br>Трение отсутствует.", sol: "Так как на автомобиль не действуют тормозящие силы (F=0), он будет сохранять скорость.", ans: "v = const" } },
-                    { name: "Сила", desc: "Мера взаимодействия тел. Векторная величина.", formula: "R = F₁ + F₂", vars: "R — равнодействующая сила, F₁, F₂ — действующие силы", example: { dano: "F₁ = 30 Н (вправо)<br>F₂ = 50 Н (вправо)", sol: "Силы направлены в одну сторону:<br>R = 30 + 50 = 80 Н.", ans: "80 Н (вправо)" } },
-                    { name: "Сила тяжести", desc: "Сила, с которой Земля притягивает к себе все тела. Направлена всегда вертикально вниз.", formula: "F_тяж = m · g", vars: "F_тяж — сила тяжести, m — масса, g — ускорение свободного падения (≈ 9.8 Н/кг)", example: { dano: "m = 5 кг<br>g ≈ 10 Н/кг", sol: "F_тяж = m · g<br>F_тяж = 5 · 10 = 50", ans: "50 Н" } },
-                    { name: "Сила упругости", desc: "Сила, возникающая при деформации тела и стремящаяся вернуть его в исходное состояние (Закон Гука).", formula: "F_упр = k · Δl", vars: "F_упр — сила упругости, k — жесткость, Δl — удлинение", example: { dano: "k = 100 Н/м<br>Δl = 0.2 м", sol: "Применяем закон Гука:<br>F_упр = k · Δl = 100 · 0.2", ans: "20 Н" } },
-                    { name: "Вес тела", desc: "Сила, с которой тело действует на опору или подвес.", formula: "P = m · g", vars: "P — вес тела, m — масса, g — ускорение свободного падения", example: { dano: "m = 60 кг<br>g ≈ 10 Н/кг<br>Тело покоится", sol: "Так как тело неподвижно, вес равен силе тяжести:<br>P = m · g = 60 · 10 = 600", ans: "600 Н" } },
-                    { name: "Сила трения", desc: "Сила, возникающая при движении одного тела по поверхности другого.", formula: "F_тр = μ · N", vars: "F_тр — сила трения, μ — коэффициент трения, N — сила реакции опоры", example: { dano: "μ = 0.2<br>N = 100 Н", sol: "F_тр = μ · N<br>F_тр = 0.2 · 100", ans: "20 Н" } },
-                    { name: "Давление твердых тел", desc: "Показывает, какая сила действует на единицу площади поверхности.", formula: "p = F / S", vars: "p — давление (Па), F — сила, S — площадь", example: { dano: "F = 100 Н<br>S = 2 м²", sol: "p = F / S<br>p = 100 / 2 = 50", ans: "50 Па" } },
-                    { name: "Архимедова сила", desc: "Выталкивающая сила, действующая на погруженное в жидкость или газ тело.", formula: "F_А = ρ_ж · g · V_п", vars: "F_А — сила Архимеда, ρ_ж — плотность жидкости, V_п — объем погруженной части", example: { dano: "ρ_ж = 1000 кг/м³ (вода)<br>V_п = 0.1 м³<br>g ≈ 10 Н/кг", sol: "F_А = ρ_ж · g · V_п<br>F_А = 1000 · 10 · 0.1", ans: "1000 Н" } },
-                    { name: "Механическая работа", desc: "Совершается, когда на тело действует сила, и оно перемещается.", formula: "A = F · s", vars: "A — работа (Дж), F — сила, s — пройденный путь", example: { dano: "F = 50 Н<br>s = 4 м", sol: "A = F · s<br>A = 50 · 4 = 200", ans: "200 Дж" } },
-                    { name: "Мощность", desc: "Показывает быстроту совершения работы.", formula: "N = A / t", vars: "N — мощность (Вт), A — работа, t — время", example: { dano: "A = 600 Дж<br>t = 10 с", sol: "N = A / t<br>N = 600 / 10 = 60", ans: "60 Вт" } }
+                    { name: "Плотность", desc: "Показывает, какая масса вещества содержится в единице объема.", formula: "ρ = m / V", vars: "ρ — плотность, m — масса, V — объем", example: { dano: "m = 400 кг, V = 0.5 м³", sol: "ρ = m / V = 400 / 0.5", ans: "800 кг/м³" } },
+                    { name: "Инерция", desc: "Свойство сохранять скорость при отсутствии сил.", formula: "v = const (если F = 0)", vars: "v — скорость", example: { dano: "Двигатель выключен, F=0", sol: "По закону инерции скорость сохраняется.", ans: "v = const" } },
+                    { name: "Сила", desc: "Мера взаимодействия тел.", formula: "R = F₁ + F₂", vars: "R — равнодействующая", example: { dano: "F₁ = 30 Н, F₂ = 50 Н (вправо)", sol: "R = 30 + 50", ans: "80 Н" } },
+                    { name: "Сила тяжести", desc: "Притяжение к Земле.", formula: "F_тяж = m · g", vars: "g ≈ 9.8 Н/кг", example: { dano: "m = 5 кг, g ≈ 10", sol: "F = 5 · 10", ans: "50 Н" } },
+                    { name: "Сила упругости", desc: "Возникает при деформации (Закон Гука).", formula: "F_упр = k · Δl", vars: "k — жесткость, Δl — удлинение", example: { dano: "k = 100, Δl = 0.2", sol: "F = 100 · 0.2", ans: "20 Н" } },
+                    { name: "Вес тела", desc: "Сила давления на опору.", formula: "P = m · g", vars: "P — вес", example: { dano: "m = 60 кг", sol: "P = 60 · 10", ans: "600 Н" } },
+                    { name: "Сила трения", desc: "Возникает при движении по поверхности.", formula: "F_тр = μ · N", vars: "μ — коэффициент трения", example: { dano: "μ = 0.2, N = 100", sol: "F = 0.2 · 100", ans: "20 Н" } },
+                    { name: "Давление", desc: "Сила, действующая на площадь.", formula: "p = F / S", vars: "p — давление (Па)", example: { dano: "F = 100 Н, S = 2 м²", sol: "p = 100 / 2", ans: "50 Па" } },
+                    { name: "Архимедова сила", desc: "Выталкивающая сила в жидкости.", formula: "F_А = ρ_ж · g · V_п", vars: "ρ_ж — плотность жидкости", example: { dano: "ρ_ж = 1000, V_п = 0.1", sol: "F_А = 1000 · 10 · 0.1", ans: "1000 Н" } },
+                    { name: "Работа", desc: "Сила на перемещение.", formula: "A = F · s", vars: "A — работа (Дж)", example: { dano: "F = 50, s = 4", sol: "A = 50 · 4", ans: "200 Дж" } },
+                    { name: "Мощность", desc: "Быстрота работы.", formula: "N = A / t", vars: "N — мощность (Вт)", example: { dano: "A = 600 Дж, t = 10 с", sol: "N = 600 / 10", ans: "60 Вт" } }
                 ]
             },
             8: {
-                title: "8 класс: Тепловые и электрические явления",
+                title: "8 класс: Теплота и Электричество",
                 topics: [
-                    { name: "Количество теплоты (нагревание)", desc: "Энергия, которую тело получает при нагревании или отдает при охлаждении.", formula: "Q = c · m · (t_2 - t_1)", vars: "Q — теплота, c — удельная теплоемкость, m — масса, t — температура", example: { dano: "c = 4200 Дж/(кг·°C)<br>m = 2 кг<br>t₁ = 20°C, t₂ = 70°C", sol: "Q = c · m · (t₂ - t₁)<br>Q = 4200 · 2 · 50", ans: "420 кДж" } },
-                    { name: "Удельная теплота плавления", desc: "Количество теплоты, необходимое для превращения 1 кг твердого вещества в жидкость.", formula: "Q = λ · m", vars: "Q — количество теплоты, λ — удельная теплота плавления, m — масса", example: { dano: "λ = 3.4·10⁵ Дж/кг<br>m = 3 кг", sol: "Q = λ · m<br>Q = 3.4·10⁵ · 3 = 10.2·10⁵ Дж", ans: "1020 кДж" } },
-                    { name: "Закон Ома для участка цепи", desc: "Сила тока прямо пропорциональна напряжению и обратно пропорциональна сопротивлению.", formula: "I = U / R", vars: "I — сила тока (А), U — напряжение (В), R — сопротивление (Ом)", example: { dano: "U = 220 В<br>R = 55 Ом", sol: "I = U / R<br>I = 220 / 55", ans: "4 А" } },
-                    { name: "Работа электрического тока", desc: "Энергия, которую выделяет электрический ток на участке цепи.", formula: "A = U · I · t", vars: "A — работа (Дж), U — напряжение, I — сила тока, t — время", example: { dano: "U = 12 В<br>I = 2 А<br>t = 60 с", sol: "A = U · I · t<br>A = 12 · 2 · 60", ans: "1440 Дж" } },
-                    { name: "Закон преломления света", desc: "При переходе луча света из одной среды в другую он меняет свое направление.", formula: "sin(α) / sin(γ) = n₂ / n₁", vars: "α — угол падения, γ — угол преломления, n — показатель среды", example: { dano: "Угол падения α = 30°<br>n₁ = 1<br>n₂ = 1.41 (стекло)", sol: "sin(30°) / sin(γ) = 1.41 / 1<br>0.5 / sin(γ) = 1.41<br>sin(γ) ≈ 0.35", ans: "≈ 20°" } }
+                    { name: "Количество теплоты", desc: "Энергия при нагревании/охлаждении.", formula: "Q = c · m · (t_2 - t_1)", vars: "Q — теплота, c — теплоемкость", example: { dano: "c = 4200, m = 2, Δt = 50", sol: "Q = 4200 · 2 · 50", ans: "420 кДж" } },
+                    { name: "Теплота плавления", desc: "Энергия для плавления 1 кг вещества.", formula: "Q = λ · m", vars: "λ — удельная теплота плавления", example: { dano: "λ = 3.4·10⁵, m = 3", sol: "Q = 3.4·10⁵ · 3", ans: "1020 кДж" } },
+                    { name: "Закон Ома", desc: "Связь тока, напряжения и сопротивления.", formula: "I = U / R", vars: "I — ток (А), U — напряжение", example: { dano: "U = 220, R = 55", sol: "I = 220 / 55", ans: "4 А" } },
+                    { name: "Работа тока", desc: "Энергия эл. тока.", formula: "A = U · I · t", vars: "t — время", example: { dano: "U = 12, I = 2, t = 60", sol: "A = 12 · 2 · 60", ans: "1440 Дж" } },
+                    { name: "Преломление света", desc: "Смена направления луча.", formula: "sin(α) / sin(γ) = n₂ / n₁", vars: "α — падение, γ — преломление", example: { dano: "α = 30°, n₁=1, n₂=1.41", sol: "0.5 / sin(γ) = 1.41", ans: "≈ 20°" } }
                 ]
             },
             9: {
-                title: "9 класс: Кинематика, динамика, законы сохранения",
+                title: "9 класс: Кинематика, Динамика",
                 topics: [
-                    { name: "Проекция перемещения", desc: "Показывает изменение координаты тела вдоль выбранной оси при равноускоренном движении.", formula: "s_x = v_0x · t + (a_x · t²) / 2", vars: "s_x — перемещение, v_0x — нач. скорость, a_x — ускорение, t — время", example: { dano: "v_0x = 2 м/с<br>a_x = 1 м/с²<br>t = 4 с", sol: "s_x = 2·4 + (1 · 4²) / 2<br>s_x = 8 + 8", ans: "16 м" } },
-                    { name: "Ускорение", desc: "Показывает, как быстро меняется скорость тела со временем.", formula: "a = (v - v_0) / t", vars: "a — ускорение, v — конечная скорость, v_0 — начальная скорость", example: { dano: "v_0 = 0 м/с<br>v = 20 м/с<br>t = 5 с", sol: "a = (20 - 0) / 5", ans: "4 м/с²" } },
-                    { name: "Относительность движения", desc: "Абсолютная скорость равна векторной сумме относительной и переносной скоростей.", formula: "v_абс = v_отн + v_пер", vars: "v_абс — скор. тела, v_отн — скор. отн. подвижной системы, v_пер — скор. системы", example: { dano: "v_лодки = 5 м/с<br>v_течения = 2 м/с<br>Плывет по течению", sol: "Направления совпадают, скорости складываются:<br>v_абс = 5 + 2", ans: "7 м/с" } },
-                    { name: "Скорость при криволинейном движении", desc: "Линейная скорость при движении по окружности.", formula: "v = (2 · π · R) / T", vars: "v — скорость, R — радиус, T — период обращения", example: { dano: "R = 2 м<br>T = 3.14 с<br>π ≈ 3.14", sol: "v = (2 · 3.14 · 2) / 3.14", ans: "4 м/с" } },
-                    { name: "Первый закон Ньютона", desc: "Тело сохраняет состояние покоя или равномерного движения, если на него не действуют силы.", formula: "ΣF = 0  =>  v = const", vars: "ΣF — сумма сил, v — скорость", example: { dano: "Санки катятся равномерно.<br>Сила тяги F = 15 Н.", sol: "Движение равномерное, сумма сил = 0. Значит сила тяги компенсируется силой трения.", ans: "Сила трения 15 Н" } },
-                    { name: "Второй закон Ньютона", desc: "Ускорение прямо пропорционально силе и обратно пропорционально массе.", formula: "F = m · a", vars: "F — равнодействующая сила, m — масса, a — ускорение", example: { dano: "m = 5 кг<br>a = 2 м/с²", sol: "F = m · a<br>F = 5 · 2", ans: "10 Н" } },
-                    { name: "Третий закон Ньютона", desc: "Тела действуют друг на друга с силами, равными по модулю и противоположными по направлению.", formula: "F₁ = -F₂", vars: "F₁ — сила действия первого тела, F₂ — второго", example: { dano: "Земля притягивает яблоко с силой 2 Н.", sol: "По 3-му закону Ньютона яблоко притягивает Землю с такой же силой.", ans: "2 Н" } },
-                    { name: "Свободное падение тел", desc: "Движение под действием только силы тяжести.", formula: "h = (g · t²) / 2", vars: "h — высота, g — ускорение свободного падения, t — время", example: { dano: "t = 3 с<br>v_0 = 0 м/с<br>g ≈ 10 м/с²", sol: "h = (10 · 3²) / 2<br>h = 90 / 2", ans: "45 м" } },
-                    { name: "Ускорение свободного падения", desc: "Ускорение, придаваемое гравитацией планеты.", formula: "g = G · M / R²", vars: "G — гравитационная постоянная, M — масса планеты, R — радиус планеты", example: { dano: "Тело на поверхности Земли.", sol: "Подставляем массу и радиус Земли в формулу.", ans: "≈ 9.8 м/с²" } },
-                    { name: "Динамика криволинейного движения", desc: "Центростремительная сила заставляет тело двигаться по окружности.", formula: "F_ц = m · v² / R", vars: "F_ц — центростремительная сила, m — масса, v — скорость, R — радиус", example: { dano: "m = 1000 кг<br>v = 10 м/с<br>R = 50 м", sol: "F_ц = 1000 · (10²) / 50<br>F_ц = 100 000 / 50", ans: "2000 Н" } },
-                    { name: "Импульс тела", desc: "Векторная мера механического движения.", formula: "p = m · v", vars: "p — импульс (кг·м/с), m — масса, v — скорость", example: { dano: "m = 1500 кг<br>v = 20 м/с", sol: "p = m · v<br>p = 1500 · 20", ans: "30000 кг·м/с" } },
-                    { name: "Закон сохранения импульса", desc: "Суммарный импульс замкнутой системы тел остается постоянным.", formula: "m₁v₁ + m₂v₂ = m₁v₁' + m₂v₂'", vars: "До знака равно — импульсы до взаимодействия, после — импульсы после.", example: { dano: "Мяч 1 кг (v=2) догоняет мяч 2 кг (v=0). Неупругий удар.", sol: "m₁v₁ + 0 = (m₁+m₂)v'<br>1·2 = (1+2)v'<br>v' = 2 / 3 м/с", ans: "0.67 м/с" } },
-                    { name: "Закон всемирного тяготения", desc: "Любые два тела во Вселенной притягиваются друг к другу.", formula: "F = G · (m₁ · m₂) / R²", vars: "G — гравитационная постоянная, R — расстояние", example: { dano: "m₁ = 10⁵ кг<br>m₂ = 10⁵ кг<br>R = 10 м", sol: "F = 6.67·10⁻¹¹ · (10¹⁰) / 100", ans: "6.67·10⁻³ Н" } }
+                    { name: "Проекция перемещения", desc: "Путь при ускорении.", formula: "s_x = v_0x · t + (a_x · t²) / 2", vars: "s_x — перемещение", example: { dano: "v_0x=2, a_x=1, t=4", sol: "s_x = 2·4 + (1·16)/2", ans: "16 м" } },
+                    { name: "Ускорение", desc: "Изменение скорости.", formula: "a = (v - v_0) / t", vars: "a — ускорение", example: { dano: "v_0 = 0, v = 20, t = 5", sol: "a = 20 / 5", ans: "4 м/с²" } },
+                    { name: "Относительность", desc: "Сложение скоростей.", formula: "v_абс = v_отн + v_пер", vars: "Абсолютная скорость", example: { dano: "v_лодки = 5, v_теч = 2", sol: "v_абс = 5 + 2", ans: "7 м/с" } },
+                    { name: "Криволинейное движение", desc: "Движение по окружности.", formula: "v = (2 · π · R) / T", vars: "R — радиус, T — период", example: { dano: "R=2, T=3.14, π=3.14", sol: "v = (2·3.14·2)/3.14", ans: "4 м/с" } },
+                    { name: "Первый закон Ньютона", desc: "Тело в покое без сил.", formula: "ΣF = 0  =>  v = const", vars: "ΣF — сумма сил", example: { dano: "Равномерное движение, F_тяги=15", sol: "F_тяги компенсируется F_тр", ans: "15 Н" } },
+                    { name: "Второй закон Ньютона", desc: "Ускорение зависит от массы и силы.", formula: "F = m · a", vars: "F — сила", example: { dano: "m = 5, a = 2", sol: "F = 5 · 2", ans: "10 Н" } },
+                    { name: "Третий закон Ньютона", desc: "Действие равно противодействию.", formula: "F₁ = -F₂", vars: "Силы взаимодействия", example: { dano: "Земля тянет яблоко с силой 2 Н", sol: "Яблоко тянет с такой же силой", ans: "2 Н" } },
+                    { name: "Свободное падение", desc: "Падение под действием гравитации.", formula: "h = (g · t²) / 2", vars: "h — высота", example: { dano: "t = 3, g ≈ 10", sol: "h = (10 · 9) / 2", ans: "45 м" } },
+                    { name: "Ускорение падения", desc: "Гравитационное ускорение.", formula: "g = G · M / R²", vars: "G — постоянная", example: { dano: "Поверхность Земли", sol: "Подстановка массы и радиуса Земли", ans: "≈ 9.8 м/с²" } },
+                    { name: "Центростремительная сила", desc: "Сила удержания на окружности.", formula: "F_ц = m · v² / R", vars: "F_ц — сила", example: { dano: "m=1000, v=10, R=50", sol: "F_ц = 1000·100/50", ans: "2000 Н" } },
+                    { name: "Импульс тела", desc: "Мера механического движения.", formula: "p = m · v", vars: "p — импульс", example: { dano: "m=1500, v=20", sol: "p = 1500 · 20", ans: "30000 кг·м/с" } },
+                    { name: "Закон сохранения импульса", desc: "Импульс замкнутой системы.", formula: "m₁v₁ + m₂v₂ = m₁v₁' + m₂v₂'", vars: "Сумма до = сумма после", example: { dano: "m₁=1, v₁=2; m₂=2, v₂=0", sol: "1·2 = 3·v'", ans: "0.67 м/с" } },
+                    { name: "Закон всемирного тяготения", desc: "Притяжение всех тел.", formula: "F = G · (m₁ · m₂) / R²", vars: "R — расстояние", example: { dano: "m₁,m₂ = 10⁵, R = 10", sol: "F = 6.67·10⁻¹¹ · 10¹⁰ / 100", ans: "6.67·10⁻³ Н" } }
                 ]
             },
             10: {
-                title: "10 класс: Молекулярная физика и электростатика",
+                title: "10 класс: Газы и Электростатика",
                 topics: [
-                    { name: "Уравнение Менделеева-Клапейрона", desc: "Связывает давление, объем, температуру и массу идеального газа.", formula: "p · V = (m / M) · R · T", vars: "p - давление, V - объем, M - молярная масса, R - газовая постоянная", example: { dano: "p = 10⁵ Па, V = 0.083 м³<br>T = 300 К<br>R = 8.31", sol: "ν = (p·V) / (R·T) = (10⁵ · 0.083) / (8.31 · 300) ≈ 3.3", ans: "3.3 моль" } },
-                    { name: "Первое начало термодинамики", desc: "Теплота, переданная системе, идет на изменение ее внутренней энергии и работу.", formula: "Q = ΔU + A", vars: "Q — подведенное тепло, ΔU — изменение энергии, A — работа газа", example: { dano: "Газ совершил работу A = 200 Дж<br>Внутр. энергия выросла на ΔU = 300 Дж", sol: "Q = ΔU + A<br>Q = 300 + 200 = 500", ans: "500 Дж" } },
-                    { name: "Закон Кулона", desc: "Сила взаимодействия между двумя неподвижными точечными зарядами.", formula: "F = k · (|q₁| · |q₂|) / r²", vars: "q₁, q₂ — заряды, r — расстояние, k — коэффициент", example: { dano: "q₁ = 2·10⁻⁶ Кл, q₂ = 3·10⁻⁶ Кл<br>r = 0.1 м<br>k = 9·10⁹", sol: "F = 9·10⁹ · (6·10⁻¹²) / 0.01<br>F = 54·10⁻³ / 0.01", ans: "5.4 Н" } },
-                    { name: "Напряженность электрического поля", desc: "Силовая характеристика электрического поля.", formula: "E = F / q", vars: "E — напряженность (В/м), F — сила, q — заряд", example: { dano: "F = 0.05 Н<br>q = 10·10⁻⁶ Кл", sol: "E = F / q<br>E = 0.05 / (10·10⁻⁶)", ans: "5000 В/м" } },
-                    { name: "Электроемкость плоского конденсатора", desc: "Характеризует способность конденсатора накапливать заряд.", formula: "C = (ε · ε₀ · S) / d", vars: "C — емкость, S — площадь пластин, d — расстояние, ε — диэл. проницаемость", example: { dano: "Заряд q = 10⁻³ Кл<br>Напряжение U = 100 В", sol: "Альтернативная формула емкости C = q / U<br>C = 10⁻³ / 100", ans: "10 мкФ" } }
+                    { name: "Уравнение Менделеева-Клапейрона", desc: "Связывает P, V, T и массу.", formula: "p · V = (m / M) · R · T", vars: "R - газовая постоянная", example: { dano: "p=10⁵, V=0.083, T=300", sol: "ν = pV/RT", ans: "3.3 моль" } },
+                    { name: "Первое начало термодинамики", desc: "Сохранение энергии для газа.", formula: "Q = ΔU + A", vars: "ΔU — изм. внутр. энергии", example: { dano: "A=200 Дж, ΔU=300 Дж", sol: "Q = 300 + 200", ans: "500 Дж" } },
+                    { name: "Закон Кулона", desc: "Взаимодействие зарядов.", formula: "F = k · (|q₁| · |q₂|) / r²", vars: "k — коэффициент", example: { dano: "q₁,q₂=3·10⁻⁶, r=0.1", sol: "F = 9·10⁹·9·10⁻¹²/0.01", ans: "8.1 Н" } },
+                    { name: "Напряженность", desc: "Силовая характеристика поля.", formula: "E = F / q", vars: "E — напряженность (В/м)", example: { dano: "F = 0.05, q = 10⁻⁵", sol: "E = 0.05 / 10⁻⁵", ans: "5000 В/м" } },
+                    { name: "Емкость конденсатора", desc: "Накопление заряда.", formula: "C = (ε · ε₀ · S) / d", vars: "C — емкость (Ф)", example: { dano: "q = 10⁻³, U = 100", sol: "C = q / U = 10⁻³ / 100", ans: "10 мкФ" } }
                 ]
             },
             11: {
-                title: "11 класс: Электромагнетизм и квантовая физика",
+                title: "11 класс: Кванты и Магнетизм",
                 topics: [
-                    { name: "Магнитный поток", desc: "Число линий магнитной индукции, пронизывающих заданную площадь.", formula: "Φ = B · S · cos(α)", vars: "Φ — магнитный поток, B — индукция, S — площадь", example: { dano: "B = 0.2 Тл<br>S = 0.5 м²<br>Перпендикулярно линиям", sol: "Φ = B · S · cos(α)<br>Φ = 0.2 · 0.5 · 1", ans: "0.1 Вб" } },
-                    { name: "Закон электромагнитной индукции", desc: "При изменении магнитного потока возникает ЭДС индукции.", formula: "ε_i = - ΔΦ / Δt", vars: "ε_i — ЭДС индукции (В), ΔΦ — изменение потока", example: { dano: "ΔΦ = 0.4 Вб<br>Δt = 2 с", sol: "|ε_i| = ΔΦ / Δt<br>|ε_i| = 0.4 / 2", ans: "0.2 В" } },
-                    { name: "Энергия фотона", desc: "Энергия кванта света напрямую зависит от его частоты.", formula: "E = h · ν", vars: "E — энергия, h — постоянная Планка, ν (ню) — частота", example: { dano: "ν = 5·10¹⁴ Гц<br>h = 6.6·10⁻³⁴ Дж·с", sol: "E = h · ν<br>E = 6.6·10⁻³⁴ · 5·10¹⁴", ans: "3.3·10⁻¹⁹ Дж" } },
-                    { name: "Уравнение Эйнштейна для фотоэффекта", desc: "Энергия фотона идет на вырывание электрона и сообщение ему кинетической энергии.", formula: "h · ν = A_вых + E_к", vars: "hν — энергия фотона, A_вых — работа выхода, E_к — кин. энергия", example: { dano: "A_вых = 2 эВ<br>E_к = 1 эВ", sol: "Энергия поглощенного фотона:<br>E_ф = A_вых + E_к = 2 + 1", ans: "3 эВ" } },
-                    { name: "Закон радиоактивного распада", desc: "Показывает, сколько радиоактивных ядер останется не распавшимися через определенное время.", formula: "N = N₀ · 2^(-t / T)", vars: "N — оставшиеся ядра, T — период полураспада", example: { dano: "T = 8 дней<br>t = 16 дней<br>N₀ = 100%", sol: "N = 100 · 2^(-16/8)<br>N = 100 · 2⁻² = 100 / 4", ans: "25% исходных ядер" } },
-                    { name: "Связь массы и энергии", desc: "Эквивалентность массы и энергии (формула Эйнштейна).", formula: "E = m · c²", vars: "E — энергия покоя, m — масса, c — скорость света (3·10⁸ м/с)", example: { dano: "m = 1 кг<br>c = 3·10⁸ м/с", sol: "E = m · c²<br>E = 1 · (3·10⁸)²", ans: "9·10¹⁶ Дж" } }
+                    { name: "Магнитный поток", desc: "Число линий магнитной индукции.", formula: "Φ = B · S · cos(α)", vars: "Φ — магнитный поток", example: { dano: "B = 0.2 Тл, S = 0.5 м²", sol: "Φ = 0.2 · 0.5 · 1", ans: "0.1 Вб" } },
+                    { name: "Закон электромагнитной индукции", desc: "ЭДС при изменении магнитного потока.", formula: "ε_i = - ΔΦ / Δt", vars: "ε_i — ЭДС индукции (В)", example: { dano: "ΔΦ = 0.4, Δt = 2", sol: "|ε_i| = 0.4 / 2", ans: "0.2 В" } },
+                    { name: "Энергия фотона", desc: "Энергия кванта света.", formula: "E = h · ν", vars: "h — постоянная Планка", example: { dano: "ν = 5·10¹⁴ Гц", sol: "E = 6.6·10⁻³⁴ · 5·10¹⁴", ans: "3.3·10⁻¹⁹ Дж" } },
+                    { name: "Фотоэффект", desc: "Уравнение Эйнштейна.", formula: "h · ν = A_вых + E_к", vars: "A_вых — работа выхода", example: { dano: "A_вых = 2 эВ, E_к = 1 эВ", sol: "E_ф = 2 + 1", ans: "3 эВ" } },
+                    { name: "Радиоактивный распад", desc: "Сколько ядер останется.", formula: "N = N₀ · 2^(-t / T)", vars: "T — период полураспада", example: { dano: "T = 8 дней, t = 16 дней", sol: "N = 100 · 2⁻²", ans: "25% исходных ядер" } },
+                    { name: "Связь массы и энергии", desc: "Эквивалентность (Эйнштейн).", formula: "E = m · c²", vars: "c — скорость света", example: { dano: "m = 1 кг", sol: "E = 1 · (3·10⁸)²", ans: "9·10¹⁶ Дж" } }
                 ]
             }
         };
@@ -191,16 +228,18 @@
         // --- ЛОГИКА 3D ФОНА ---
         particlesJS("particles-js", {
             "particles": {
-                "number": { "value": 50 }, "color": { "value": "#0ea5e9" }, "shape": { "type": "circle" },
+                "number": { "value": 45 }, "color": { "value": "#0ea5e9" }, "shape": { "type": "circle" },
                 "opacity": { "value": 0.4 }, "size": { "value": 3 },
                 "line_linked": { "enable": true, "distance": 150, "color": "#0ea5e9", "opacity": 0.2, "width": 1 },
-                "move": { "enable": true, "speed": 1.5, "direction": "none" }
+                "move": { "enable": true, "speed": 1.2, "direction": "none" }
             },
             "interactivity": { "events": { "onhover": { "enable": true, "mode": "grab" }, "onclick": { "enable": true, "mode": "push" } } }
         });
 
-        // --- ЛОГИКА 3D ГОЛОГРАММ (Three.js) ---
+        // --- ЛОГИКА 3D ГОЛОГРАММ (Three.js) С ОТСЛЕЖИВАНИЕМ МЫШИ ---
         let scene, camera, renderer, currentMesh;
+        let mouseX = 0, mouseY = 0;
+        let targetRotationX = 0, targetRotationY = 0;
 
         function init3D() {
             const container = document.getElementById('model-3d-container');
@@ -209,7 +248,7 @@
             camera.position.z = 6;
             
             renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-            renderer.setSize(250, 250);
+            renderer.setSize(220, 220);
             container.appendChild(renderer.domElement);
 
             const light = new THREE.PointLight(0x0ea5e9, 2, 100);
@@ -217,14 +256,23 @@
             scene.add(light);
             scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
+            // Отслеживание мыши для 3D
+            document.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX - window.innerWidth / 2);
+                mouseY = (e.clientY - window.innerHeight / 2);
+                targetRotationY = mouseX * 0.002;
+                targetRotationX = mouseY * 0.002;
+            });
+
             animate3D();
         }
 
         function animate3D() {
             requestAnimationFrame(animate3D);
             if (currentMesh) {
-                currentMesh.rotation.x += 0.01;
-                currentMesh.rotation.y += 0.015;
+                // Базовое вращение + реакция на мышь
+                currentMesh.rotation.y += 0.01 + (targetRotationY - currentMesh.rotation.y) * 0.05;
+                currentMesh.rotation.x += 0.005 + (targetRotationX - currentMesh.rotation.x) * 0.05;
             }
             renderer.render(scene, camera);
         }
@@ -239,13 +287,13 @@
             }
 
             let geometry;
-            if (grade === 'main') geometry = new THREE.IcosahedronGeometry(2, 0); // Икосаэдр для главной
-            else if (grade === 'search') geometry = new THREE.OctahedronGeometry(2, 0); // Октаэдр для поиска
-            else if (grade === 7) geometry = new THREE.BoxGeometry(2.5, 2.5, 2.5); // Куб
-            else if (grade === 8) geometry = new THREE.TorusGeometry(1.5, 0.6, 16, 50); // Тор
-            else if (grade === 9) geometry = new THREE.ConeGeometry(2, 3, 16); // Конус
-            else if (grade === 10) geometry = new THREE.SphereGeometry(2, 16, 16); // Сфера
-            else if (grade === 11) geometry = new THREE.TorusKnotGeometry(1.2, 0.4, 64, 16); // Узел
+            if (grade === 'main') geometry = new THREE.IcosahedronGeometry(2, 0); 
+            else if (grade === 'search') geometry = new THREE.OctahedronGeometry(2, 0);
+            else if (grade === 7) geometry = new THREE.BoxGeometry(2.2, 2.2, 2.2); 
+            else if (grade === 8) geometry = new THREE.TorusGeometry(1.4, 0.5, 16, 50); 
+            else if (grade === 9) geometry = new THREE.ConeGeometry(1.8, 2.8, 16); 
+            else if (grade === 10) geometry = new THREE.SphereGeometry(1.8, 16, 16); 
+            else if (grade === 11) geometry = new THREE.TorusKnotGeometry(1.1, 0.35, 64, 16); 
 
             const material = new THREE.MeshStandardMaterial({
                 color: 0x0ea5e9, wireframe: true, emissive: 0x0ea5e9, emissiveIntensity: 0.8
@@ -255,34 +303,39 @@
             scene.add(currentMesh);
         }
 
-        // --- ЛОГИКА ГЛАВНОГО ЭКРАНА ---
+        // --- ЛОГИКА ГЛАВНОГО ЭКРАНА С ФАКТАМИ ---
         function renderWelcomeScreen() {
             spawn3DModel('main');
+            const randomFact = physicsFacts[Math.floor(Math.random() * physicsFacts.length)];
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
                 <div class="glass-card vanilla-tilt-card rounded-2xl p-8 fade-in">
                     <div class="glass-card-inner">
                         <h2 class="text-3xl font-bold text-white mb-4 drop-shadow-md">Добро пожаловать в справочник!</h2>
-                        <p class="text-lg text-slate-300 mb-8 leading-relaxed">
-                            <span class="text-brand-blue font-bold font-mono text-xl tracking-wide uppercase">Физика</span> — это фундаментальная наука о природе. Она изучает простейшие и вместе с тем наиболее общие законы материального мира, структуру и движение материи.
+                        <p class="text-lg text-slate-300 mb-6 leading-relaxed">
+                            <span class="text-brand-blue font-bold font-mono text-xl tracking-wide uppercase">Физика</span> — это фундаментальная наука о природе. Она изучает простейшие и вместе с тем наиболее общие законы материального мира.
                         </p>
+                        
+                        <!-- Блок интересных фактов -->
+                        <div class="bg-gradient-to-r from-brand-blue/20 to-transparent p-4 rounded-xl border-l-4 border-brand-blue mb-8 shadow-inner" style="transform: translateZ(25px);">
+                            <h4 class="text-brand-blue font-bold text-sm uppercase tracking-wider mb-1">💡 А знаете ли вы?</h4>
+                            <p class="text-slate-200 text-sm italic">«${randomFact}»</p>
+                        </div>
+
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-brand-blue shadow-inner" style="transform: translateZ(20px);">
-                                <h3 class="text-white font-bold mb-2">📚 5 лет программы</h3>
-                                <p class="text-sm text-slate-400">Собраны все ключевые формулы и законы с 7 по 11 класс.</p>
+                                <h3 class="text-white font-bold mb-2">📚 Программа</h3>
+                                <p class="text-xs text-slate-400">Все формулы и законы с 7 по 11 класс.</p>
                             </div>
                             <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-emerald-500 shadow-inner" style="transform: translateZ(20px);">
-                                <h3 class="text-white font-bold mb-2">💡 Примеры задач</h3>
-                                <p class="text-sm text-slate-400">Понятные примеры с оформлением «Дано - Решение - Ответ».</p>
+                                <h3 class="text-white font-bold mb-2">💡 Задачи</h3>
+                                <p class="text-xs text-slate-400">Примеры с оформлением «Дано - Решение - Ответ».</p>
                             </div>
                             <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-purple-500 shadow-inner" style="transform: translateZ(20px);">
-                                <h3 class="text-white font-bold mb-2">🧊 3D Визуализация</h3>
-                                <p class="text-sm text-slate-400">Вращающиеся голограммы и интерактивные эффекты.</p>
+                                <h3 class="text-white font-bold mb-2">🧊 Интерактив</h3>
+                                <p class="text-xs text-slate-400">3D-голограммы реагируют на ваши движения!</p>
                             </div>
                         </div>
-                        <p class="mt-8 text-center text-emerald-400 font-semibold animate-pulse tracking-wide" style="transform: translateZ(10px);">
-                            👆 Введите запрос в поиск или выберите класс, чтобы начать!
-                        </p>
                     </div>
                 </div>
             `;
@@ -295,8 +348,7 @@
 
         // --- ЛОГИКА ОТРИСОВКИ ТЕМ ПО КЛАССАМ ---
         function loadClass(grade) {
-            document.getElementById('search-input').value = ''; // Очищаем поиск при клике на класс
-
+            document.getElementById('search-input').value = ''; 
             document.querySelectorAll('.class-btn').forEach(btn => {
                 btn.classList.remove('bg-brand-blue', 'text-white', 'shadow-[0_0_20px_rgba(14,165,233,0.8)]');
                 btn.classList.add('bg-white/5', 'text-slate-300');
@@ -310,19 +362,18 @@
             spawn3DModel(grade);
 
             const data = physicsData[grade];
-            let html = `<div class="fade-in mb-8 text-center md:text-left"><h2 class="text-3xl font-bold text-white border-b border-white/10 pb-4 inline-block drop-shadow-md">${data.title}</h2></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8">`;
+            let html = `<div class="fade-in mb-6 text-center md:text-left"><h2 class="text-2xl font-bold text-white border-b border-white/10 pb-3 inline-block drop-shadow-md">${data.title}</h2></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6">`;
             html += generateCardsHtml(data.topics);
             html += `</div>`;
             
             document.getElementById('content-area').innerHTML = html;
-            setTimeout(() => VanillaTilt.init(document.querySelectorAll(".vanilla-tilt-card"), { max: 8, speed: 400, glare: true, "max-glare": 0.2, scale: 1.02 }), 100);
+            setTimeout(() => VanillaTilt.init(document.querySelectorAll(".vanilla-tilt-card"), { max: 6, speed: 400, glare: true, "max-glare": 0.15, scale: 1.02 }), 100);
         }
 
         // --- ЛОГИКА ПОИСКА ---
         document.getElementById('search-input').addEventListener('input', function(e) {
             const query = e.target.value.toLowerCase().trim();
             
-            // Сбрасываем активные кнопки классов
             document.querySelectorAll('.class-btn').forEach(btn => {
                 btn.classList.remove('bg-brand-blue', 'text-white', 'shadow-[0_0_20px_rgba(14,165,233,0.8)]');
                 btn.classList.add('bg-white/5', 'text-slate-300');
@@ -333,7 +384,7 @@
                 return;
             }
 
-            spawn3DModel('search'); // Специальная модель для поиска
+            spawn3DModel('search'); 
 
             let results = [];
             for (let grade in physicsData) {
@@ -348,50 +399,49 @@
 
             const contentArea = document.getElementById('content-area');
             if (results.length === 0) {
-                contentArea.innerHTML = `<div class="text-center text-slate-400 py-10 bg-black/20 rounded-xl backdrop-blur-md border border-white/5 fade-in">По запросу «<span class="text-white">${query}</span>» ничего не найдено. Попробуйте изменить запрос.</div>`;
+                contentArea.innerHTML = `<div class="text-center text-slate-400 py-10 bg-black/20 rounded-xl backdrop-blur-md border border-white/5 fade-in">По запросу «<span class="text-white">${query}</span>» ничего не найдено.</div>`;
                 return;
             }
 
-            let html = `<div class="fade-in mb-8 text-center md:text-left"><h2 class="text-3xl font-bold text-white border-b border-white/10 pb-4 inline-block drop-shadow-md">Результаты поиска: ${results.length}</h2></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8">`;
+            let html = `<div class="fade-in mb-6 text-center md:text-left"><h2 class="text-2xl font-bold text-white border-b border-white/10 pb-3 inline-block drop-shadow-md">Результаты поиска: ${results.length}</h2></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6">`;
             html += generateCardsHtml(results);
             html += `</div>`;
             
             contentArea.innerHTML = html;
-            setTimeout(() => VanillaTilt.init(document.querySelectorAll(".vanilla-tilt-card"), { max: 8, speed: 400, glare: true, "max-glare": 0.2, scale: 1.02 }), 100);
+            setTimeout(() => VanillaTilt.init(document.querySelectorAll(".vanilla-tilt-card"), { max: 6, speed: 400, glare: true, "max-glare": 0.15, scale: 1.02 }), 100);
         });
 
-        // Вспомогательная функция для генерации HTML карточек
+        // Вспомогательная функция для HTML карточек
         function generateCardsHtml(topics) {
             let html = '';
             topics.forEach((topic, index) => {
                 let exampleHtml = '';
                 if (topic.example) {
                     exampleHtml = `
-                        <div class="example-box mt-5 p-4 rounded-lg shadow-inner">
-                            <h4 class="text-xs text-emerald-400 font-bold mb-3 uppercase flex items-center gap-2">Пример решения</h4>
-                            <div class="flex flex-col gap-2 text-sm font-mono text-slate-300">
+                        <div class="example-box mt-4 p-3 rounded-lg shadow-inner">
+                            <h4 class="text-xs text-emerald-400 font-bold mb-2 uppercase flex items-center gap-1">Пример решения</h4>
+                            <div class="flex flex-col gap-1 text-xs font-mono text-slate-300">
                                 <p><span class="text-slate-500">Дано:</span> ${topic.example.dano}</p>
-                                <p><span class="text-slate-500">Решение:</span> ${topic.example.sol}</p>
-                                <p class="text-brand-blue font-bold bg-brand-blue/20 inline-block px-2 py-1 rounded w-max">Ответ: ${topic.example.ans}</p>
+                                <p><span class="text-slate-500">Реш:</span> ${topic.example.sol}</p>
+                                <p class="text-brand-blue font-bold bg-brand-blue/20 inline-block px-2 py-1 rounded w-max mt-1">Ответ: ${topic.example.ans}</p>
                             </div>
                         </div>`;
                 }
                 
-                // Если карточка из поиска, добавляем бейдж класса
-                let badgeHtml = topic.gradeBadge ? `<span class="absolute top-4 right-4 bg-brand-blue/20 text-brand-blue text-xs font-bold px-3 py-1 rounded-full border border-brand-blue/30 drop-shadow-md" style="transform: translateZ(20px);">${topic.gradeBadge}</span>` : '';
+                let badgeHtml = topic.gradeBadge ? `<span class="absolute top-4 right-4 bg-brand-blue/20 text-brand-blue text-xs font-bold px-2 py-1 rounded border border-brand-blue/30 drop-shadow-md" style="transform: translateZ(20px);">${topic.gradeBadge}</span>` : '';
 
                 html += `
-                    <div class="glass-card vanilla-tilt-card rounded-2xl p-6 fade-in flex flex-col justify-between" style="animation-delay: ${index * 0.1}s">
+                    <div class="glass-card vanilla-tilt-card rounded-2xl p-5 fade-in flex flex-col justify-between" style="animation-delay: ${index * 0.05}s">
                         ${badgeHtml}
                         <div class="glass-card-inner">
-                            <div class="flex items-center gap-3 mb-4 pr-20">
-                                <div class="w-10 h-10 rounded-full bg-brand-blue/20 flex items-center justify-center text-brand-blue font-bold shadow-[0_0_15px_rgba(14,165,233,0.3)] shrink-0">${index + 1}</div>
-                                <h3 class="text-xl font-bold text-white drop-shadow-md">${topic.name}</h3>
+                            <div class="flex items-center gap-3 mb-3 pr-16">
+                                <div class="w-8 h-8 rounded-full bg-brand-blue/20 flex items-center justify-center text-brand-blue font-bold shadow-[0_0_15px_rgba(14,165,233,0.3)] shrink-0">${index + 1}</div>
+                                <h3 class="text-lg font-bold text-white drop-shadow-md leading-tight">${topic.name}</h3>
                             </div>
-                            <p class="text-slate-300 mb-5 text-sm drop-shadow-sm">${topic.desc}</p>
-                            <div class="formula-box p-4 rounded-lg">
-                                <span class="text-xs text-brand-blue font-bold uppercase mb-1 block">Формула</span>
-                                <code class="font-mono text-xl text-emerald-400 block mb-2 drop-shadow-[0_0_8px_rgba(16,185,129,0.4)]">${topic.formula}</code>
+                            <p class="text-slate-300 mb-4 text-sm drop-shadow-sm leading-relaxed">${topic.desc}</p>
+                            <div class="formula-box p-3 rounded-lg">
+                                <span class="text-[10px] text-brand-blue font-bold uppercase mb-1 block tracking-wider">Формула</span>
+                                <code class="font-mono text-lg text-emerald-400 block mb-2 drop-shadow-[0_0_8px_rgba(16,185,129,0.4)]">${topic.formula}</code>
                                 <p class="font-mono text-xs text-slate-400 border-t border-white/10 pt-2">${topic.vars}</p>
                             </div>
                         </div>
