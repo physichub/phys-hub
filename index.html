@@ -4,12 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Название, которое будет видно в поиске -->
     <title>PhysHub | Школьный 3D-справочник по физике</title>
     
-    <!-- Описание сайта для Google и Яндекса -->
     <meta name="description" content="PhysHub — это интерактивный справочник по физике для 7-11 классов. Все главные формулы, законы Ньютона, термодинамика, примеры решения задач и 3D-визуализация.">
-    <!-- Ключевые слова, по которым вас будут искать -->
     <meta name="keywords" content="physhub, физика, справочник по физике, формулы по физике, физика 7 класс, физика 8 класс, физика 9 класс, физика 10 класс, физика 11 класс, ОГЭ физика, ЕГЭ физика, решение задач">
     <meta name="author" content="sahar21">
     <meta name="robots" content="index, follow">
@@ -54,11 +51,13 @@
             background: radial-gradient(ellipse at top right, #1e293b, #0f172a, #000000);
         }
 
+        /* ОПТИМИЗИРОВАННОЕ СВЕЧЕНИЕ: Аппаратное ускорение (GPU) */
         #mouse-glow {
-            position: fixed; top: 0; left: 0; width: 400px; height: 400px;
+            position: fixed; top: -200px; left: -200px; width: 400px; height: 400px;
             background: radial-gradient(circle, rgba(14,165,233,0.15) 0%, rgba(0,0,0,0) 70%);
             border-radius: 50%; pointer-events: none; z-index: -1;
-            transform: translate(-50%, -50%); transition: opacity 0.3s ease; opacity: 0;
+            transition: opacity 0.3s ease; opacity: 0;
+            will-change: transform; /* Указываем браузеру оптимизировать анимацию */
         }
 
         .glass-card {
@@ -81,7 +80,6 @@
         .fade-in { animation: fadeIn 0.4s ease-in-out forwards; opacity: 0; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
         
-        /* Уменьшил размеры контейнера для ПК */
         #model-3d-container {
             width: 100%; display: flex; justify-content: center; align-items: center; pointer-events: none; position: relative;
             height: 220px;
@@ -103,15 +101,13 @@
     <div id="particles-js"></div>
     <div id="mouse-glow"></div>
 
-    <!-- НАВИГАЦИЯ -->
-    <nav class="w-full p-6 flex justify-between items-center relative z-50">
-        <div class="flex items-center gap-2 cursor-pointer group" onclick="goHome()">
+    <nav class="w-full p-6 md:p-10 flex justify-between items-center relative z-50">
+        <div class="flex items-center gap-2 md:gap-4 cursor-pointer group" onclick="goHome()">
             <svg class="w-8 h-8 md:w-10 md:h-10 text-brand-blue drop-shadow-[0_0_10px_rgba(14,165,233,0.8)] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
             <span class="text-2xl md:text-3xl font-bold tracking-tight text-white drop-shadow-md group-hover:text-brand-blue transition-colors">Phys<span class="text-brand-blue group-hover:text-white transition-colors">Hub</span></span>
         </div>
     </nav>
 
-    <!-- ВЕРХНИЙ БЛОК -->
     <header class="container mx-auto px-6 pt-2 md:pt-4 pb-4 relative z-10">
         <div class="text-center max-w-3xl md:max-w-4xl mx-auto mb-8 relative">
             <p class="font-mono text-sm md:text-base italic text-slate-400 opacity-80 absolute -top-6 md:-top-8 left-1/2 transform -translate-x-1/2">by sahar²¹</p>
@@ -134,13 +130,10 @@
         </div>
     </header>
 
-    <!-- 3D МОДЕЛЬ -->
     <div id="model-3d-container" class="drop-shadow-[0_0_25px_rgba(14,165,233,0.6)] relative z-10"></div>
 
-    <!-- ОСНОВНОЙ КОНТЕНТ -->
     <main class="container mx-auto px-6 pb-20 relative z-10">
         
-        <!-- СЕКЦИЯ: ГЛАВНОЕ МЕНЮ -->
         <div id="welcome-section" class="max-w-5xl mx-auto block">
             <div class="glass-card vanilla-tilt-card rounded-2xl p-8 md:p-10 fade-in mb-8">
                 <div class="glass-card-inner">
@@ -180,38 +173,61 @@
             </div>
         </div>
 
-        <!-- СЕКЦИЯ: ТЕСТ (12 ВОПРОСОВ) -->
         <div id="quiz-section" class="max-w-3xl md:max-w-4xl mx-auto hidden">
             <div class="glass-card rounded-2xl p-6 md:p-8 fade-in border-t-4 border-t-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
                 <div class="flex items-center justify-between mb-6 md:mb-8 border-b border-white/10 pb-4">
                     <h3 class="text-2xl md:text-3xl font-bold text-white flex items-center gap-3"><span class="text-3xl">🧠</span> Блиц-тест</h3>
                     <button onclick="goHome()" class="text-sm md:text-base text-slate-400 hover:text-white transition-colors">✕ Закрыть</button>
                 </div>
-                <div id="quiz-content" class="min-h-[250px] md:min-h-[300px] flex flex-col justify-center">
-                    <!-- Сюда JS вставляет вопросы -->
-                </div>
+                <div id="quiz-content" class="min-h-[250px] md:min-h-[300px] flex flex-col justify-center"></div>
             </div>
         </div>
 
-        <!-- СЕКЦИЯ: ТЕМЫ И КАРТОЧКИ (Справочник) -->
-        <div id="content-section" class="max-w-5xl mx-auto hidden">
-            <!-- Сюда JS вставляет карточки -->
-        </div>
+        <div id="content-section" class="max-w-5xl mx-auto hidden"></div>
 
     </main>
 
-    <!-- СКРИПТЫ -->
     <script>
+        // --- ОПТИМИЗИРОВАННОЕ УПРАВЛЕНИЕ МЫШЬЮ И СВЕЧЕНИЕМ ---
+        let globalMouseX = window.innerWidth / 2;
+        let globalMouseY = window.innerHeight / 2;
+        let isMouseActive = false;
+        let targetRotationX = 0, targetRotationY = 0;
         const glow = document.getElementById('mouse-glow');
+
+        // Обработчик события мыши - только записывает координаты
         document.addEventListener('mousemove', (e) => {
-            glow.style.opacity = '1'; glow.style.left = e.clientX + 'px'; glow.style.top = e.clientY + 'px';
-        });
-        document.addEventListener('mouseleave', () => glow.style.opacity = '0');
-        document.addEventListener('touchmove', (e) => {
-            glow.style.opacity = '1'; glow.style.left = e.touches[0].clientX + 'px'; glow.style.top = e.touches[0].clientY + 'px';
+            globalMouseX = e.clientX;
+            globalMouseY = e.clientY;
+            targetRotationY = (globalMouseX - window.innerWidth / 2) * 0.002;
+            targetRotationX = (globalMouseY - window.innerHeight / 2) * 0.002;
+            
+            if (!isMouseActive) {
+                glow.style.opacity = '1';
+                isMouseActive = true;
+            }
         });
 
-        // БАЗА ДАННЫХ ФИЗИКИ (МАКСИМАЛЬНО ПОЛНАЯ)
+        document.addEventListener('mouseleave', () => {
+            glow.style.opacity = '0';
+            isMouseActive = false;
+        });
+
+        // passive: true улучшает скролл на мобильных устройствах
+        document.addEventListener('touchmove', (e) => {
+            globalMouseX = e.touches[0].clientX;
+            globalMouseY = e.touches[0].clientY;
+            targetRotationY = (globalMouseX - window.innerWidth / 2) * 0.002;
+            targetRotationX = (globalMouseY - window.innerHeight / 2) * 0.002;
+
+            if (!isMouseActive) {
+                glow.style.opacity = '1';
+                isMouseActive = true;
+            }
+        }, { passive: true });
+
+
+        // --- БАЗА ДАННЫХ ---
         const physicsData = {
             7: {
                 title: "7 класс: Механика и давление",
@@ -285,7 +301,6 @@
             }
         };
 
-        // ДАННЫЕ ДЛЯ 12 ВОПРОСОВ БЛИЦ-ТЕСТА
         const quizData = [
             { q: "В каких единицах измеряется сила тока?", options: ["Вольтах", "Ваттах", "Амперах", "Джоулях"], ans: 2 },
             { q: "Какая формула описывает Второй закон Ньютона?", options: ["F = m·g", "F = m·a", "p = m·v", "A = F·s"], ans: 1 },
@@ -322,7 +337,6 @@
 
         // --- ЛОГИКА 3D ГОЛОГРАММ ---
         let scene, camera, renderer, currentMesh;
-        let mouseX = 0, mouseY = 0, targetRotationX = 0, targetRotationY = 0;
 
         function init3D() {
             const container = document.getElementById('model-3d-container');
@@ -332,7 +346,6 @@
             
             renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
             
-            // Уменьшенные адаптивные размеры для ПК
             const size = window.innerWidth >= 1024 ? 300 : (window.innerWidth >= 768 ? 260 : 220);
             renderer.setSize(size, size);
             container.appendChild(renderer.domElement);
@@ -342,10 +355,6 @@
             scene.add(light);
             scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
-            document.addEventListener('mousemove', (e) => {
-                mouseX = (e.clientX - window.innerWidth / 2); mouseY = (e.clientY - window.innerHeight / 2);
-                targetRotationY = mouseX * 0.002; targetRotationX = mouseY * 0.002;
-            });
             animate3D();
         }
 
@@ -356,6 +365,7 @@
             }
         });
 
+        // ОПТИМИЗИРОВАННЫЙ ЦИКЛ АНИМАЦИИ
         function animate3D() {
             requestAnimationFrame(animate3D);
             if (currentMesh) {
@@ -363,6 +373,11 @@
                 currentMesh.rotation.x += 0.005 + (targetRotationX - currentMesh.rotation.x) * 0.05;
             }
             renderer.render(scene, camera);
+
+            // Обновляем позицию свечения мыши аппаратно (на видеокарте)
+            if (isMouseActive) {
+                glow.style.transform = `translate3d(${globalMouseX}px, ${globalMouseY}px, 0)`;
+            }
         }
 
         function spawn3DModel(grade) {
@@ -372,7 +387,6 @@
             }
 
             let geometry;
-            // Уменьшенный скейл моделей
             const scale = window.innerWidth >= 1024 ? 1.3 : (window.innerWidth >= 768 ? 1.1 : 1);
 
             if (grade === 'main') geometry = new THREE.IcosahedronGeometry(2 * scale, 0); 
