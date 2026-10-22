@@ -9,7 +9,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     
@@ -115,7 +114,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-black/30 p-4 rounded-xl border-l-2 border-brand-blue shadow-inner">
                         <h3 class="text-white font-bold mb-1 text-sm">📚 База знаний</h3>
-                        <p class="text-xs text-slate-400">Сотни формул (7-11 класс).</p>
+                        <p class="text-xs text-slate-400">Сотни формул по Перышкину.</p>
                     </div>
                     <div class="bg-black/30 p-4 rounded-xl border-l-2 border-[#10b981] shadow-inner">
                         <h3 class="text-white font-bold mb-1 text-sm">📝 Задачи</h3>
@@ -123,7 +122,7 @@
                     </div>
                     <div class="bg-black/30 p-4 rounded-xl border-l-2 border-[#8b5cf6] shadow-inner">
                         <h3 class="text-white font-bold mb-1 text-sm">🔬 Лаборатория</h3>
-                        <p class="text-xs text-slate-400">Живые опыты и графики.</p>
+                        <p class="text-xs text-slate-400">Живые симуляции.</p>
                     </div>
                     <div class="bg-black/30 p-4 rounded-xl border-l-2 border-[#ec4899] shadow-inner">
                         <h3 class="text-white font-bold mb-1 text-sm">🧊 3D Модели</h3>
@@ -226,19 +225,27 @@
     </main>
 
     <script>
-        // --- БАЗА ДАННЫХ (Расширенная) ---
+        // --- 1. ОГРОМНАЯ БАЗА ДАННЫХ ПО ПЕРЫШКИНУ (15 ТЕМ НА КЛАСС) ---
         const physicsData = {
             7: {
                 title: "7 класс: Механика",
                 topics: [
-                    { name: "Скорость", desc: "Быстрота перемещения.", formula: "v = s / t", vars: "v — скорость, s — путь, t — время", example: { dano: "s = 100 м, t = 20 с", sol: "v = 100 / 20", ans: "5 м/с" }, calc: { vars: [{id:'s', name:'Путь s'}, {id:'t', name:'Время t'}], expr: 's/t', unit: 'м/с' } },
+                    { name: "Скорость", desc: "При равномерном движении.", formula: "v = s / t", vars: "v — скорость, s — путь, t — время", example: { dano: "s = 100 м, t = 20 с", sol: "v = 100 / 20", ans: "5 м/с" }, calc: { vars: [{id:'s', name:'Путь s'}, {id:'t', name:'Время t'}], expr: 's/t', unit: 'м/с' } },
                     { name: "Плотность", desc: "Масса в единице объема.", formula: "ρ = m / V", vars: "ρ — плотность, m — масса, V — объем", example: { dano: "m = 400 кг, V = 0.5 м³", sol: "ρ = 400 / 0.5", ans: "800 кг/м³" }, calc: { vars: [{id:'m', name:'Масса m'}, {id:'v', name:'Объем V'}], expr: 'm/v', unit: 'кг/м³' } },
                     { name: "Сила тяжести", desc: "Притяжение к Земле.", formula: "F = m · g", vars: "g ≈ 9.8 Н/кг", example: { dano: "m = 5 кг", sol: "F = 5 · 9.8", ans: "49 Н" }, calc: { vars: [{id:'m', name:'Масса m'}], expr: 'm*9.8', unit: 'Н' } },
                     { name: "Сила упругости", desc: "Закон Гука.", formula: "F = k · Δl", vars: "k — жесткость, Δl — удлинение", example: { dano: "k = 100, Δl = 0.2", sol: "F = 100 · 0.2", ans: "20 Н" }, calc: { vars: [{id:'k', name:'Жестк. k'}, {id:'l', name:'Удлин. Δl'}], expr: 'k*l', unit: 'Н' } },
+                    { name: "Вес тела", desc: "Давление на опору.", formula: "P = m · g", vars: "P — вес тела", example: { dano: "m = 60", sol: "P = 60 · 9.8", ans: "588 Н" }, calc: { vars: [{id:'m', name:'Масса m'}], expr: 'm*9.8', unit: 'Н' } },
+                    { name: "Сила трения", desc: "Сила трения скольжения.", formula: "F_тр = μ · N", vars: "μ — коэффициент, N — сила реакции", example: { dano: "μ = 0.2, N = 100 Н", sol: "F = 0.2 · 100", ans: "20 Н" }, calc: { vars: [{id:'mu', name:'Коэф. μ'}, {id:'N', name:'Опора N'}], expr: 'mu*N', unit: 'Н' } },
                     { name: "Давление твердых тел", desc: "Сила на площадь.", formula: "p = F / S", vars: "F — сила, S — площадь", example: { dano: "F = 100 Н, S = 2 м²", sol: "p = 100 / 2", ans: "50 Па" }, calc: { vars: [{id:'f', name:'Сила F'}, {id:'s', name:'Площадь S'}], expr: 'f/s', unit: 'Па' } },
                     { name: "Давление жидкости", desc: "Гидростатика.", formula: "p = ρ · g · h", vars: "ρ — плотность, h — высота", example: { dano: "ρ = 1000, h = 10", sol: "p = 1000 · 9.8 · 10", ans: "98 кПа" }, calc: { vars: [{id:'ro', name:'Плотн. ρ'}, {id:'h', name:'Высота h'}], expr: 'ro*9.8*h', unit: 'Па' } },
-                    { name: "Архимедова сила", desc: "Выталкивающая сила.", formula: "F_А = ρ_ж · g · V_п", vars: "V_п — погруж. объем", example: { dano: "ρ = 1000, V = 0.1", sol: "F = 1000 · 9.8 · 0.1", ans: "980 Н" }, calc: { vars: [{id:'ro', name:'Плотн. ρ'}, {id:'v', name:'Объем V'}], expr: 'ro*9.8*v', unit: 'Н' } },
-                    { name: "Механическая работа", desc: "Действие силы на пути.", formula: "A = F · s", vars: "F — сила, s — путь", example: { dano: "F = 50 Н, s = 4 м", sol: "A = 50 · 4", ans: "200 Дж" }, calc: { vars: [{id:'f', name:'Сила F'}, {id:'s', name:'Путь s'}], expr: 'f*s', unit: 'Дж' } }
+                    { name: "Архимедова сила", desc: "Выталкивающая сила жидкости.", formula: "F_А = ρ_ж · g · V_п", vars: "V_п — погруж. объем", example: { dano: "ρ = 1000, V = 0.1", sol: "F = 1000 · 9.8 · 0.1", ans: "980 Н" }, calc: { vars: [{id:'ro', name:'Плотн. ρ'}, {id:'v', name:'Объем V'}], expr: 'ro*9.8*v', unit: 'Н' } },
+                    { name: "Условие плавания тел", desc: "Равенство сил.", formula: "F_А = F_тяж", vars: "ρ_ж = ρ_т — плавает внутри", example: { dano: "ρ_ж > ρ_т", sol: "Всплывает", ans: "Наверх" } },
+                    { name: "Механическая работа", desc: "Действие силы на пути.", formula: "A = F · s", vars: "F — сила, s — путь", example: { dano: "F = 50 Н, s = 4 м", sol: "A = 50 · 4", ans: "200 Дж" }, calc: { vars: [{id:'f', name:'Сила F'}, {id:'s', name:'Путь s'}], expr: 'f*s', unit: 'Дж' } },
+                    { name: "Мощность", desc: "Быстрота совершения работы.", formula: "N = A / t", vars: "A — работа, t — время", example: { dano: "A = 600 Дж, t = 10 с", sol: "N = 600 / 10", ans: "60 Вт" }, calc: { vars: [{id:'a', name:'Работа A'}, {id:'t', name:'Время t'}], expr: 'a/t', unit: 'Вт' } },
+                    { name: "Момент силы", desc: "Правило рычага.", formula: "M = F · l", vars: "F — сила, l — плечо", example: { dano: "F = 20 Н, l = 0.5 м", sol: "M = 20 · 0.5", ans: "10 Н·м" }, calc: { vars: [{id:'f', name:'Сила F'}, {id:'l', name:'Плечо l'}], expr: 'f*l', unit: 'Н·м' } },
+                    { name: "КПД", desc: "Коэффициент полезного действия.", formula: "η = (A_п / A_з) · 100%", vars: "A_п — полезная, A_з — затраченная", example: { dano: "A_п = 80, A_з = 100", sol: "80 / 100 · 100", ans: "80 %" }, calc: { vars: [{id:'ap', name:'Пол. A_п'}, {id:'az', name:'Затр. A_з'}], expr: 'ap/az*100', unit: '%' } },
+                    { name: "Кинетическая энергия", desc: "Энергия движения.", formula: "E_к = mv² / 2", vars: "m — масса, v — скорость", example: { dano: "m = 2, v = 10", sol: "2 · 100 / 2", ans: "100 Дж" }, calc: { vars: [{id:'m', name:'Масса m'}, {id:'v', name:'Скор. v'}], expr: 'm*v*v/2', unit: 'Дж' } },
+                    { name: "Потенциальная энергия", desc: "Энергия положения.", formula: "E_п = mgh", vars: "h — высота", example: { dano: "m = 5, h = 10", sol: "5 · 9.8 · 10", ans: "490 Дж" }, calc: { vars: [{id:'m', name:'Масса m'}, {id:'h', name:'Высота h'}], expr: 'm*9.8*h', unit: 'Дж' } }
                 ]
             },
             8: {
@@ -247,22 +254,38 @@
                     { name: "Количество теплоты (нагрев)", desc: "Нагрев/охлаждение.", formula: "Q = c · m · Δt", vars: "c — уд. теплоемкость", example: { dano: "c = 4200, m = 2, Δt = 50", sol: "Q = 4200 · 2 · 50", ans: "420 кДж" }, calc: { vars: [{id:'c', name:'c'},{id:'m', name:'m'},{id:'dt', name:'Δt'}], expr: 'c*m*dt', unit: 'Дж' } },
                     { name: "Теплота сгорания", desc: "Энергия топлива.", formula: "Q = q · m", vars: "q — уд. теплота сгорания", example: { dano: "q = 4.4e7, m = 2", sol: "Q = 4.4e7 · 2", ans: "88 МДж" }, calc: { vars: [{id:'q', name:'q'},{id:'m', name:'m'}], expr: 'q*m', unit: 'Дж' } },
                     { name: "Плавление", desc: "Твердое в жидкое.", formula: "Q = λ · m", vars: "λ — теплота плавления", example: { dano: "λ = 3.4e5, m = 3", sol: "Q = 3.4e5 · 3", ans: "1020 кДж" }, calc: { vars: [{id:'l', name:'λ'},{id:'m', name:'m'}], expr: 'l*m', unit: 'Дж' } },
+                    { name: "Парообразование", desc: "Жидкость в газ.", formula: "Q = L · m", vars: "L — теплота парообразования", example: { dano: "L = 2.3e6, m = 1", sol: "Q = 2.3e6 · 1", ans: "2.3 МДж" }, calc: { vars: [{id:'l', name:'L'},{id:'m', name:'m'}], expr: 'l*m', unit: 'Дж' } },
+                    { name: "Влажность воздуха", desc: "Относительная влажность.", formula: "φ = (p / p₀) · 100%", vars: "p — давление пара, p₀ — насыщ.", example: { dano: "p=15, p0=30", sol: "15/30 · 100", ans: "50 %" }, calc: { vars: [{id:'p', name:'p'},{id:'p0', name:'p0'}], expr: 'p/p0*100', unit: '%' } },
+                    { name: "Сила тока", desc: "Заряд за время.", formula: "I = q / t", vars: "q — заряд, t — время", example: { dano: "q=10, t=2", sol: "10/2", ans: "5 А" }, calc: { vars: [{id:'q', name:'q'},{id:'t', name:'t'}], expr: 'q/t', unit: 'А' } },
+                    { name: "Электрическое напряжение", desc: "Работа по перемещению заряда.", formula: "U = A / q", vars: "A — работа", example: { dano: "A=100, q=5", sol: "100/5", ans: "20 В" }, calc: { vars: [{id:'a', name:'A'},{id:'q', name:'q'}], expr: 'a/q', unit: 'В' } },
+                    { name: "Сопротивление", desc: "Характеристика проводника.", formula: "R = ρ · l / S", vars: "ρ — уд. сопротивление, l — длина", example: { dano: "ρ=0.017, l=100, S=1.7", sol: "0.017·100/1.7", ans: "1 Ом" }, calc: { vars: [{id:'ro', name:'ρ'},{id:'l', name:'l'},{id:'s', name:'S'}], expr: 'ro*l/s', unit: 'Ом' } },
                     { name: "Закон Ома", desc: "Участок цепи.", formula: "I = U / R", vars: "U — напряжение, R — сопротивление", example: { dano: "U = 220, R = 55", sol: "I = 220 / 55", ans: "4 А" }, calc: { vars: [{id:'u', name:'U'},{id:'r', name:'R'}], expr: 'u/r', unit: 'А' } },
+                    { name: "Последовательное соед.", desc: "Цепи.", formula: "R = R₁ + R₂", vars: "I = const, U = U1+U2", example: { dano: "R1=5, R2=10", sol: "5+10", ans: "15 Ом" }, calc: { vars: [{id:'r1', name:'R1'},{id:'r2', name:'R2'}], expr: 'r1+r2', unit: 'Ом' } },
+                    { name: "Параллельное соед.", desc: "Цепи.", formula: "1/R = 1/R₁ + 1/R₂", vars: "U = const, I = I1+I2", example: { dano: "R1=10, R2=10", sol: "1/R = 1/10 + 1/10", ans: "5 Ом" }, calc: { vars: [{id:'r1', name:'R1'},{id:'r2', name:'R2'}], expr: '1/(1/r1 + 1/r2)', unit: 'Ом' } },
                     { name: "Работа тока", desc: "Энергия.", formula: "A = U · I · t", vars: "t — время", example: { dano: "U=12, I=2, t=10", sol: "A = 12·2·10", ans: "240 Дж" }, calc: { vars: [{id:'u', name:'U'},{id:'i', name:'I'},{id:'t', name:'t'}], expr: 'u*i*t', unit: 'Дж' } },
-                    { name: "Закон Джоуля-Ленца", desc: "Теплота проводника.", formula: "Q = I² · R · t", vars: "I — ток, R — сопр.", example: { dano: "I=2, R=10, t=5", sol: "Q = 4·10·5", ans: "200 Дж" }, calc: { vars: [{id:'i', name:'I'},{id:'r', name:'R'},{id:'t', name:'t'}], expr: 'i*i*r*t', unit: 'Дж' } }
+                    { name: "Мощность тока", desc: "Ватты.", formula: "P = U · I", vars: "U — напряжение, I — ток", example: { dano: "U=220, I=5", sol: "P = 220·5", ans: "1100 Вт" }, calc: { vars: [{id:'u', name:'U'},{id:'i', name:'I'}], expr: 'u*i', unit: 'Вт' } },
+                    { name: "Закон Джоуля-Ленца", desc: "Теплота проводника.", formula: "Q = I² · R · t", vars: "I — ток, R — сопр.", example: { dano: "I=2, R=10, t=5", sol: "Q = 4·10·5", ans: "200 Дж" }, calc: { vars: [{id:'i', name:'I'},{id:'r', name:'R'},{id:'t', name:'t'}], expr: 'i*i*r*t', unit: 'Дж' } },
+                    { name: "Закон отражения света", desc: "Оптика.", formula: "∠α = ∠β", vars: "Угол падения = углу отражения", example: { dano: "Угол падения 30°", sol: "Угол отражения тоже", ans: "30°" } }
                 ]
             },
             9: {
                 title: "9 класс: Кинематика, Динамика",
                 topics: [
+                    { name: "Координаты", desc: "Уравнение при равномерном движ.", formula: "x = x₀ + v_x·t", vars: "x0 - начальная, v - скорость", example: { dano: "x0=5, v=2, t=3", sol: "x = 5 + 2*3", ans: "11 м" }, calc: { vars: [{id:'x0', name:'x0'},{id:'v', name:'v'},{id:'t', name:'t'}], expr: 'x0+v*t', unit: 'м' } },
                     { name: "Ускорение", desc: "Изменение скорости.", formula: "a = (v - v_0) / t", vars: "v0 — нач. скорость", example: { dano: "v=20, v0=0, t=5", sol: "a = 20/5", ans: "4 м/с²" }, calc: { vars: [{id:'v', name:'v'},{id:'v0', name:'v0'},{id:'t', name:'t'}], expr: '(v-v0)/t', unit: 'м/с²' } },
                     { name: "Перемещение", desc: "При ускорении.", formula: "s = v_0t + at² / 2", vars: "a — ускорение", example: { dano: "v0=2, a=1, t=4", sol: "s = 2·4 + 16/2", ans: "16 м" }, calc: { vars: [{id:'v0', name:'v0'},{id:'a', name:'a'},{id:'t', name:'t'}], expr: 'v0*t + 0.5*a*t*t', unit: 'м' } },
+                    { name: "Перемещение без t", desc: "Расчет пути без времени.", formula: "s = (v² - v_0²) / 2a", vars: "Часто для торможения", example: { dano: "v0=0, v=10, a=2", sol: "s = 100 / 4", ans: "25 м" }, calc: { vars: [{id:'v', name:'v'},{id:'v0', name:'v0'},{id:'a', name:'a'}], expr: '(v*v - v0*v0)/(2*a)', unit: 'м' } },
                     { name: "Первый закон Ньютона", desc: "Закон инерции.", formula: "ΣF = 0 => v = const", vars: "ΣF — равнодействующая", example: { dano: "Тело едет равномерно", sol: "Сумма сил = 0", ans: "0 Н" } },
                     { name: "Второй закон Ньютона", desc: "Связь силы и ускорения.", formula: "F = m · a", vars: "m — масса", example: { dano: "m=5, a=2", sol: "F = 5·2", ans: "10 Н" }, calc: { vars: [{id:'m', name:'m'},{id:'a', name:'a'}], expr: 'm*a', unit: 'Н' } },
                     { name: "Третий закон Ньютона", desc: "Взаимодействие.", formula: "F₁ = -F₂", vars: "Действие равно противодействию.", example: { dano: "F1 = 50 Н", sol: "F2 = -F1", ans: "50 Н" } },
                     { name: "Свободное падение", desc: "Без нач. скорости.", formula: "h = g · t² / 2", vars: "g ≈ 9.8", example: { dano: "t = 3", sol: "h = 9.8·9/2", ans: "44.1 м" }, calc: { vars: [{id:'t', name:'t'}], expr: '9.8*t*t/2', unit: 'м' } },
+                    { name: "Вес тела с ускорением", desc: "Лифт.", formula: "P = m(g ± a)", vars: "+ вверх, - вниз", example: { dano: "m=50, a=2 (вверх)", sol: "P = 50*(9.8+2)", ans: "590 Н" }, calc: { vars: [{id:'m', name:'m'},{id:'a', name:'a (±)'}], expr: 'm*(9.8+a)', unit: 'Н' } },
                     { name: "Закон всемирного тяготения", desc: "Притяжение масс.", formula: "F = G · m₁m₂ / R²", vars: "G = 6.67e-11", example: { dano: "m1=m2=1e5, R=10", sol: "6.67e-11·1e10/100", ans: "6.67 мН" }, calc: { vars: [{id:'m1', name:'m1'},{id:'m2', name:'m2'},{id:'r', name:'R'}], expr: '6.67e-11*m1*m2/(r*r)', unit: 'Н' } },
-                    { name: "Импульс", desc: "Кол-во движения.", formula: "p = m · v", vars: "m — масса, v — скорость", example: { dano: "m=1000, v=20", sol: "p = 1000·20", ans: "20000" }, calc: { vars: [{id:'m', name:'m'},{id:'v', name:'v'}], expr: 'm*v', unit: 'кг·м/с' } }
+                    { name: "Импульс", desc: "Кол-во движения.", formula: "p = m · v", vars: "m — масса, v — скорость", example: { dano: "m=1000, v=20", sol: "p = 1000·20", ans: "20000" }, calc: { vars: [{id:'m', name:'m'},{id:'v', name:'v'}], expr: 'm*v', unit: 'кг·м/с' } },
+                    { name: "ЗСИ", desc: "Закон сохр. импульса.", formula: "m₁v₁ + m₂v₂ = const", vars: "При упругом и неупругом ударе.", example: { dano: "Неупругий удар", sol: "m1v1+m2v2=(m1+m2)v", ans: "..." } },
+                    { name: "Колебания (Период)", desc: "Время одного колебания.", formula: "T = 1 / ν", vars: "ν - частота", example: { dano: "ν = 50 Гц", sol: "T = 1 / 50", ans: "0.02 с" }, calc: { vars: [{id:'nu', name:'ν'}], expr: '1/nu', unit: 'с' } },
+                    { name: "Волны (Длина волны)", desc: "Звук/Свет.", formula: "λ = v / ν", vars: "v - скорость волны", example: { dano: "v=340, ν=170", sol: "λ = 340 / 170", ans: "2 м" }, calc: { vars: [{id:'v', name:'v'},{id:'nu', name:'ν'}], expr: 'v/nu', unit: 'м' } },
+                    { name: "Энергия ядра", desc: "Дефект масс.", formula: "E = Δm · c²", vars: "c — скорость света", example: { dano: "Δm = 1 а.е.м.", sol: "1 а.е.м. = 931.5 МэВ", ans: "931.5 МэВ" }, calc: { vars: [{id:'dm', name:'Δm (аем)'}], expr: 'dm*931.5', unit: 'МэВ' } }
                 ]
             },
             10: {
@@ -297,7 +320,7 @@
             }
         };
 
-        // --- БАЗА ЗАДАЧ ДЛЯ НОВОГО РАЗДЕЛА ---
+        // --- 2. БАЗА ЗАДАЧ ДЛЯ НОВОГО РАЗДЕЛА ---
         const tasksData = [
             { q: "Автомобиль массой 1500 кг разгоняется с ускорением 2 м/с². Чему равна сила тяги двигателя, если трением пренебречь?", hint: "Формула: F = m·a", ans: 3000, unit: "Н" },
             { q: "Какое давление на пол оказывает мальчик весом 400 Н, если площадь подошв его обуви 0.04 м²?", hint: "Формула: p = F/S", ans: 10000, unit: "Па" },
@@ -306,38 +329,38 @@
             { q: "Тело падает с высоты без начальной скорости ровно 3 секунды. С какой высоты оно упало? (Принять g=10 м/с²)", hint: "Формула: h = gt²/2", ans: 45, unit: "м" }
         ];
 
-        // --- БАЗА ИЗ 30 ВОПРОСОВ (ТЕОРИЯ + ЗАДАЧИ) ---
+        // --- 3. БАЗА ИЗ РОВНО 30 ВОПРОСОВ (ТЕОРИЯ + ЗАДАЧИ) ---
         const allQuizQuestions = [
-            { q: "В каких единицах измеряется сила тока?", options: ["Вольтах", "Ваттах", "Амперах", "Джоулях"], ans: 2 },
-            { q: "Формула Второго закона Ньютона?", options: ["F = m·g", "F = m·a", "p = m·v", "A = F·s"], ans: 1 },
-            { q: "Ускорение свободного падения (g) на Земле примерно:", options: ["9.8 м/с²", "3.14 м/с²", "1.6 м/с²", "100 м/с²"], ans: 0 },
-            { q: "Какая сила выталкивает тело из жидкости?", options: ["Тяжести", "Трения", "Упругости", "Архимедова"], ans: 3 },
-            { q: "Закон Ома для участка цепи:", options: ["P = U·I", "Q = I²·R·t", "I = U / R", "C = q / U"], ans: 2 },
-            { q: "Тело массой 3 кг движется с ускорением 4 м/с². Чему равна сила?", options: ["12 Н", "7 Н", "0.75 Н", "1.33 Н"], ans: 0 },
-            { q: "Механическая работа вычисляется по формуле:", options: ["A = F·s", "N = A/t", "M = F·l", "p = F/S"], ans: 0 },
-            { q: "Плотность вещества это:", options: ["ρ = m/V", "ρ = V/m", "ρ = m·V", "ρ = m·g"], ans: 0 },
-            { q: "В чем суть Третьего закона Ньютона?", options: ["Тела сохраняют скорость", "Действие равно противодействию", "F = ma", "Все тела падают одинаково"], ans: 1 },
-            { q: "Какая частица НЕ входит в состав атомного ядра?", options: ["Протон", "Нейтрон", "Электрон", "Входят все"], ans: 2 },
-            { q: "В каких единицах измеряется давление?", options: ["Ньютонах", "Паскалях", "Джоулях", "Ваттах"], ans: 1 },
-            { q: "Уравнение Менделеева-Клапейрона?", options: ["Q = cmΔt", "pV = (m/M)RT", "F = G(m1m2)/R²", "E = mc²"], ans: 1 },
-            { q: "Напряжение в сети 220В, сопротивление 22 Ом. Чему равен ток?", options: ["10 А", "20 А", "4840 А", "0.1 А"], ans: 0 },
-            { q: "Энергия фотона вычисляется как:", options: ["E = mc²", "E = mgh", "E = hν", "E = mv²/2"], ans: 2 },
-            { q: "Единицы измерения мощности?", options: ["Паскаль", "Джоуль", "Ватт", "Вольт"], ans: 2 },
-            { q: "Закон сохранения импульса:", options: ["m₁v₁ + m₂v₂ = const", "E = const", "Q₁ + Q₂ = 0", "F = ma"], ans: 0 },
-            { q: "Скорость света в вакууме:", options: ["300 км/с", "300 000 км/с", "340 м/с", "Неизвестна"], ans: 1 },
-            { q: "Изотермический процесс протекает при постоянной...", options: ["Массе", "Давлении", "Температуре", "Объеме"], ans: 2 },
-            { q: "Единица электрического сопротивления?", options: ["Ом", "Ампер", "Кулон", "Генри"], ans: 0 },
-            { q: "Каким прибором измеряют напряжение?", options: ["Амперметр", "Вольтметр", "Барометр", "Динамометр"], ans: 1 },
-            { q: "Разложение белого света в спектр — это...", options: ["Отражение", "Преломление", "Дисперсия", "Дифракция"], ans: 2 },
-            { q: "Переход из твердого в газообразное (минуя жидкость):", options: ["Плавление", "Сублимация", "Конденсация", "Кипение"], ans: 1 },
-            { q: "Формула кинетической энергии?", options: ["mgh", "mc²", "mv²/2", "kx²/2"], ans: 2 },
-            { q: "Прибор для измерения атмосферного давления?", options: ["Манометр", "Барометр", "Ареометр", "Термометр"], ans: 1 },
-            { q: "Магнитное поле создается...", options: ["Покоящимися зарядами", "Движущимися зарядами", "Нейтронами", "Массой"], ans: 1 },
-            { q: "Груз 100 Н подняли на 2 м. Какая работа совершена?", options: ["50 Дж", "200 Дж", "102 Дж", "0 Дж"], ans: 1 },
-            { q: "Период пружинного маятника зависит от...", options: ["Длины нити", "Массы и жесткости", "Ускорения g", "Амплитуды"], ans: 1 },
-            { q: "Положительно заряженная частица в ядре атома?", options: ["Протон", "Нейтрон", "Электрон", "Фотон"], ans: 0 },
-            { q: "Кто открыл явление электромагнитной индукции?", options: ["Ньютон", "Эйнштейн", "Фарадей", "Резерфорд"], ans: 2 },
-            { q: "Формула силы Лоренца:", options: ["F = IBl", "F = qvB", "F = ma", "F = mg"], ans: 1 }
+            { q: "1. В каких единицах измеряется сила тока?", options: ["Вольтах", "Ваттах", "Амперах", "Джоулях"], ans: 2 },
+            { q: "2. Формула Второго закона Ньютона?", options: ["F = m·g", "F = m·a", "p = m·v", "A = F·s"], ans: 1 },
+            { q: "3. Ускорение свободного падения (g) на Земле примерно:", options: ["9.8 м/с²", "3.14 м/с²", "1.6 м/с²", "100 м/с²"], ans: 0 },
+            { q: "4. Какая сила выталкивает тело из жидкости?", options: ["Тяжести", "Трения", "Упругости", "Архимедова"], ans: 3 },
+            { q: "5. Закон Ома для участка цепи:", options: ["P = U·I", "Q = I²·R·t", "I = U / R", "C = q / U"], ans: 2 },
+            { q: "6. Тело массой 3 кг движется с ускорением 4 м/с². Чему равна сила?", options: ["12 Н", "7 Н", "0.75 Н", "1.33 Н"], ans: 0 },
+            { q: "7. Механическая работа вычисляется по формуле:", options: ["A = F·s", "N = A/t", "M = F·l", "p = F/S"], ans: 0 },
+            { q: "8. Плотность вещества это:", options: ["ρ = m/V", "ρ = V/m", "ρ = m·V", "ρ = m·g"], ans: 0 },
+            { q: "9. В чем суть Третьего закона Ньютона?", options: ["Тела сохраняют скорость", "Действие равно противодействию", "F = ma", "Все тела падают одинаково"], ans: 1 },
+            { q: "10. Какая частица НЕ входит в состав атомного ядра?", options: ["Протон", "Нейтрон", "Электрон", "Входят все"], ans: 2 },
+            { q: "11. В каких единицах измеряется давление?", options: ["Ньютонах", "Паскалях", "Джоулях", "Ваттах"], ans: 1 },
+            { q: "12. Уравнение Менделеева-Клапейрона?", options: ["Q = cmΔt", "pV = (m/M)RT", "F = G(m1m2)/R²", "E = mc²"], ans: 1 },
+            { q: "13. Напряжение в сети 220В, сопротивление 22 Ом. Чему равен ток?", options: ["10 А", "20 А", "4840 А", "0.1 А"], ans: 0 },
+            { q: "14. Энергия фотона вычисляется как:", options: ["E = mc²", "E = mgh", "E = hν", "E = mv²/2"], ans: 2 },
+            { q: "15. Единицы измерения мощности?", options: ["Паскаль", "Джоуль", "Ватт", "Вольт"], ans: 2 },
+            { q: "16. Закон сохранения импульса:", options: ["m₁v₁ + m₂v₂ = const", "E = const", "Q₁ + Q₂ = 0", "F = ma"], ans: 0 },
+            { q: "17. Скорость света в вакууме:", options: ["300 км/с", "300 000 км/с", "340 м/с", "Неизвестна"], ans: 1 },
+            { q: "18. Изотермический процесс протекает при постоянной...", options: ["Массе", "Давлении", "Температуре", "Объеме"], ans: 2 },
+            { q: "19. Единица электрического сопротивления?", options: ["Ом", "Ампер", "Кулон", "Генри"], ans: 0 },
+            { q: "20. Каким прибором измеряют напряжение?", options: ["Амперметр", "Вольтметр", "Барометр", "Динамометр"], ans: 1 },
+            { q: "21. Разложение белого света в спектр — это...", options: ["Отражение", "Преломление", "Дисперсия", "Дифракция"], ans: 2 },
+            { q: "22. Переход из твердого в газообразное (минуя жидкость):", options: ["Плавление", "Сублимация", "Конденсация", "Кипение"], ans: 1 },
+            { q: "23. Формула кинетической энергии?", options: ["mgh", "mc²", "mv²/2", "kx²/2"], ans: 2 },
+            { q: "24. Прибор для измерения атмосферного давления?", options: ["Манометр", "Барометр", "Ареометр", "Термометр"], ans: 1 },
+            { q: "25. Магнитное поле создается...", options: ["Покоящимися зарядами", "Движущимися зарядами", "Нейтронами", "Массой"], ans: 1 },
+            { q: "26. Груз 100 Н подняли на 2 м. Какая работа совершена?", options: ["50 Дж", "200 Дж", "102 Дж", "0 Дж"], ans: 1 },
+            { q: "27. Период пружинного маятника зависит от...", options: ["Длины нити", "Массы и жесткости", "Ускорения g", "Амплитуды"], ans: 1 },
+            { q: "28. Положительно заряженная частица в ядре атома?", options: ["Протон", "Нейтрон", "Электрон", "Фотон"], ans: 0 },
+            { q: "29. Кто открыл явление электромагнитной индукции?", options: ["Ньютон", "Эйнштейн", "Фарадей", "Резерфорд"], ans: 2 },
+            { q: "30. Формула силы Лоренца:", options: ["F = IBl", "F = qvB", "F = ma", "F = mg"], ans: 1 }
         ];
 
         // --- 3D ФОН И СВЕЧЕНИЕ ---
@@ -513,7 +536,7 @@
             sContent.innerHTML = html + `</div>`;
         });
 
-        // --- ТЕСТ (30 ВОПРОСОВ) ---
+        // --- ТЕСТ (30 ВОПРОСОВ БЕЗ ПЕРЕМЕШИВАНИЯ, ИДУТ ПОДРЯД) ---
         let qIndex=0, qScore=0, qAnswered=false;
         function startQuizScreen() {
             hideAll(); sQuiz.classList.remove('hidden'); spawn3DModel('main'); stopAllSims(); window.scrollTo(0,0);
@@ -524,7 +547,7 @@
             let opts = q.options.map((o, i) => `<button id="qb-${i}" onclick="selQuiz(${i})" class="w-full text-left px-5 py-3 bg-black/40 border border-white/10 rounded-xl hover:bg-emerald-500/20 text-slate-200 transition-all">${o}</button>`).join('');
             document.getElementById('quiz-content').innerHTML = `
                 <div class="mb-4 flex justify-between text-sm text-emerald-500 font-bold"><span>Вопрос ${qIndex+1} из 30</span><span>Счет: ${qScore}</span></div>
-                <h4 class="text-2xl text-white font-semibold mb-6">${q.q}</h4>
+                <h4 class="text-xl md:text-2xl text-white font-semibold mb-6">${q.q}</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">${opts}</div>
                 <div id="q-next" class="hidden text-right"><button onclick="nextQ()" class="px-6 py-2 bg-emerald-500 text-white font-bold rounded-lg hover:bg-emerald-400">Далее ➔</button></div>
             `;
@@ -585,7 +608,6 @@
             else { sim1.req = requestAnimationFrame(loopSim1); }
         }
         function drawSim1() {
-            // Рисуем машинку (css left)
             let box = document.getElementById('sim1-car');
             let px = (sim1.x / 100) * 80; // 100 метров = 80% ширины
             if(px > 90) px=90; if(px < 0) px=0;
@@ -626,9 +648,9 @@
         }
         function drawSim2() {
             let ball = document.getElementById('sim2-ball');
-            // Масштаб: 200м = 100% высоты контейнера. Контейнер ~128px (h-32)
+            // Масштаб: 200м = 100% высоты контейнера.
             let percentY = ((sim2.h - sim2.curH) / 200) * 100; 
-            if(percentY > 90) percentY = 90;
+            if(percentY > 80) percentY = 80; // Чтобы не проваливался под землю
             ball.style.top = percentY + '%';
             document.getElementById('sim2-t').innerText = sim2.t.toFixed(2);
             document.getElementById('sim2-cur-h').innerText = sim2.curH.toFixed(2);
