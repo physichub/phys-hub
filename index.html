@@ -16,207 +16,193 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { 
-                        sans: ['Inter', 'sans-serif'], 
-                        mono: ['JetBrains Mono', 'monospace'],
-                        serif: ['Lora', 'serif'] 
-                    },
-                    colors: { 
-                        brand: { blue: '#2563eb', neon: '#3b82f6', dark: '#0b1120', panel: '#111827', card: '#151c2c' } 
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], serif: ['Lora', 'serif'] },
+                    colors: { brand: { neon: '#3b82f6', dark: '#0b1120', panel: '#111827', card: '#151c2c' } }
                 }
             }
         }
     </script>
     <style>
-        body { background-color: #0b1120; color: #f8fafc; margin: 0; padding: 0; overflow-x: hidden; }
+        body { background-color: #0b1120; color: #f8fafc; margin: 0; overflow: hidden; }
         
-        /* Скроллбар в стиле дашборда */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0b1120; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        /* Скроллбар */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
 
         #particles-js { position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 0; pointer-events: none; }
+        #mouse-glow { position: fixed; top: -250px; left: -250px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%); border-radius: 50%; pointer-events: none; z-index: 0; transition: opacity 0.3s; opacity: 0; will-change: transform; }
 
-        #mouse-glow {
-            position: fixed; top: -200px; left: -200px; width: 500px; height: 500px;
-            background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, rgba(0,0,0,0) 70%);
-            border-radius: 50%; pointer-events: none; z-index: 0;
-            transition: opacity 0.3s ease; opacity: 0; will-change: transform;
-        }
+        @keyframes shimmer { from { background-position: 200% center; } to { background-position: 0% center; } }
+        .animate-shimmer { background: var(--sahar-grad, linear-gradient(90deg, #94a3b8 0%, #f8fafc 50%, #94a3b8 100%)); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 4s linear infinite; cursor: pointer; }
 
-        @keyframes shimmer {
-            from { background-position: 200% center; }
-            to { background-position: 0% center; }
-        }
-        .animate-shimmer {
-            background: var(--sahar-grad, linear-gradient(90deg, #94a3b8 0%, #f8fafc 50%, #94a3b8 100%));
-            background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            animation: shimmer 4s linear infinite; cursor: pointer;
-        }
-
-        .glass-panel { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(20px); border-right: 1px solid rgba(255, 255, 255, 0.05); }
+        .glass-panel { background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(20px); border-right: 1px solid rgba(255, 255, 255, 0.05); }
         .glass-card { background: #151c2c; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1rem; transition: all 0.3s; position: relative; overflow: hidden; }
         .glass-card:hover { border-color: rgba(59, 130, 246, 0.4); box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.2); transform: translateY(-2px); }
         
-        .math-text { font-family: 'Lora', serif; font-size: 1.5rem; letter-spacing: 0.05em; }
-
-        .fade-in { animation: fadeIn 0.4s ease-in-out forwards; opacity: 0; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .math-text { font-family: 'Lora', serif; font-size: 1.3rem; letter-spacing: 0.05em; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; opacity: 0; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         
-        #model-3d-container { width: 100%; height: 100%; min-height: 200px; display: flex; justify-content: center; align-items: center; position: relative; }
-        #model-3d-container::before { content: ''; position: absolute; width: 120px; height: 120px; background: var(--glow-color, rgba(59, 130, 246, 0.3)); filter: blur(50px); border-radius: 50%; z-index: -1; }
+        #model-3d-container { width: 100%; height: 100%; min-height: 180px; display: flex; justify-content: center; align-items: center; position: relative; }
+        #model-3d-container::before { content: ''; position: absolute; width: 120px; height: 120px; background: var(--glow-color, rgba(59, 130, 246, 0.4)); filter: blur(45px); border-radius: 50%; z-index: -1; transition: background 0.5s; }
 
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=range] { -webkit-appearance: none; width: 100%; background: rgba(255,255,255,0.1); height: 4px; border-radius: 2px; outline: none; margin: 10px 0; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--theme-color, #3b82f6); cursor: pointer; transition: transform 0.1s; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--theme-color, #3b82f6); cursor: pointer; transition: 0.2s; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
         input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 
-        /* Активный пункт бокового меню */
-        .nav-item.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-left: 3px solid #3b82f6; }
+        .nav-item.active { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border-left: 3px solid #3b82f6; }
         .nav-item { border-left: 3px solid transparent; }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden selection:bg-brand-neon selection:text-white">
+<body class="flex h-screen selection:bg-brand-neon selection:text-white">
 
     <div id="particles-js"></div>
     <div id="mouse-glow"></div>
 
     <!-- БОКОВОЕ МЕНЮ (SIDEBAR) -->
-    <aside id="sidebar" class="w-72 flex-shrink-0 glass-panel flex flex-col h-full z-40 absolute md:relative -translate-x-full md:translate-x-0 transition-transform duration-300">
+    <aside id="sidebar" class="w-72 flex-shrink-0 glass-panel flex flex-col h-full z-50 absolute md:relative -translate-x-full md:translate-x-0 transition-transform duration-300 shadow-2xl md:shadow-none">
         <!-- Логотип -->
-        <div class="h-20 flex items-center px-8 border-b border-white/5">
+        <div class="h-20 flex items-center px-6 border-b border-white/5 bg-brand-dark/50">
             <svg class="w-8 h-8 text-brand-neon mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
             <span class="text-2xl font-bold tracking-tight text-white">Phys<span class="text-brand-neon">Hub</span></span>
-            <button onclick="toggleSidebar()" class="ml-auto md:hidden text-slate-400">✕</button>
+            <button onclick="toggleSidebar()" class="ml-auto md:hidden text-slate-400 hover:text-white text-xl">✕</button>
         </div>
 
         <!-- Навигация -->
-        <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1 scroll-smooth">
-            <p class="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-4">Разделы</p>
-            <button id="nav-main" onclick="goHome()" class="nav-item active w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300 transition-colors">
-                <span>🏠</span> Главная
-            </button>
-            <button id="nav-7" onclick="loadClass(7)" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300 transition-colors">
-                <span>📘</span> 7 класс
-            </button>
-            <button id="nav-8" onclick="loadClass(8)" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300 transition-colors">
-                <span>📙</span> 8 класс
-            </button>
-            <button id="nav-9" onclick="loadClass(9)" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300 transition-colors">
-                <span>📗</span> 9 класс
-            </button>
-            <button id="nav-10" onclick="loadClass(10)" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300 transition-colors">
-                <span>📕</span> 10 класс
-            </button>
-            <button id="nav-11" onclick="loadClass(11)" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300 transition-colors">
-                <span>📓</span> 11 класс
-            </button>
+        <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+            <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 mt-2">База знаний</p>
+            <button id="nav-main" onclick="goHome()" class="nav-item active w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300 transition-all"><span>🏠</span> Главная</button>
+            <button id="nav-7" onclick="loadClass(7)" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300 transition-all"><span>📘</span> 7 класс</button>
+            <button id="nav-8" onclick="loadClass(8)" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300 transition-all"><span>📙</span> 8 класс</button>
+            <button id="nav-9" onclick="loadClass(9)" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300 transition-all"><span>📗</span> 9 класс</button>
+            <button id="nav-10" onclick="loadClass(10)" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300 transition-all"><span>📕</span> 10 класс</button>
+            <button id="nav-11" onclick="loadClass(11)" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300 transition-all"><span>📓</span> 11 класс</button>
 
-            <p class="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-6">Практика</p>
-            <button id="nav-lab" onclick="loadLab()" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300 transition-colors">
-                <span>🔬</span> Лаборатория
-            </button>
-            <button id="nav-tasks" onclick="loadTasks()" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300 transition-colors">
-                <span>📝</span> Решение задач
-            </button>
-            <button id="nav-quiz" onclick="startQuizScreen()" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300 transition-colors">
-                <span>🧠</span> Блиц-тест (30)
-            </button>
+            <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 mt-6">Практикум</p>
+            <button id="nav-lab" onclick="loadLab()" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300 transition-all"><span>🔬</span> Лаборатория</button>
+            <button id="nav-tasks" onclick="loadTasks()" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300 transition-all"><span>📝</span> Решение задач</button>
+            <button id="nav-quiz" onclick="startQuizScreen()" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300 transition-all"><span>🧠</span> Блиц-тест (30)</button>
         </nav>
 
-        <!-- Пасхалка внизу сайдбара -->
-        <div class="p-6 border-t border-white/5 text-center">
-            <span onclick="changeSaharColor()" class="font-mono text-xs font-bold tracking-widest animate-shimmer">BY SAHAR²¹</span>
+        <!-- Пасхалка -->
+        <div class="p-5 border-t border-white/5 text-center bg-black/20">
+            <span onclick="changeSaharColor()" class="font-mono text-[10px] font-bold tracking-[0.2em] animate-shimmer">BY SAHAR²¹</span>
         </div>
     </aside>
 
-    <!-- ОСНОВНАЯ ЧАСТЬ (MAIN) -->
-    <div class="flex-1 flex flex-col h-screen overflow-hidden relative z-10">
+    <!-- ОСНОВНАЯ ЧАСТЬ -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden relative z-10 w-full">
         
-        <!-- ВЕРХНЯЯ ПАНЕЛЬ (Header) -->
-        <header class="h-20 flex items-center justify-between px-6 border-b border-white/5 bg-brand-dark/50 backdrop-blur-md">
-            <div class="flex items-center gap-4 w-full max-w-2xl">
-                <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white">☰</button>
-                <div class="relative w-full">
-                    <input type="text" id="search-input" placeholder="Поиск по терминам, формулам..." class="w-full bg-brand-panel border border-white/10 rounded-full py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-neon transition-colors shadow-inner">
-                    <svg class="w-4 h-4 absolute left-4 top-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <!-- Верхняя панель поиска -->
+        <header class="h-20 flex-shrink-0 flex items-center px-6 border-b border-white/5 bg-[#0b1120]/80 backdrop-blur-md z-20">
+            <div class="flex items-center gap-4 w-full">
+                <button onclick="toggleSidebar()" class="md:hidden text-slate-300 hover:text-white p-2 bg-white/5 rounded-lg border border-white/10">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <div class="relative w-full max-w-2xl">
+                    <input type="text" id="search-input" placeholder="Поиск по терминам и формулам (например: Ньютон, Импульс)..." class="w-full bg-[#151c2c] border border-white/10 rounded-full py-3 pl-12 pr-6 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-neon transition-colors shadow-inner">
+                    <svg class="w-5 h-5 absolute left-4 top-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
-            </div>
-            <div class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-400">
-                <span class="hover:text-white cursor-pointer transition-colors" onclick="goHome()">Главная</span>
-                <span class="hover:text-white cursor-pointer transition-colors" onclick="loadTasks()">Задачи</span>
-                <span class="hover:text-white cursor-pointer transition-colors" onclick="loadLab()">Опыты</span>
             </div>
         </header>
 
-        <!-- ОБЛАСТЬ КОНТЕНТА -->
-        <main class="flex-1 overflow-y-auto p-6 md:p-10" id="main-scroll">
+        <!-- СКРОЛЛИРУЕМАЯ ОБЛАСТЬ КОНТЕНТА -->
+        <main class="flex-1 overflow-y-auto p-4 md:p-8 relative" id="main-scroll">
             
-            <!-- ГЛАВНАЯ СТРАНИЦА (HERO + ПОПУЛЯРНОЕ) -->
-            <div id="welcome-section" class="max-w-6xl mx-auto block fade-in">
+            <!-- ГЛАВНАЯ СТРАНИЦА -->
+            <div id="welcome-section" class="max-w-6xl mx-auto block fade-in pb-10">
                 
-                <!-- Hero Banner -->
-                <div class="bg-brand-panel border border-white/5 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 mb-10 overflow-hidden relative shadow-2xl">
-                    <div class="absolute top-0 right-0 w-96 h-96 bg-brand-neon/10 blur-[100px] rounded-full pointer-events-none"></div>
+                <!-- Баннер -->
+                <div class="bg-[#111827] border border-white/5 rounded-3xl p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 mb-8 relative shadow-2xl overflow-hidden">
+                    <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-neon/10 blur-[120px] rounded-full pointer-events-none"></div>
+                    
                     <div class="max-w-xl relative z-10">
-                        <h1 class="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">Физика — <br><span class="text-brand-neon">это язык Вселенной</span></h1>
-                        <p class="text-slate-400 text-sm md:text-base mb-8 leading-relaxed">
-                            Здесь вы найдете все основные термины, формулы и определения по физике. От механики до квантовой физики. Удобно, наглядно, в одном месте.
+                        <span class="inline-block py-1 px-3 rounded-full bg-brand-neon/20 border border-brand-neon/30 text-brand-neon text-xs font-bold tracking-wider mb-4">ВЕРСИЯ 2.0</span>
+                        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight">Физика — <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">язык Вселенной</span></h1>
+                        <p class="text-slate-400 text-sm md:text-base mb-6 leading-relaxed">
+                            Фундаментальная наука о природе. Она изучает простейшие и наиболее общие законы материального мира. Без знания физики невозможно понять устройство нашей Вселенной.
                         </p>
-                        <button onclick="loadClass(9)" class="bg-brand-neon hover:bg-blue-400 text-white font-semibold py-3 px-8 rounded-full shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all transform hover:scale-105">
-                            Перейти к темам →
-                        </button>
+                        <div class="flex flex-wrap gap-4">
+                            <button onclick="loadClass(9)" class="bg-brand-neon hover:bg-blue-500 text-white font-semibold py-3 px-8 rounded-full shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-transform hover:scale-105">Начать изучение</button>
+                            <button onclick="loadLab()" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold py-3 px-8 rounded-full transition-colors">В лабораторию</button>
+                        </div>
                     </div>
-                    <div class="w-full md:w-1/2 h-64 relative z-10" id="model-3d-container"></div>
+                    
+                    <div class="w-full md:w-1/2 h-48 md:h-72 relative z-10" id="model-3d-container"></div>
+                </div>
+
+                <!-- Статистика и возможности -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+                    <div class="glass-card p-5 border-t-2 border-t-brand-neon">
+                        <div class="text-3xl mb-2">📚</div>
+                        <h3 class="text-white font-bold text-lg mb-1">89 тем</h3>
+                        <p class="text-xs text-slate-400">Полный школьный курс от 7 до 11 класса.</p>
+                    </div>
+                    <div class="glass-card p-5 border-t-2 border-t-[#10b981]">
+                        <div class="text-3xl mb-2">🧮</div>
+                        <h3 class="text-white font-bold text-lg mb-1">Калькулятор</h3>
+                        <p class="text-xs text-slate-400">Встроенный расчет по каждой формуле.</p>
+                    </div>
+                    <div class="glass-card p-5 border-t-2 border-t-[#8b5cf6]">
+                        <div class="text-3xl mb-2">🔬</div>
+                        <h3 class="text-white font-bold text-lg mb-1">Симуляции</h3>
+                        <p class="text-xs text-slate-400">Интерактивные опыты в реальном времени.</p>
+                    </div>
+                    <div class="glass-card p-5 border-t-2 border-t-[#ec4899]">
+                        <div class="text-3xl mb-2">🧠</div>
+                        <h3 class="text-white font-bold text-lg mb-1">30 вопросов</h3>
+                        <p class="text-xs text-slate-400">Сложный экзамен для проверки знаний.</p>
+                    </div>
                 </div>
 
                 <div class="flex items-center gap-3 mb-6">
-                    <span class="text-yellow-400 text-xl">⭐</span>
-                    <h2 class="text-2xl font-bold">Популярные формулы</h2>
+                    <span class="text-yellow-400 text-2xl">⚡</span>
+                    <h2 class="text-2xl font-bold">Случайные формулы</h2>
                 </div>
                 
-                <!-- Сетка карточек популярных формул генерируется через JS -->
+                <!-- Сетка случайных формул -->
                 <div id="popular-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
 
-            <!-- СЕКЦИЯ КОНТЕНТА (ТЕМЫ) -->
-            <div id="content-section" class="max-w-6xl mx-auto hidden"></div>
+            <!-- СЕКЦИЯ ТЕМ (КЛАССЫ И ПОИСК) -->
+            <div id="content-section" class="max-w-6xl mx-auto hidden pb-10"></div>
 
             <!-- СЕКЦИЯ ТЕСТА -->
-            <div id="quiz-section" class="max-w-4xl mx-auto hidden">
-                <div class="glass-card p-8 md:p-10 border-t-4 border-emerald-500 shadow-[0_0_40px_rgba(16,185,129,0.1)]">
+            <div id="quiz-section" class="max-w-4xl mx-auto hidden pb-10">
+                <div class="glass-card p-6 md:p-10 border-t-4 border-emerald-500 shadow-[0_0_40px_rgba(16,185,129,0.1)]">
                     <div class="flex justify-between items-center mb-8 border-b border-white/5 pb-6">
                         <div>
-                            <h2 class="text-3xl font-bold mb-2">Блиц-тест</h2>
-                            <p class="text-sm text-slate-400">30 вопросов из всех разделов физики</p>
+                            <h2 class="text-3xl font-bold mb-2">Экзамен по физике</h2>
+                            <p class="text-sm text-slate-400">30 вопросов: от плотности до квантовой физики</p>
                         </div>
-                        <button onclick="goHome()" class="bg-white/5 hover:bg-white/10 p-2 rounded-lg text-slate-400 transition-colors">✕</button>
+                        <button onclick="goHome()" class="bg-white/5 hover:bg-white/10 p-2 rounded-lg text-slate-400 transition-colors">✕ Завершить</button>
                     </div>
                     <div id="quiz-content" class="min-h-[300px] flex flex-col justify-center"></div>
                 </div>
             </div>
 
             <!-- СЕКЦИЯ ЗАДАЧ -->
-            <div id="tasks-section" class="max-w-4xl mx-auto hidden">
-                <div class="flex items-center gap-3 mb-8">
-                    <span class="text-[#10b981] text-3xl">📝</span>
+            <div id="tasks-section" class="max-w-4xl mx-auto hidden pb-10">
+                <div class="flex items-center gap-4 mb-8 bg-[#151c2c] p-6 rounded-2xl border border-white/5">
+                    <div class="w-14 h-14 rounded-full bg-[#10b981]/20 flex items-center justify-center text-[#10b981] text-2xl">📝</div>
                     <div>
-                        <h2 class="text-3xl font-bold">Решение задач</h2>
-                        <p class="text-sm text-slate-400">Тренируйтесь в расчетах</p>
+                        <h2 class="text-3xl font-bold text-white">Решение задач</h2>
+                        <p class="text-sm text-slate-400 mt-1">Прочитайте условие, подставьте значения в формулу и введите численный ответ.</p>
                     </div>
                 </div>
                 <div id="tasks-container" class="grid grid-cols-1 gap-6"></div>
             </div>
 
             <!-- СЕКЦИЯ ЛАБОРАТОРИИ -->
-            <div id="lab-section" class="max-w-5xl mx-auto hidden">
-                <div class="flex items-center gap-3 mb-8">
-                    <span class="text-[#8b5cf6] text-3xl">🔬</span>
+            <div id="lab-section" class="max-w-5xl mx-auto hidden pb-10">
+                <div class="flex items-center gap-4 mb-8 bg-[#151c2c] p-6 rounded-2xl border border-white/5">
+                    <div class="w-14 h-14 rounded-full bg-[#8b5cf6]/20 flex items-center justify-center text-[#8b5cf6] text-2xl">🔬</div>
                     <div>
-                        <h2 class="text-3xl font-bold">Виртуальная лаборатория</h2>
-                        <p class="text-sm text-slate-400">Интерактивные физические симуляции</p>
+                        <h2 class="text-3xl font-bold text-white">Виртуальная лаборатория</h2>
+                        <p class="text-sm text-slate-400 mt-1">Задавайте параметры и наблюдайте за физическими процессами в реальном времени.</p>
                     </div>
                 </div>
                 
@@ -236,7 +222,7 @@
                             <button onclick="startSim1()" class="flex-1 bg-brand-neon hover:bg-blue-500 text-white font-semibold py-2.5 rounded-lg transition-colors">▶ Запуск</button>
                             <button onclick="resetSim1()" class="flex-1 bg-white/10 hover:bg-white/20 text-white font-semibold py-2.5 rounded-lg transition-colors">Сброс</button>
                         </div>
-                        <div class="mt-auto p-4 bg-brand-dark/50 rounded-lg border border-white/5 font-mono text-sm text-brand-neon flex justify-between">
+                        <div class="mt-auto p-4 bg-brand-dark/80 rounded-lg border border-white/5 font-mono text-sm text-brand-neon flex justify-between shadow-inner">
                             <span>t: <span id="sim1-t">0.00</span> с</span><span>x: <span id="sim1-x">0.00</span> м</span><span>v: <span id="sim1-v">0.00</span> м/с</span>
                         </div>
                     </div>
@@ -256,7 +242,7 @@
                             <button onclick="startSim2()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold py-2.5 rounded-lg transition-colors">⬇ Бросить</button>
                             <button onclick="resetSim2()" class="flex-1 bg-white/10 hover:bg-white/20 text-white font-semibold py-2.5 rounded-lg transition-colors">Поднять</button>
                         </div>
-                        <div class="mt-auto p-4 bg-brand-dark/50 rounded-lg border border-white/5 font-mono text-sm text-emerald-400 flex justify-between">
+                        <div class="mt-auto p-4 bg-brand-dark/80 rounded-lg border border-white/5 font-mono text-sm text-emerald-400 flex justify-between shadow-inner">
                             <span>Время: <span id="sim2-t">0.00</span> с</span><span>Высота: <span id="sim2-cur-h">50.00</span> м</span>
                         </div>
                     </div>
@@ -266,8 +252,9 @@
         </main>
     </div>
 
+    <!-- ЕДИНЫЙ БЛОК СКРИПТОВ -->
     <script>
-        // --- 1. ОГРОМНАЯ БАЗА ДАННЫХ ПО ПЕРЫШКИНУ И МЯКИШЕВУ (89 ТЕМ) ---
+        // --- 1. ОГРОМНАЯ БАЗА ДАННЫХ (89 ТЕМ) ---
         const physicsData = {
             7: {
                 title: "7 класс: Механика",
@@ -297,7 +284,7 @@
                 ]
             },
             8: {
-                title: "8 класс: Теплота, Электричество, Оптика",
+                title: "8 класс: Теплота, Ток, Оптика",
                 topics: [
                     { name: "Количество теплоты (нагрев)", desc: "Нагрев/охлаждение.", formula: "Q = c m \\Delta t", vars: "c — уд. теплоемкость", example: { dano: "c = 4200, m = 2, Δt = 50", sol: "Q = 4200 · 2 · 50", ans: "420 кДж" }, calc: { vars: [{id:'c', name:'c'},{id:'m', name:'m'},{id:'dt', name:'Δt'}], expr: 'c*m*dt', unit: 'Дж' } },
                     { name: "Теплота сгорания", desc: "Энергия топлива.", formula: "Q = q m", vars: "q — уд. теплота сгорания", example: { dano: "q = 4.4e7, m = 2", sol: "Q = 4.4e7 · 2", ans: "88 МДж" }, calc: { vars: [{id:'q', name:'q'},{id:'m', name:'m'}], expr: 'q*m', unit: 'Дж' } },
@@ -369,10 +356,10 @@
                 ]
             },
             11: {
-                title: "11 класс: Электродинамика, Оптика, Кванты",
+                title: "11 класс: Электродинамика и Кванты",
                 topics: [
-                    { name: "Сила Ампера", desc: "Магнитное поле и ток.", formula: "F_А = IBl \\sin\\alpha", vars: "B — индукция", example: { dano: "I=2, B=0.1, l=1, a=90°", sol: "F = 2·0.1·1", ans: "0.2 Н" }, calc: { vars: [{id:'i', name:'I'},{id:'b', name:'B'},{id:'l', name:'l'}], expr: 'i*b*l', unit: 'Н' } },
-                    { name: "Сила Лоренца", desc: "Магнитное поле и заряд.", formula: "F_Л = qvB \\sin\\alpha", vars: "Определяет радиус частиц", example: { dano: "q=1, v=10, B=2, a=90°", sol: "F = 1·10·2", ans: "20 Н" }, calc: { vars: [{id:'q', name:'q'},{id:'v', name:'v'},{id:'b', name:'B'}], expr: 'q*v*b', unit: 'Н' } },
+                    { name: "Сила Ампера", desc: "Поле действует на проводник.", formula: "F_А = IBl \\sin\\alpha", vars: "B — индукция", example: { dano: "I=2, B=0.1, l=1, a=90°", sol: "F = 2·0.1·1", ans: "0.2 Н" }, calc: { vars: [{id:'i', name:'I'},{id:'b', name:'B'},{id:'l', name:'l'}], expr: 'i*b*l', unit: 'Н' } },
+                    { name: "Сила Лоренца", desc: "Поле действует на заряд.", formula: "F_Л = qvB \\sin\\alpha", vars: "Определяет радиус частиц", example: { dano: "q=1, v=10, B=2, a=90°", sol: "F = 1·10·2", ans: "20 Н" }, calc: { vars: [{id:'q', name:'q'},{id:'v', name:'v'},{id:'b', name:'B'}], expr: 'q*v*b', unit: 'Н' } },
                     { name: "Радиус орбиты частицы", desc: "В магнитном поле.", formula: "r = \\frac{mv}{qB}", vars: "Следствие Лоренца", example: { dano: "Электрон", sol: "Зависит от скорости", ans: "м" } },
                     { name: "Магнитный поток", desc: "Сквозь площадку.", formula: "\\Phi = BS\\cos\\alpha", vars: "S — площадь", example: { dano: "B=0.2, S=0.5, a=0°", sol: "Φ = 0.2·0.5", ans: "0.1 Вб" }, calc: { vars: [{id:'b', name:'B'},{id:'s', name:'S'}], expr: 'b*s', unit: 'Вб' } },
                     { name: "ЭДС Индукции", desc: "Закон Фарадея.", formula: "\\varepsilon = -\\frac{\\Delta\\Phi}{\\Delta t}", vars: "Явление ЭМИ", example: { dano: "ΔΦ=0.4, Δt=2", sol: "ε = 0.4 / 2", ans: "0.2 В" }, calc: { vars: [{id:'df', name:'ΔΦ'},{id:'dt', name:'Δt'}], expr: 'df/dt', unit: 'В' } },
@@ -394,7 +381,7 @@
             }
         };
 
-        // --- 2. БАЗА ЗАДАЧ ДЛЯ НОВОГО РАЗДЕЛА ---
+        // --- 2. БАЗА ЗАДАЧ ДЛЯ РАЗДЕЛА "РЕШЕНИЕ ЗАДАЧ" ---
         const tasksData = [
             { q: "Автомобиль массой 1500 кг разгоняется с ускорением 2 м/с². Чему равна сила тяги двигателя, если трением пренебречь?", hint: "Формула: F = m·a", ans: 3000, unit: "Н" },
             { q: "Какое давление на пол оказывает мальчик весом 400 Н, если площадь подошв его обуви 0.04 м²?", hint: "Формула: p = F/S", ans: 10000, unit: "Па" },
@@ -406,7 +393,7 @@
             { q: "Сколько энергии выделится при полном сгорании 2 кг дров? (Удельная теплота сгорания дров 10 МДж/кг). Введите ответ в МДж.", hint: "Формула: Q = q·m", ans: 20, unit: "МДж" }
         ];
 
-        // --- 3. БАЗА ИЗ РОВНО 30 ВОПРОСОВ (ТЕОРИЯ + ЗАДАЧИ) ---
+        // --- 3. БАЗА ИЗ РОВНО 30 ВОПРОСОВ (ТЕОРИЯ + ЗАДАЧИ) ИДУТ ПОДРЯД ---
         const allQuizQuestions = [
             { q: "1. В каких единицах измеряется сила тока?", options: ["Вольтах", "Ваттах", "Амперах", "Джоулях"], ans: 2 },
             { q: "2. Какая формула описывает Второй закон Ньютона?", options: ["F = m·g", "F = m·a", "p = m·v", "A = F·s"], ans: 1 },
@@ -442,9 +429,8 @@
 
         // --- УПРАВЛЕНИЕ UI И САЙДБАРОМ ---
         const sidebar = document.getElementById('sidebar');
-        function toggleSidebar() {
-            sidebar.classList.toggle('-translate-x-full');
-        }
+        function toggleSidebar() { sidebar.classList.toggle('-translate-x-full'); }
+        function closeSidebarOnMobile() { if (window.innerWidth < 768) { sidebar.classList.add('-translate-x-full'); } }
 
         const sections = ['welcome', 'quiz', 'content', 'tasks', 'lab'];
         function hideAll() { 
@@ -454,6 +440,7 @@
 
         function goHome() {
             hideAll(); 
+            closeSidebarOnMobile();
             document.getElementById('welcome-section').classList.remove('hidden'); 
             document.getElementById('nav-main').classList.add('active');
             spawn3DModel('main'); 
@@ -462,7 +449,7 @@
             stopAllSims();
         }
 
-        // Генерация случайных карточек для главной страницы[span_5](start_span)[span_5](end_span)
+        // Генерация случайных карточек для главной страницы
         function renderPopularCards() {
             let allTopics = [];
             Object.keys(physicsData).forEach(g => {
@@ -490,14 +477,10 @@
             document.getElementById('popular-cards').innerHTML = html;
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            init3D();
-            goHome();
-        });
-
         // --- ОТОБРАЖЕНИЕ ТЕМ (БАЗА) ---
         function loadClass(grade) {
             hideAll(); 
+            closeSidebarOnMobile();
             document.getElementById('content-section').classList.remove('hidden'); 
             const navBtn = document.getElementById('nav-'+grade);
             if(navBtn) navBtn.classList.add('active');
@@ -560,7 +543,9 @@
 
         // --- РЕШЕНИЕ ЗАДАЧ (НОВЫЙ РАЗДЕЛ) ---
         function loadTasks() {
-            hideAll(); document.getElementById('tasks-section').classList.remove('hidden'); 
+            hideAll(); 
+            closeSidebarOnMobile();
+            document.getElementById('tasks-section').classList.remove('hidden'); 
             document.getElementById('nav-tasks').classList.add('active');
             spawn3DModel('tasks'); stopAllSims(); document.getElementById('main-scroll').scrollTo(0,0);
             
@@ -621,7 +606,9 @@
         // --- ТЕСТ (30 ВОПРОСОВ БЕЗ ПЕРЕМЕШИВАНИЯ) ---
         let qIndex=0, qScore=0, qAnswered=false;
         function startQuizScreen() {
-            hideAll(); document.getElementById('quiz-section').classList.remove('hidden'); 
+            hideAll(); 
+            closeSidebarOnMobile();
+            document.getElementById('quiz-section').classList.remove('hidden'); 
             document.getElementById('nav-quiz').classList.add('active');
             spawn3DModel('main'); stopAllSims(); document.getElementById('main-scroll').scrollTo(0,0);
             qIndex=0; qScore=0; showQuizQ();
@@ -669,12 +656,14 @@
             `;
         }
 
-        // --- ЛАБОРАТОРИЯ (Живая анимация 9 класс) ---
+        // --- ЛАБОРАТОРИЯ (Живая анимация) ---
         let sim1 = { run: false, x: 0, v: 0, a: 10, t: 0, lastTime: 0, req: null };
         let sim2 = { run: false, h: 50, curH: 50, t: 0, lastTime: 0, req: null };
 
         function loadLab() {
-            hideAll(); document.getElementById('lab-section').classList.remove('hidden'); 
+            hideAll(); 
+            closeSidebarOnMobile();
+            document.getElementById('lab-section').classList.remove('hidden'); 
             document.getElementById('nav-lab').classList.add('active');
             spawn3DModel('lab'); window.scrollTo(0,0);
             resetSim1(); resetSim2();
@@ -710,12 +699,12 @@
             sim1.v += sim1.a * dt;
             sim1.x += sim1.v * dt;
             drawSim1();
-            if(sim1.x > 100 || sim1.x < -10) { sim1.run = false; } // Остановка у края
+            if(sim1.x > 100 || sim1.x < -10) { sim1.run = false; }
             else { sim1.req = requestAnimationFrame(loopSim1); }
         }
         function drawSim1() {
             let box = document.getElementById('sim1-car');
-            let px = (sim1.x / 100) * 80; // 100 метров = 80% ширины
+            let px = (sim1.x / 100) * 80; 
             if(px > 90) px=90; if(px < 0) px=0;
             box.style.left = px + '%';
             document.getElementById('sim1-t').innerText = sim1.t.toFixed(2);
@@ -761,10 +750,10 @@
             document.getElementById('sim2-cur-h').innerText = sim2.curH.toFixed(2);
         }
 
-        // --- ИНИЦИАЛИЗАЦИЯ 3D ---
-        particlesJS("particles-js", {
-            "particles": { "number": { "value": 30 }, "color": { "value": "#3b82f6" }, "shape": { "type": "circle" }, "opacity": { "value": 0.2 }, "size": { "value": 3 }, "line_linked": { "enable": true, "distance": 150, "color": "#3b82f6", "opacity": 0.1, "width": 1 }, "move": { "enable": true, "speed": 1 } },
-            "interactivity": { "events": { "onhover": { "enable": true, "mode": "grab" }, "onclick": { "enable": true, "mode": "push" } } }
+        // --- ИНИЦИАЛИЗАЦИЯ ПОСЛЕ ЗАГРУЗКИ ---
+        window.addEventListener('DOMContentLoaded', () => {
+            init3D();
+            goHome();
         });
     </script>
 </body>
