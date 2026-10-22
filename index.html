@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <title>PhysHub | Школьный 3D-справочник по физике</title>
-    <meta name="description" content="PhysHub — это интерактивный справочник по физике для 7-11 классов. Умный калькулятор, формулы, законы Ньютона, термодинамика, примеры решения задач и 3D-визуализация.">
-    <meta name="keywords" content="physhub, физика, справочник по физике, формулы по физике, калькулятор по физике, физика 7 класс, физика 8 класс, физика 9 класс, физика 10 класс, физика 11 класс, ОГЭ, ЕГЭ">
+    <meta name="description" content="PhysHub — это интерактивный справочник по физике для 7-11 классов. Умный калькулятор, виртуальная лаборатория, формулы, законы Ньютона, термодинамика, примеры решения задач и 3D-визуализация.">
+    <meta name="keywords" content="physhub, физика, справочник по физике, формулы по физике, виртуальная лаборатория, калькулятор по физике, физика 7 класс, физика 8 класс, физика 9 класс, физика 10 класс, физика 11 класс, ОГЭ, ЕГЭ">
     <meta name="author" content="sahar21">
     <meta name="robots" content="index, follow">
     
@@ -65,6 +65,15 @@
         @media (min-width: 1024px) { #model-3d-container::before { width: 200px; height: 200px; filter: blur(60px); } }
 
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        /* Стили для ползунков лаборатории */
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; background: rgba(255,255,255,0.1); height: 6px; border-radius: 5px; outline: none; margin-top: 10px; margin-bottom: 10px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #0ea5e9; cursor: pointer; transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
     </style>
 </head>
 <body class="min-h-screen overflow-x-hidden selection:bg-white selection:text-black relative">
@@ -98,12 +107,16 @@
             <button id="btn-9" onclick="loadClass(9)" class="class-btn px-5 py-2 md:px-6 md:py-2.5 rounded-full font-semibold text-sm md:text-base transition-all bg-white/5 border border-white/10 text-slate-300 shadow-lg hover:bg-white/10">9 класс</button>
             <button id="btn-10" onclick="loadClass(10)" class="class-btn px-5 py-2 md:px-6 md:py-2.5 rounded-full font-semibold text-sm md:text-base transition-all bg-white/5 border border-white/10 text-slate-300 shadow-lg hover:bg-white/10">10 класс</button>
             <button id="btn-11" onclick="loadClass(11)" class="class-btn px-5 py-2 md:px-6 md:py-2.5 rounded-full font-semibold text-sm md:text-base transition-all bg-white/5 border border-white/10 text-slate-300 shadow-lg hover:bg-white/10">11 класс</button>
+            
+            <!-- НОВАЯ КНОПКА: ВИРТУАЛЬНАЯ ЛАБОРАТОРИЯ -->
+            <button id="btn-lab" onclick="loadLab()" class="class-btn px-5 py-2 md:px-6 md:py-2.5 rounded-full font-semibold text-sm md:text-base transition-all bg-[#0ea5e9]/20 border border-[#0ea5e9]/50 text-white shadow-[0_0_15px_rgba(14,165,233,0.4)] hover:bg-[#0ea5e9]/40 hover:scale-105">🔬 Лаборатория</button>
         </div>
     </header>
 
     <div id="model-3d-container" class="relative z-10"></div>
 
     <main class="container mx-auto px-6 pb-20 relative z-10">
+        <!-- ГЛАВНОЕ МЕНЮ -->
         <div id="welcome-section" class="max-w-5xl mx-auto block">
             <div class="glass-card vanilla-tilt-card rounded-2xl p-8 md:p-10 fade-in mb-8">
                 <div class="glass-card-inner">
@@ -111,18 +124,20 @@
                     <p class="text-lg md:text-xl text-slate-300 mb-6 md:mb-8 leading-relaxed">
                         Интерактивный путеводитель по ключевым законам и формулам школьного курса физики.
                     </p>
+                    
                     <div id="fact-box" class="bg-gradient-to-r from-blue-500/20 to-transparent p-4 md:p-6 rounded-xl border-l-4 border-[#0ea5e9] mb-8 shadow-inner" style="transform: translateZ(25px);">
                         <h4 class="text-[#0ea5e9] font-bold text-sm md:text-base uppercase tracking-wider mb-2">💡 А знаете ли вы?</h4>
                         <p id="fact-text" class="text-slate-200 text-sm md:text-base italic leading-relaxed">«Свет от Солнца до Земли летит 8 минут 20 секунд.»</p>
                     </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-[#0ea5e9] shadow-inner" style="transform: translateZ(20px);">
                             <h3 class="text-white font-bold mb-2 md:text-lg">🧮 Умный калькулятор</h3>
                             <p class="text-xs md:text-sm text-slate-400">Встроенный калькулятор прямо в карточках решит формулу за вас.</p>
                         </div>
                         <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-[#10b981] shadow-inner" style="transform: translateZ(20px);">
-                            <h3 class="text-white font-bold mb-2 md:text-lg">💡 Решебник</h3>
-                            <p class="text-xs md:text-sm text-slate-400">К каждой теме написан пример задачи «Дано - Решение - Ответ».</p>
+                            <h3 class="text-white font-bold mb-2 md:text-lg">🔬 Лаборатория</h3>
+                            <p class="text-xs md:text-sm text-slate-400">Интерактивные виртуальные опыты в реальном времени.</p>
                         </div>
                         <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-[#ec4899] shadow-inner" style="transform: translateZ(20px);">
                             <h3 class="text-white font-bold mb-2 md:text-lg">🧊 3D Модели</h3>
@@ -141,6 +156,7 @@
             </div>
         </div>
 
+        <!-- ТЕСТ -->
         <div id="quiz-section" class="max-w-3xl md:max-w-4xl mx-auto hidden">
             <div id="quiz-card" class="glass-card rounded-2xl p-6 md:p-8 fade-in border-t-4 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
                 <div class="flex items-center justify-between mb-6 md:mb-8 border-b border-white/10 pb-4">
@@ -151,7 +167,87 @@
             </div>
         </div>
 
+        <!-- КОНТЕНТ (ТЕМЫ) -->
         <div id="content-section" class="max-w-5xl mx-auto hidden"></div>
+
+        <!-- ВИРТУАЛЬНАЯ ЛАБОРАТОРИЯ -->
+        <div id="lab-section" class="max-w-5xl mx-auto hidden">
+            <div class="fade-in mb-6 md:mb-8 text-center md:text-left">
+                <h2 class="text-2xl md:text-3xl font-bold text-white border-b border-white/10 pb-3 md:pb-4 inline-block drop-shadow-md">🔬 Виртуальная лаборатория</h2>
+                <p class="text-slate-400 mt-2 text-sm md:text-base">Двигайте ползунки и сразу видите, как меняется физическое явление.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+                <!-- Опыт 1: Маятник -->
+                <div class="glass-card rounded-2xl p-6 fade-in flex flex-col">
+                    <h3 class="text-xl font-bold text-white mb-2">Математический маятник</h3>
+                    <p class="text-slate-400 text-sm mb-4 border-b border-white/10 pb-2">Зависимость периода от длины нити.</p>
+                    <div class="flex-grow">
+                        <label class="text-sm text-brand-blue font-bold">Длина нити (l): <span id="lab-pend-val" class="text-white">1 м</span></label>
+                        <input type="range" id="lab-pend-l" min="0.1" max="10" step="0.1" value="1" oninput="updateLab()">
+                    </div>
+                    <div class="bg-black/30 p-4 rounded-xl mt-4 border border-[#0ea5e9]/30 text-center">
+                        <span class="text-slate-400 text-sm">Период колебаний (T):</span>
+                        <div id="lab-pend-out" class="text-3xl font-mono text-[#0ea5e9] font-bold mt-1">2.01 с</div>
+                    </div>
+                </div>
+
+                <!-- Опыт 2: Свободное падение -->
+                <div class="glass-card rounded-2xl p-6 fade-in flex flex-col">
+                    <h3 class="text-xl font-bold text-white mb-2">Свободное падение</h3>
+                    <p class="text-slate-400 text-sm mb-4 border-b border-white/10 pb-2">Зависимость времени падения от высоты.</p>
+                    <div class="flex-grow">
+                        <label class="text-sm text-brand-blue font-bold">Высота (h): <span id="lab-fall-val" class="text-white">45 м</span></label>
+                        <input type="range" id="lab-fall-h" min="1" max="500" step="1" value="45" oninput="updateLab()">
+                    </div>
+                    <div class="bg-black/30 p-4 rounded-xl mt-4 border border-[#0ea5e9]/30 text-center">
+                        <span class="text-slate-400 text-sm">Время падения (t):</span>
+                        <div id="lab-fall-out" class="text-2xl font-mono text-[#0ea5e9] font-bold mt-1">3.03 с <span class="text-sm text-slate-400">(v = 29.7 м/с)</span></div>
+                    </div>
+                </div>
+
+                <!-- Опыт 3: Электрическая цепь -->
+                <div class="glass-card rounded-2xl p-6 fade-in flex flex-col">
+                    <h3 class="text-xl font-bold text-white mb-2">Электрическая цепь (Закон Ома)</h3>
+                    <p class="text-slate-400 text-sm mb-4 border-b border-white/10 pb-2">Связь напряжения, сопротивления и силы тока.</p>
+                    <div class="flex-grow space-y-4">
+                        <div>
+                            <label class="text-sm text-brand-blue font-bold">Напряжение (U): <span id="lab-ohm-val-u" class="text-white">220 В</span></label>
+                            <input type="range" id="lab-ohm-u" min="1" max="1000" step="1" value="220" oninput="updateLab()">
+                        </div>
+                        <div>
+                            <label class="text-sm text-brand-blue font-bold">Сопротивление (R): <span id="lab-ohm-val-r" class="text-white">55 Ом</span></label>
+                            <input type="range" id="lab-ohm-r" min="1" max="200" step="1" value="55" oninput="updateLab()">
+                        </div>
+                    </div>
+                    <div class="bg-black/30 p-4 rounded-xl mt-4 border border-[#0ea5e9]/30 text-center">
+                        <span class="text-slate-400 text-sm">Сила тока (I):</span>
+                        <div id="lab-ohm-out" class="text-3xl font-mono text-[#0ea5e9] font-bold mt-1">4.00 А</div>
+                    </div>
+                </div>
+
+                <!-- Опыт 4: Оптика -->
+                <div class="glass-card rounded-2xl p-6 fade-in flex flex-col">
+                    <h3 class="text-xl font-bold text-white mb-2">Оптика: Тонкая линза</h3>
+                    <p class="text-slate-400 text-sm mb-4 border-b border-white/10 pb-2">Зависимость положения изображения от фокуса.</p>
+                    <div class="flex-grow space-y-4">
+                        <div>
+                            <label class="text-sm text-brand-blue font-bold">Фокусное расстояние (F): <span id="lab-opt-val-f" class="text-white">10 см</span></label>
+                            <input type="range" id="lab-opt-f" min="5" max="50" step="1" value="10" oninput="updateLab()">
+                        </div>
+                        <div>
+                            <label class="text-sm text-brand-blue font-bold">Раст. до предмета (d): <span id="lab-opt-val-d" class="text-white">30 см</span></label>
+                            <input type="range" id="lab-opt-d" min="1" max="100" step="1" value="30" oninput="updateLab()">
+                        </div>
+                    </div>
+                    <div class="bg-black/30 p-4 rounded-xl mt-4 border border-[#0ea5e9]/30 text-center">
+                        <span class="text-slate-400 text-sm">Параметры изображения:</span>
+                        <div id="lab-opt-out" class="text-lg font-mono text-[#0ea5e9] font-bold mt-1">f = 15.0 см | Действительное</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <script>
@@ -164,7 +260,8 @@
             11: '#ec4899',// Розовый
             'main': '#0ea5e9',
             'search': '#facc15', // Желтый
-            'quiz': '#10b981'    // Изумрудный
+            'quiz': '#10b981',   // Изумрудный
+            'lab': '#3b82f6'     // Синий для лаборатории
         };
 
         let currentColor = colors['main'];
@@ -182,6 +279,23 @@
             const searchInput = document.getElementById('search-input');
             searchInput.addEventListener('focus', () => { searchInput.style.borderColor = currentColor; });
             searchInput.addEventListener('blur', () => { searchInput.style.borderColor = 'rgba(255,255,255,0.2)'; });
+
+            // Подстраиваем ползунки лаборатории под цвет темы
+            const styleId = 'dynamic-range-style';
+            let styleEl = document.getElementById(styleId);
+            if (!styleEl) {
+                styleEl = document.createElement('style');
+                styleEl.id = styleId;
+                document.head.appendChild(styleEl);
+            }
+            styleEl.innerHTML = `
+                input[type=range]::-webkit-slider-thumb { background: ${currentColor}; box-shadow: 0 0 10px ${currentColor}80; }
+                .lab-accent { color: ${currentColor}; }
+                .lab-border { border-color: ${currentColor}4D; }
+            `;
+
+            document.querySelectorAll('#lab-section .text-\\[\\#0ea5e9\\]').forEach(el => el.style.color = currentColor);
+            document.querySelectorAll('#lab-section .border-\\[\\#0ea5e9\\]\\/30').forEach(el => el.style.borderColor = currentColor + '4D');
         }
 
         // --- УПРАВЛЕНИЕ МЫШЬЮ И СВЕЧЕНИЕМ ---
@@ -202,7 +316,7 @@
             if (!isMouseActive) { glow.style.opacity = '1'; isMouseActive = true; }
         }, { passive: true });
 
-        // --- БАЗА ДАННЫХ ---
+        // --- БАЗА ДАННЫХ И КАЛЬКУЛЯТОР ---
         const physicsData = {
             7: {
                 title: "7 класс: Механика",
@@ -223,7 +337,7 @@
                 ]
             },
             8: {
-                title: "8 класс: Теплота и Электричество",
+                title: "8 класс: Теплота и Ток",
                 topics: [
                     { name: "Количество теплоты (нагрев)", desc: "При нагревании/охлаждении.", formula: "Q = c · m · Δt", vars: "c — уд. теплоемкость", example: { dano: "c=4200, m=2, Δt=50", sol: "Q = 4200·2·50", ans: "420 кДж" }, calc: { vars: [{id:'c', name:'Теплоемк. (c)'}, {id:'m', name:'Масса (m)'}, {id:'dt', name:'Δt'}], expr: 'c*m*dt', unit: 'Дж' } },
                     { name: "Теплота сгорания", desc: "При сгорании топлива.", formula: "Q = q · m", vars: "q — уд. теплота сгорания", example: { dano: "q=4.4·10⁷, m=2", sol: "Q = 4.4e7 * 2", ans: "88 МДж" }, calc: { vars: [{id:'q', name:'Уд. теплота (q)'}, {id:'m', name:'Масса (m)'}], expr: 'q*m', unit: 'Дж' } },
@@ -260,23 +374,19 @@
                     { name: "Уравнение Менделеева", desc: "Для идеального газа (расчет давления).", formula: "p = (m / M) · R · T / V", vars: "R = 8.31", example: { dano: "m=M(1 моль), T=300, V=0.083", sol: "p = 1·8.31·300/0.083", ans: "30 кПа" }, calc: { vars: [{id:'m', name:'m'}, {id:'M', name:'M'}, {id:'T', name:'T (Кельвин)'}, {id:'V', name:'V'}], expr: '(m/M)*8.31*T/V', unit: 'Па' } },
                     { name: "Внутренняя энергия", desc: "Для одноатомного газа.", formula: "U = 1.5 · (m/M) · R · T", vars: "U — энергия (Дж)", example: { dano: "ν=1 моль, T=300 К", sol: "U = 1.5 * 1 * 8.31 * 300", ans: "3.74 кДж" }, calc: { vars: [{id:'m', name:'m'}, {id:'M', name:'M'}, {id:'T', name:'T (Кельвин)'}], expr: '1.5*(m/M)*8.31*T', unit: 'Дж' } },
                     { name: "Первое начало термодинамики", desc: "Закон сохранения энергии.", formula: "Q = ΔU + A", vars: "Q — тепло, A — работа", example: { dano: "A=200, ΔU=300", sol: "Q = 300+200", ans: "500 Дж" }, calc: { vars: [{id:'du', name:'ΔU'}, {id:'a', name:'Работа (A)'}], expr: 'du+a', unit: 'Дж' } },
-                    { name: "Закон Кулона", desc: "Взаимодействие зарядов.", formula: "F = k · (q₁ · q₂) / r²", vars: "k = 9·10⁹", example: { dano: "q=3мкКл, r=0.1", sol: "F = 9e9 * 9e-12 / 0.01", ans: "8.1 Н" }, calc: { vars: [{id:'q1', name:'q1'}, {id:'q2', name:'q2'}, {id:'r', name:'Радиус (r)'}], expr: '9000000000 * Math.abs(q1*q2) / (r*r)', unit: 'Н' } },
-                    { name: "Напряженность", desc: "Силовая характеристика электрополя.", formula: "E = F / q", vars: "E — напряженность (В/м)", example: { dano: "F = 0.05 Н, q = 10 мкКл", sol: "E = 0.05 / 10⁻⁵", ans: "5000 В/м" }, calc: { vars: [{id:'F', name:'Сила (F)'}, {id:'q', name:'Заряд (q)'}], expr: 'F/q', unit: 'В/м' } }
+                    { name: "Закон Кулона", desc: "Взаимодействие зарядов.", formula: "F = k · (q₁ · q₂) / r²", vars: "k = 9·10⁹", example: { dano: "q=3мкКл, r=0.1", sol: "F = 9e9 * 9e-12 / 0.01", ans: "8.1 Н" }, calc: { vars: [{id:'q1', name:'q1'}, {id:'q2', name:'q2'}, {id:'r', name:'Радиус (r)'}], expr: '9000000000 * Math.abs(q1*q2) / (r*r)', unit: 'Н' } }
                 ]
             },
             11: {
-                title: "11 класс: Электромагнетизм и Кванты",
+                title: "11 класс: Кванты и Магнетизм",
                 topics: [
                     { name: "Сила Ампера", desc: "Магнитное поле на проводник (sin α=1).", formula: "F_А = I · B · l", vars: "I — ток, B — индукция", example: { dano: "I=2, B=0.1, l=1", sol: "F = 2 · 0.1 · 1", ans: "0.2 Н" }, calc: { vars: [{id:'i', name:'Ток (I)'}, {id:'b', name:'Индукция (B)'}, {id:'l', name:'Длина (l)'}], expr: 'i*b*l', unit: 'Н' } },
-                    { name: "Сила Лоренца", desc: "Действует на движущийся заряд.", formula: "F_Л = q · v · B", vars: "q — заряд, v — скорость", example: { dano: "q=1Кл, v=10, B=2Тл", sol: "F = 1 * 10 * 2", ans: "20 Н" }, calc: { vars: [{id:'q', name:'q'}, {id:'v', name:'v'}, {id:'b', name:'B'}], expr: 'q*v*b', unit: 'Н' } },
-                    { name: "ЭДС Индукции", desc: "Закон Фарадея.", formula: "ε_i = ΔΦ / Δt", vars: "Изменение магнитного потока.", example: { dano: "ΔΦ=0.4, Δt=2", sol: "ε_i = 0.4 / 2", ans: "0.2 В" }, calc: { vars: [{id:'df', name:'ΔΦ'}, {id:'dt', name:'Δt'}], expr: 'df/dt', unit: 'В' } },
-                    { name: "Энергия фотона", desc: "Квант света.", formula: "E = h · ν", vars: "h = 6.63·10⁻³⁴", example: { dano: "ν = 5·10¹⁴", sol: "E = 6.63e-34 * 5e14", ans: "3.3e-19 Дж" }, calc: { vars: [{id:'nu', name:'Частота (ν)'}], expr: '6.63e-34 * nu', unit: 'Дж' } },
-                    { name: "Фотоэффект", desc: "Уравнение Эйнштейна.", formula: "hν = A_вых + E_к", vars: "A_вых — работа выхода", example: { dano: "A_вых=2 эВ, E_к=1 эВ", sol: "hν = 2 + 1", ans: "3 эВ" }, calc: { vars: [{id:'a', name:'A вых.'}, {id:'e', name:'E кин.'}], expr: 'a+e', unit: '' } }
+                    { name: "Энергия фотона", desc: "Квант света.", formula: "E = h · ν", vars: "h = 6.63·10⁻³⁴", example: { dano: "ν = 5·10¹⁴", sol: "E = 6.63e-34 * 5e14", ans: "3.3e-19 Дж" }, calc: { vars: [{id:'nu', name:'Частота (ν)'}], expr: '6.63e-34 * nu', unit: 'Дж' } }
                 ]
             }
         };
 
-        // БАЗА 30 ВОПРОСОВ (Расширенная)
+        // БАЗА 30 ВОПРОСОВ
         const allQuizQuestions = [
             { q: "В каких единицах измеряется сила тока?", options: ["Вольтах", "Ваттах", "Амперах", "Джоулях"], ans: 2 },
             { q: "Формула Второго закона Ньютона?", options: ["F = m·g", "F = m·a", "p = m·v", "A = F·s"], ans: 1 },
@@ -379,6 +489,7 @@
             if (grade === 'main') geometry = new THREE.IcosahedronGeometry(2 * scale, 0); 
             else if (grade === 'search') geometry = new THREE.OctahedronGeometry(2 * scale, 0);
             else if (grade === 'quiz') geometry = new THREE.DodecahedronGeometry(1.8 * scale, 0); 
+            else if (grade === 'lab') geometry = new THREE.TorusKnotGeometry(1.4 * scale, 0.4 * scale, 100, 16); 
             else if (grade === 7) geometry = new THREE.BoxGeometry(2.2 * scale, 2.2 * scale, 2.2 * scale); 
             else if (grade === 8) geometry = new THREE.TorusGeometry(1.4 * scale, 0.5 * scale, 16, 50); 
             else if (grade === 9) geometry = new THREE.ConeGeometry(1.8 * scale, 2.8 * scale, 16); 
@@ -394,15 +505,18 @@
         const secWelcome = document.getElementById('welcome-section');
         const secQuiz = document.getElementById('quiz-section');
         const secContent = document.getElementById('content-section');
+        const secLab = document.getElementById('lab-section');
 
         function goHome() {
             document.getElementById('search-input').value = '';
             document.querySelectorAll('.class-btn').forEach(btn => {
                 btn.style.backgroundColor = ''; btn.style.borderColor = 'rgba(255,255,255,0.1)'; btn.style.boxShadow = ''; btn.style.color = '#cbd5e1';
+                if(btn.id === 'btn-lab') { btn.style.color = 'white'; btn.style.borderColor = 'rgba(14,165,233,0.5)'; btn.style.backgroundColor = 'rgba(14,165,233,0.2)'; }
             });
             
             secQuiz.classList.add('hidden');
             secContent.classList.add('hidden');
+            secLab.classList.add('hidden');
             secWelcome.classList.remove('hidden');
             
             spawn3DModel('main');
@@ -412,7 +526,69 @@
         window.addEventListener('DOMContentLoaded', () => {
             spawn3DModel('main');
             setTimeout(() => VanillaTilt.init(document.querySelectorAll(".vanilla-tilt-card"), { max: 5, speed: 400, glare: true, "max-glare": 0.1, scale: 1.01 }), 100);
+            updateLab(); // Инициализация значений лаборатории
         });
+
+        // --- ЛОГИКА ВИРТУАЛЬНОЙ ЛАБОРАТОРИИ ---
+        function loadLab() {
+            document.getElementById('search-input').value = ''; 
+            document.querySelectorAll('.class-btn').forEach(btn => {
+                btn.style.backgroundColor = ''; btn.style.borderColor = 'rgba(255,255,255,0.1)'; btn.style.boxShadow = ''; btn.style.color = '#cbd5e1';
+            });
+            
+            const btnLab = document.getElementById('btn-lab');
+            btnLab.style.backgroundColor = colors['lab'];
+            btnLab.style.borderColor = colors['lab'];
+            btnLab.style.color = '#fff';
+            btnLab.style.boxShadow = `0 0 20px ${colors['lab']}80`;
+
+            secWelcome.classList.add('hidden');
+            secQuiz.classList.add('hidden');
+            secContent.classList.add('hidden');
+            secLab.classList.remove('hidden');
+            
+            spawn3DModel('lab');
+            window.scrollTo(0, 0);
+        }
+
+        function updateLab() {
+            // 1. Маятник (T = 2*pi*sqrt(l/g))
+            let l = parseFloat(document.getElementById('lab-pend-l').value);
+            let t = 2 * Math.PI * Math.sqrt(l / 9.8);
+            document.getElementById('lab-pend-out').innerText = t.toFixed(2) + ' с';
+            document.getElementById('lab-pend-val').innerText = l.toFixed(1) + ' м';
+
+            // 2. Свободное падение (t = sqrt(2h/g), v = sqrt(2gh))
+            let h = parseFloat(document.getElementById('lab-fall-h').value);
+            let time = Math.sqrt(2 * h / 9.8);
+            let v = Math.sqrt(2 * 9.8 * h);
+            document.getElementById('lab-fall-out').innerHTML = time.toFixed(2) + ' с <span class="text-sm text-slate-400 block md:inline md:ml-2">(v = ' + v.toFixed(1) + ' м/с)</span>';
+            document.getElementById('lab-fall-val').innerText = h + ' м';
+
+            // 3. Электрическая цепь (I = U/R)
+            let u = parseFloat(document.getElementById('lab-ohm-u').value);
+            let r = parseFloat(document.getElementById('lab-ohm-r').value);
+            let i = u / r;
+            document.getElementById('lab-ohm-out').innerText = i.toFixed(2) + ' А';
+            document.getElementById('lab-ohm-val-u').innerText = u + ' В';
+            document.getElementById('lab-ohm-val-r').innerText = r + ' Ом';
+
+            // 4. Оптика (Тонкая линза: 1/F = 1/d + 1/f => f = (d*F)/(d-F))
+            let focal = parseFloat(document.getElementById('lab-opt-f').value);
+            let dist = parseFloat(document.getElementById('lab-opt-d').value);
+            let imgDistText = '';
+            if (dist === focal) {
+                imgDistText = 'Нет изображения (в бесконечности)';
+            } else {
+                let f_img = (dist * focal) / (dist - focal);
+                let mag = Math.abs(f_img / dist);
+                let type = f_img > 0 ? "Действительное" : "Мнимое";
+                imgDistText = `f = ${Math.abs(f_img).toFixed(1)} см | ${type} <br><span class="text-sm text-slate-400">Увеличение: ${mag.toFixed(1)}x</span>`;
+            }
+            document.getElementById('lab-opt-out').innerHTML = imgDistText;
+            document.getElementById('lab-opt-val-f').innerText = focal + ' см';
+            document.getElementById('lab-opt-val-d').innerText = dist + ' см';
+        }
 
         // --- ЛОГИКА ТЕСТА (СЛУЧАЙНЫЕ 12 из 30) ---
         let currentQuizData = [];
@@ -433,6 +609,7 @@
         function startQuizScreen() {
             secWelcome.classList.add('hidden');
             secContent.classList.add('hidden');
+            secLab.classList.add('hidden');
             secQuiz.classList.remove('hidden');
             
             spawn3DModel('quiz');
@@ -552,6 +729,7 @@
             
             document.querySelectorAll('.class-btn').forEach(btn => {
                 btn.style.backgroundColor = ''; btn.style.borderColor = 'rgba(255,255,255,0.1)'; btn.style.boxShadow = ''; btn.style.color = '#cbd5e1';
+                if(btn.id === 'btn-lab') { btn.style.color = 'white'; btn.style.borderColor = 'rgba(14,165,233,0.5)'; btn.style.backgroundColor = 'rgba(14,165,233,0.2)'; }
             });
             
             spawn3DModel(grade); 
@@ -566,6 +744,7 @@
 
             secWelcome.classList.add('hidden');
             secQuiz.classList.add('hidden');
+            secLab.classList.add('hidden');
             secContent.classList.remove('hidden');
 
             const data = physicsData[grade];
@@ -583,11 +762,12 @@
             
             document.querySelectorAll('.class-btn').forEach(btn => {
                 btn.style.backgroundColor = ''; btn.style.borderColor = 'rgba(255,255,255,0.1)'; btn.style.boxShadow = ''; btn.style.color = '#cbd5e1';
+                if(btn.id === 'btn-lab') { btn.style.color = 'white'; btn.style.borderColor = 'rgba(14,165,233,0.5)'; btn.style.backgroundColor = 'rgba(14,165,233,0.2)'; }
             });
 
             if (query.length === 0) { goHome(); return; }
 
-            secWelcome.classList.add('hidden'); secQuiz.classList.add('hidden'); secContent.classList.remove('hidden');
+            secWelcome.classList.add('hidden'); secQuiz.classList.add('hidden'); secLab.classList.add('hidden'); secContent.classList.remove('hidden');
             spawn3DModel('search'); 
 
             let results = [];
