@@ -31,9 +31,10 @@
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
 
-        /* Холсты для эффектов */
         #particles-js { position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 0; pointer-events: none; }
-        #trail-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; pointer-events: none; }
+        
+        /* Свечение за курсором (базовое, не грузит ПК) */
+        #mouse-glow { position: fixed; top: -250px; left: -250px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%); border-radius: 50%; pointer-events: none; z-index: 0; transition: opacity 0.3s; opacity: 0; will-change: transform; }
 
         @keyframes shimmer { from { background-position: 200% center; } to { background-position: 0% center; } }
         .animate-shimmer { background: var(--sahar-grad, linear-gradient(90deg, #94a3b8 0%, #f8fafc 50%, #94a3b8 100%)); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 4s linear infinite; cursor: pointer; }
@@ -43,16 +44,16 @@
         .glass-card:hover { border-color: rgba(59, 130, 246, 0.4); box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.2); transform: translateY(-2px); }
         
         .math-text { font-family: 'Lora', serif; font-size: 1.3rem; letter-spacing: 0.05em; }
-        .fade-in { animation: fadeIn 0.4s ease-out forwards; opacity: 0; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; opacity: 0; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
         /* 3D Контейнеры */
-        .model-3d-target { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; position: relative; }
-        .model-3d-target::before { content: ''; position: absolute; width: 120px; height: 120px; background: var(--glow-color, rgba(59, 130, 246, 0.3)); filter: blur(45px); border-radius: 50%; z-index: -1; transition: background 0.5s; }
+        .model-3d-target { width: 100%; height: 100%; min-height: 180px; display: flex; justify-content: center; align-items: center; position: relative; z-index: 10; }
+        .model-3d-target::before { content: ''; position: absolute; width: 120px; height: 120px; background: var(--glow-color, rgba(59, 130, 246, 0.3)); filter: blur(45px); border-radius: 50%; z-index: -1; transition: background 0.5s; pointer-events: none; }
 
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=range] { -webkit-appearance: none; width: 100%; background: rgba(255,255,255,0.1); height: 4px; border-radius: 2px; outline: none; margin: 10px 0; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--theme-color, #3b82f6); cursor: pointer; transition: 0.2s; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--theme-color, #3b82f6); cursor: pointer; transition: 0.2s; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
         input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 
         .nav-item.active { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border-left: 3px solid #3b82f6; }
@@ -62,7 +63,7 @@
 <body class="flex h-screen selection:bg-brand-neon selection:text-white">
 
     <div id="particles-js"></div>
-    <canvas id="trail-canvas"></canvas>
+    <div id="mouse-glow"></div>
 
     <!-- БОКОВОЕ МЕНЮ (SIDEBAR) -->
     <aside id="sidebar" class="w-72 flex-shrink-0 glass-panel flex flex-col h-full z-50 absolute md:relative -translate-x-full md:translate-x-0 transition-transform duration-300 shadow-2xl md:shadow-none">
@@ -87,6 +88,7 @@
             <button id="nav-quiz" onclick="startQuizScreen()" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300 transition-all"><span>🧠</span> Блиц-тест (30)</button>
         </nav>
 
+        <!-- ПАСХАЛКА В МЕНЮ -->
         <div class="p-5 border-t border-white/5 text-center bg-black/20">
             <span onclick="changeSaharColor()" class="font-mono text-[11px] font-bold tracking-[0.2em] animate-shimmer">BY SAHAR²¹</span>
         </div>
@@ -101,7 +103,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
                 <div class="relative w-full max-w-2xl">
-                    <input type="text" id="search-input" placeholder="Поиск по терминам и формулам (например: Ньютон, Импульс)..." class="w-full bg-[#151c2c] border border-white/10 rounded-full py-3 pl-12 pr-6 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-neon transition-colors shadow-inner">
+                    <input type="text" id="search-input" placeholder="Поиск по терминам и формулам..." class="w-full bg-[#151c2c] border border-white/10 rounded-full py-3 pl-12 pr-6 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-neon transition-colors shadow-inner">
                     <svg class="w-5 h-5 absolute left-4 top-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
             </div>
@@ -116,7 +118,7 @@
                     <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-neon/10 blur-[120px] rounded-full pointer-events-none"></div>
                     
                     <div class="max-w-xl relative z-10">
-                        <span class="inline-block py-1 px-3 rounded-full bg-brand-neon/20 border border-brand-neon/30 text-brand-neon text-xs font-bold tracking-wider mb-4">ВЕРСИЯ 3.0 PRO</span>
+                        <span class="inline-block py-1 px-3 rounded-full bg-brand-neon/20 border border-brand-neon/30 text-brand-neon text-xs font-bold tracking-wider mb-4">ИНТЕРАКТИВНАЯ ФИЗИКА 3.0</span>
                         <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight">Физика — <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">язык Вселенной</span></h1>
                         <p class="text-slate-400 text-sm md:text-base mb-6 leading-relaxed">
                             Фундаментальная наука о природе. Она изучает простейшие и наиболее общие законы материального мира. Без знания физики невозможно понять устройство нашей Вселенной.
@@ -126,6 +128,7 @@
                             <button onclick="loadLab()" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold py-3 px-8 rounded-full transition-colors">В лабораторию</button>
                         </div>
                     </div>
+                    
                     <!-- 3D Контейнер Главной страницы -->
                     <div class="w-full md:w-1/2 h-48 md:h-72 relative z-10 model-3d-target" id="target-main"></div>
                 </div>
@@ -135,13 +138,13 @@
                         <div class="text-3xl mb-2">📚</div><h3 class="text-white font-bold text-lg mb-1">База тем</h3><p class="text-xs text-slate-400">Полный школьный курс.</p>
                     </div>
                     <div class="glass-card p-5 border-t-2 border-t-[#10b981]">
-                        <div class="text-3xl mb-2">🧮</div><h3 class="text-white font-bold text-lg mb-1">Калькулятор</h3><p class="text-xs text-slate-400">Расчет прямо в карточках.</p>
+                        <div class="text-3xl mb-2">🧮</div><h3 class="text-white font-bold text-lg mb-1">Калькулятор</h3><p class="text-xs text-slate-400">Встроенный в каждую формулу.</p>
                     </div>
                     <div class="glass-card p-5 border-t-2 border-t-[#8b5cf6]">
-                        <div class="text-3xl mb-2">🔬</div><h3 class="text-white font-bold text-lg mb-1">Симуляции</h3><p class="text-xs text-slate-400">Интерактивные опыты.</p>
+                        <div class="text-3xl mb-2">🔬</div><h3 class="text-white font-bold text-lg mb-1">Симуляции</h3><p class="text-xs text-slate-400">Живые интерактивные опыты.</p>
                     </div>
                     <div class="glass-card p-5 border-t-2 border-t-[#ec4899]">
-                        <div class="text-3xl mb-2">🧠</div><h3 class="text-white font-bold text-lg mb-1">30 вопросов</h3><p class="text-xs text-slate-400">Экзамен для проверки.</p>
+                        <div class="text-3xl mb-2">🧠</div><h3 class="text-white font-bold text-lg mb-1">30 вопросов</h3><p class="text-xs text-slate-400">Проверь себя на прочность.</p>
                     </div>
                 </div>
 
@@ -153,7 +156,6 @@
 
             <!-- СЕКЦИЯ ТЕМ (КЛАССЫ) -->
             <div id="content-section" class="max-w-6xl mx-auto hidden pb-10">
-                <!-- Заголовок с 3D -->
                 <div class="bg-[#111827] border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-8 shadow-xl">
                     <div>
                         <h2 id="class-title" class="text-3xl md:text-4xl font-bold text-white mb-2">Раздел</h2>
@@ -169,7 +171,7 @@
                 <div class="bg-[#111827] border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-8 shadow-xl border-t-4 border-t-emerald-500">
                     <div>
                         <h2 class="text-3xl font-bold mb-2">Экзамен по физике</h2>
-                        <p class="text-slate-400">30 вопросов. Проверь свои знания.</p>
+                        <p class="text-slate-400">30 вопросов без перемешивания. Идут подряд.</p>
                     </div>
                     <div class="w-full md:w-1/3 h-32 md:h-40 relative model-3d-target" id="target-quiz"></div>
                 </div>
@@ -183,7 +185,7 @@
                 <div class="bg-[#111827] border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-8 shadow-xl border-t-4 border-t-[#10b981]">
                     <div>
                         <h2 class="text-3xl font-bold text-white mb-2">Решение задач</h2>
-                        <p class="text-slate-400">Считай, вводи ответ и проверяй себя.</p>
+                        <p class="text-slate-400">Введи число в поле и нажми Проверить.</p>
                     </div>
                     <div class="w-full md:w-1/3 h-32 md:h-40 relative model-3d-target" id="target-tasks"></div>
                 </div>
@@ -195,7 +197,7 @@
                 <div class="bg-[#111827] border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-8 shadow-xl border-t-4 border-t-[#8b5cf6]">
                     <div>
                         <h2 class="text-3xl font-bold text-white mb-2">Виртуальная лаборатория</h2>
-                        <p class="text-slate-400">Интерактивные процессы в реальном времени.</p>
+                        <p class="text-slate-400">Двигай ползунки и смотри за симуляцией.</p>
                     </div>
                     <div class="w-full md:w-1/3 h-32 md:h-40 relative model-3d-target" id="target-lab"></div>
                 </div>
@@ -206,7 +208,7 @@
                         <h3 class="text-xl font-bold mb-4 text-[#8b5cf6]">🚗 Кинематика автомобиля</h3>
                         <div class="relative w-full h-32 bg-black/40 border border-white/10 rounded-xl mb-6 overflow-hidden">
                             <div class="absolute bottom-4 w-full border-b-2 border-dashed border-slate-600"></div>
-                            <div id="sim1-car" class="absolute bottom-4 left-0 w-12 h-6 bg-brand-neon rounded shadow-[0_0_15px_#3b82f6] flex items-center justify-center text-[10px] font-bold">m</div>
+                            <div id="sim1-car" class="absolute bottom-4 left-0 w-12 h-6 bg-brand-neon rounded shadow-[0_0_15px_#3b82f6] flex items-center justify-center text-[10px] font-bold text-white">m</div>
                         </div>
                         <div class="grid grid-cols-2 gap-4 mb-6 text-sm">
                             <div><label class="text-slate-400 block mb-1">v₀: <span id="sim1-v0-val" class="text-white font-bold">0</span> м/с</label><input type="range" id="sim1-v0" min="-50" max="50" value="0" oninput="updateSim1UI()"></div>
@@ -246,42 +248,9 @@
         </main>
     </div>
 
-    <!-- ЕДИНСТВЕННЫЙ БЛОК СКРИПТОВ (БЕЗ ДУБЛИКАТОВ И FRAC) -->
+    <!-- ЕДИНСТВЕННЫЙ БЛОК СКРИПТОВ -->
     <script>
-        // --- 1. ЭФФЕКТ КАСАНИЯ (МАГИЧЕСКИЙ СЛЕД) ---
-        const canvas = document.getElementById('trail-canvas');
-        const ctx = canvas.getContext('2d');
-        let trail = [];
-        let mouseX = window.innerWidth / 2;
-        let mouseY = window.innerHeight / 2;
-
-        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; trail.push({x: mouseX, y: mouseY, age: 0}); });
-        document.addEventListener('touchmove', e => { mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; trail.push({x: mouseX, y: mouseY, age: 0}); }, {passive: true});
-
-        function animateTrail() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < trail.length; i++) {
-                let p = trail[i];
-                p.age++;
-                if (p.age > 30) { trail.splice(i, 1); i--; continue; }
-                let radius = 6 * (1 - p.age / 30);
-                let alpha = 0.5 * (1 - p.age / 30);
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(59, 130, 246, ${alpha})`;
-                ctx.fill();
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = `rgba(59, 130, 246, ${alpha})`;
-            }
-            requestAnimationFrame(animateTrail);
-        }
-        animateTrail();
-
-        // --- 2. ПАСХАЛКА ЦВЕТОВ ---
+        // --- 1. ПАСХАЛКА ЦВЕТОВ ---
         const saharColors = [
             'linear-gradient(90deg, #475569 0%, #cbd5e1 50%, #475569 100%)', 
             'linear-gradient(90deg, #0ea5e9 0%, #ec4899 50%, #0ea5e9 100%)', 
@@ -295,25 +264,25 @@
             document.documentElement.style.setProperty('--sahar-grad', saharColors[saharIdx]);
         }
 
-        // --- 3. ЧИСТАЯ БАЗА ДАННЫХ (БЕЗ LATEX И FRAC) ---
+        // --- 2. ЧИСТАЯ БАЗА ДАННЫХ (БЕЗ LATEX И FRAC) ---
         const physicsData = {
             7: {
                 title: "7 класс: Механика",
                 topics: [
                     { name: "Скорость (равномерное)", formula: "v = s / t", desc: "Быстрота перемещения.", vars: "v-скорость, s-путь, t-время", example: { dano: "s = 100 м, t = 20 с", sol: "v = 100 / 20", ans: "5 м/с" }, calc: { vars: [{id:'s',name:'Путь'},{id:'t',name:'Время'}], expr: 's/t', unit:'м/с' } },
                     { name: "Средняя скорость", formula: "v = s_весь / t_весь", desc: "При неравномерном движении.", vars: "Сумма путей на сумму времени", example: { dano: "s1=10, s2=20, t1=1, t2=2", sol: "v = 30 / 3", ans: "10 м/с" } },
-                    { name: "Плотность", formula: "ρ = m / V", desc: "Масса в объеме.", vars: "ρ-плотность, m-масса", example: { dano: "m = 400 кг, V = 0.5 м³", sol: "ρ = 400 / 0.5", ans: "800 кг/м³" }, calc: { vars: [{id:'m',name:'Масса'},{id:'v',name:'Объем'}], expr: 'm/v', unit:'кг/м³' } },
+                    { name: "Плотность", formula: "p = m / V", desc: "Масса в объеме.", vars: "p-плотность, m-масса", example: { dano: "m = 400 кг, V = 0.5 м³", sol: "p = 400 / 0.5", ans: "800 кг/м³" }, calc: { vars: [{id:'m',name:'Масса'},{id:'v',name:'Объем'}], expr: 'm/v', unit:'кг/м³' } },
                     { name: "Сила тяжести", formula: "F = m · g", desc: "Притяжение Земли.", vars: "g ≈ 9.8 Н/кг", example: { dano: "m = 5 кг", sol: "F = 5 * 9.8", ans: "49 Н" }, calc: { vars: [{id:'m',name:'Масса'}], expr: 'm*9.8', unit:'Н' } },
                     { name: "Вес тела", formula: "P = m · g", desc: "Сила давления на опору.", vars: "В состоянии покоя", example: { dano: "m = 60 кг", sol: "P = 60 * 9.8", ans: "588 Н" }, calc: { vars: [{id:'m',name:'Масса'}], expr: 'm*9.8', unit:'Н' } },
-                    { name: "Сила упругости", formula: "F = k · Δl", desc: "Закон Гука.", vars: "k-жесткость, Δl-удлинение", example: { dano: "k = 100, Δl = 0.2", sol: "F = 100 * 0.2", ans: "20 Н" }, calc: { vars: [{id:'k',name:'k'},{id:'l',name:'Δl'}], expr: 'k*l', unit:'Н' } },
-                    { name: "Сила трения", formula: "F_тр = μ · N", desc: "Трение скольжения.", vars: "μ-коэффициент, N-реакция", example: { dano: "μ = 0.2, N = 100", sol: "F = 0.2 * 100", ans: "20 Н" }, calc: { vars: [{id:'mu',name:'μ'},{id:'n',name:'N'}], expr: 'mu*n', unit:'Н' } },
+                    { name: "Сила упругости", formula: "F = k · dl", desc: "Закон Гука.", vars: "k-жесткость, dl-удлинение", example: { dano: "k = 100, dl = 0.2", sol: "F = 100 * 0.2", ans: "20 Н" }, calc: { vars: [{id:'k',name:'k'},{id:'l',name:'dl'}], expr: 'k*l', unit:'Н' } },
+                    { name: "Сила трения", formula: "F_тр = u · N", desc: "Трение скольжения.", vars: "u-коэффициент, N-реакция", example: { dano: "u = 0.2, N = 100", sol: "F = 0.2 * 100", ans: "20 Н" }, calc: { vars: [{id:'mu',name:'u'},{id:'n',name:'N'}], expr: 'mu*n', unit:'Н' } },
                     { name: "Равнодействующая", formula: "R = F1 ± F2", desc: "Сумма сил.", vars: "Направленных вдоль прямой", example: { dano: "F1=10 вправо, F2=4 влево", sol: "R = 10 - 4", ans: "6 Н" } },
                     { name: "Давление твердых тел", formula: "p = F / S", desc: "Сила на площадь.", vars: "p в Паскалях", example: { dano: "F = 100 Н, S = 2 м²", sol: "p = 100 / 2", ans: "50 Па" }, calc: { vars: [{id:'f',name:'F'},{id:'s',name:'S'}], expr: 'f/s', unit:'Па' } },
-                    { name: "Давление жидкости", formula: "p = ρ · g · h", desc: "Гидростатика.", vars: "h-высота столба", example: { dano: "ρ = 1000, h = 10", sol: "p = 1000 * 9.8 * 10", ans: "98000 Па" }, calc: { vars: [{id:'r',name:'ρ'},{id:'h',name:'h'}], expr: 'r*9.8*h', unit:'Па' } },
-                    { name: "Сообщающиеся сосуды", formula: "h1 / h2 = ρ2 / ρ1", desc: "Давление на дно.", vars: "Равенство давлений", example: { dano: "h1=10, ρ1=1000, ρ2=800", sol: "h2 = 10 * 1000 / 800", ans: "12.5 см" } },
+                    { name: "Давление жидкости", formula: "p = po · g · h", desc: "Гидростатика.", vars: "h-высота столба", example: { dano: "po = 1000, h = 10", sol: "p = 1000 * 9.8 * 10", ans: "98000 Па" }, calc: { vars: [{id:'r',name:'po'},{id:'h',name:'h'}], expr: 'r*9.8*h', unit:'Па' } },
+                    { name: "Сообщающиеся сосуды", formula: "h1 / h2 = p2 / p1", desc: "Давление на дно.", vars: "Равенство давлений", example: { dano: "h1=10, p1=1000, p2=800", sol: "h2 = 10 * 1000 / 800", ans: "12.5 см" } },
                     { name: "Гидравлический пресс", formula: "F1 / S1 = F2 / S2", desc: "Выигрыш в силе.", vars: "Отношение", example: { dano: "F1=10, S1=2, S2=10", sol: "F2 = 10 * 10 / 2", ans: "50 Н" } },
-                    { name: "Архимедова сила", formula: "F_А = ρ_ж · g · V_п", desc: "Выталкивающая сила.", vars: "V-погруженный объем", example: { dano: "ρ = 1000, V = 0.1", sol: "F = 1000 * 9.8 * 0.1", ans: "980 Н" }, calc: { vars: [{id:'r',name:'ρ'},{id:'v',name:'V'}], expr: 'r*9.8*v', unit:'Н' } },
-                    { name: "Условие плавания", formula: "F_А = F_тяж", desc: "Сравнение сил.", vars: "ρ жидкости и ρ тела", example: { dano: "Плотность тела меньше воды", sol: "Выталкивающая сила больше", ans: "Тело всплывает" } },
+                    { name: "Архимедова сила", formula: "F_А = po_ж · g · V_п", desc: "Выталкивающая сила.", vars: "V-погруженный объем", example: { dano: "po = 1000, V = 0.1", sol: "F = 1000 * 9.8 * 0.1", ans: "980 Н" }, calc: { vars: [{id:'r',name:'po'},{id:'v',name:'V'}], expr: 'r*9.8*v', unit:'Н' } },
+                    { name: "Условие плавания", formula: "F_А = F_тяж", desc: "Сравнение сил.", vars: "Плотности жидкости и тела", example: { dano: "Плотность тела меньше воды", sol: "Выталкивающая сила больше", ans: "Тело всплывает" } },
                     { name: "Механическая работа", formula: "A = F · s", desc: "Сила умножить на путь.", vars: "В Джоулях", example: { dano: "F = 50 Н, s = 4 м", sol: "A = 50 * 4", ans: "200 Дж" }, calc: { vars: [{id:'f',name:'F'},{id:'s',name:'s'}], expr: 'f*s', unit:'Дж' } },
                     { name: "Мощность", formula: "N = A / t", desc: "Быстрота работы.", vars: "В Ваттах", example: { dano: "A = 600 Дж, t = 10 с", sol: "N = 600 / 10", ans: "60 Вт" }, calc: { vars: [{id:'a',name:'A'},{id:'t',name:'t'}], expr: 'a/t', unit:'Вт' } },
                     { name: "Момент силы", formula: "M = F · l", desc: "Вращающее действие.", vars: "l-плечо силы", example: { dano: "F = 20 Н, l = 0.5 м", sol: "M = 20 * 0.5", ans: "10 Н·м" }, calc: { vars: [{id:'f',name:'F'},{id:'l',name:'l'}], expr: 'f*l', unit:'Н·м' } }
@@ -322,23 +291,23 @@
             8: {
                 title: "8 класс: Теплота, Ток, Оптика",
                 topics: [
-                    { name: "Нагрев и охлаждение", formula: "Q = c · m · Δt", desc: "Кол-во теплоты.", vars: "c-уд. теплоемкость", example: { dano: "c = 4200, m = 2, Δt = 50", sol: "Q = 4200 * 2 * 50", ans: "420000 Дж" }, calc: { vars: [{id:'c',name:'c'},{id:'m',name:'m'},{id:'t',name:'Δt'}], expr:'c*m*t', unit:'Дж' } },
+                    { name: "Нагрев и охлаждение", formula: "Q = c · m · dt", desc: "Кол-во теплоты.", vars: "c-уд. теплоемкость", example: { dano: "c = 4200, m = 2, dt = 50", sol: "Q = 4200 * 2 * 50", ans: "420000 Дж" }, calc: { vars: [{id:'c',name:'c'},{id:'m',name:'m'},{id:'t',name:'dt'}], expr:'c*m*t', unit:'Дж' } },
                     { name: "Сгорание топлива", formula: "Q = q · m", desc: "Топливо.", vars: "q-уд. сгорания", example: { dano: "q = 44000000, m = 2", sol: "Q = 44000000 * 2", ans: "88 МДж" }, calc: { vars: [{id:'q',name:'q'},{id:'m',name:'m'}], expr:'q*m', unit:'Дж' } },
-                    { name: "Плавление", formula: "Q = λ · m", desc: "Твердое в жидкость.", vars: "λ-уд. плавления", example: { dano: "λ = 340000, m = 3", sol: "Q = 340000 * 3", ans: "1020 кДж" }, calc: { vars: [{id:'l',name:'λ'},{id:'m',name:'m'}], expr:'l*m', unit:'Дж' } },
-                    { name: "Парообразование", formula: "Q = L · m", desc: "Жидкость в газ.", vars: "L-теплота парообр.", example: { dano: "L = 2300000, m = 1", sol: "Q = 2300000 * 1", ans: "2.3 МДж" }, calc: { vars: [{id:'l',name:'L'},{id:'m',name:'m'}], expr:'l*m', unit:'Дж' } },
+                    { name: "Плавление", formula: "Q = L · m", desc: "Твердое в жидкость.", vars: "L-уд. плавления", example: { dano: "L = 340000, m = 3", sol: "Q = 340000 * 3", ans: "1020 кДж" }, calc: { vars: [{id:'l',name:'L'},{id:'m',name:'m'}], expr:'l*m', unit:'Дж' } },
+                    { name: "Парообразование", formula: "Q = R · m", desc: "Жидкость в газ.", vars: "R-теплота парообр.", example: { dano: "R = 2300000, m = 1", sol: "Q = 2300000 * 1", ans: "2.3 МДж" }, calc: { vars: [{id:'l',name:'R'},{id:'m',name:'m'}], expr:'l*m', unit:'Дж' } },
                     { name: "Тепловой баланс", formula: "Q_отд = Q_пол", desc: "Обмен в системе.", vars: "Изолированная система", example: { dano: "Смешали горячую и холодную воду", sol: "Количество теплоты сохраняется", ans: "Уравнение" } },
-                    { name: "Влажность", formula: "φ = p / p0 · 100%", desc: "Относительная.", vars: "p0-давление насыщ. пара", example: { dano: "p = 15, p0 = 30", sol: "φ = 15 / 30 * 100", ans: "50 %" }, calc: { vars: [{id:'p',name:'p'},{id:'p0',name:'p0'}], expr:'p/p0*100', unit:'%' } },
+                    { name: "Влажность", formula: "f = p / p_0 · 100%", desc: "Относительная.", vars: "p0-давление насыщ. пара", example: { dano: "p = 15, p0 = 30", sol: "f = 15 / 30 * 100", ans: "50 %" }, calc: { vars: [{id:'p',name:'p'},{id:'p0',name:'p0'}], expr:'p/p0*100', unit:'%' } },
                     { name: "Закон сохр. заряда", formula: "q1 + q2 = const", desc: "Заряды.", vars: "При соприкосновении", example: { dano: "q1 = 2, q2 = -4", sol: "q = (2 - 4) / 2", ans: "-1 Кл" } },
                     { name: "Сила тока", formula: "I = q / t", desc: "Заряд за время.", vars: "В Амперах", example: { dano: "q = 10, t = 2", sol: "I = 10 / 2", ans: "5 А" }, calc: { vars: [{id:'q',name:'q'},{id:'t',name:'t'}], expr:'q/t', unit:'А' } },
                     { name: "Напряжение", formula: "U = A / q", desc: "Работа поля.", vars: "В Вольтах", example: { dano: "A = 100, q = 5", sol: "U = 100 / 5", ans: "20 В" }, calc: { vars: [{id:'a',name:'A'},{id:'q',name:'q'}], expr:'a/q', unit:'В' } },
-                    { name: "Сопротивление", formula: "R = ρ · l / S", desc: "Характеристика.", vars: "ρ-уд. сопротивление", example: { dano: "ρ = 0.017, l = 100, S = 1.7", sol: "R = 0.017 * 100 / 1.7", ans: "1 Ом" }, calc: { vars: [{id:'ro',name:'ρ'},{id:'l',name:'l'},{id:'s',name:'S'}], expr:'ro*l/s', unit:'Ом' } },
+                    { name: "Сопротивление", formula: "R = p · l / S", desc: "Характеристика.", vars: "p-уд. сопротивление", example: { dano: "p = 0.017, l = 100, S = 1.7", sol: "R = 0.017 * 100 / 1.7", ans: "1 Ом" }, calc: { vars: [{id:'ro',name:'p'},{id:'l',name:'l'},{id:'s',name:'S'}], expr:'ro*l/s', unit:'Ом' } },
                     { name: "Закон Ома", formula: "I = U / R", desc: "Главный закон цепи.", vars: "Участок цепи", example: { dano: "U = 220, R = 55", sol: "I = 220 / 55", ans: "4 А" }, calc: { vars: [{id:'u',name:'U'},{id:'r',name:'R'}], expr:'u/r', unit:'А' } },
                     { name: "Посл. соединение", formula: "R = R1 + R2", desc: "В ряд.", vars: "Ток постоянный", example: { dano: "R1 = 5, R2 = 10", sol: "R = 5 + 10", ans: "15 Ом" }, calc: { vars: [{id:'r1',name:'R1'},{id:'r2',name:'R2'}], expr:'r1+r2', unit:'Ом' } },
-                    { name: "Парал. соединение", formula: "1/R = 1/R1 + 1/R2", desc: "Ветвление.", vars: "Напряжение постоянно", example: { dano: "R1 = 10, R2 = 10", sol: "R = 10*10 / 20", ans: "5 Ом" }, calc: { vars: [{id:'r1',name:'R1'},{id:'r2',name:'R2'}], expr:'(r1*r2)/(r1+r2)', unit:'Ом' } },
+                    { name: "Парал. соединение", formula: "1 / R = 1 / R1 + 1 / R2", desc: "Ветвление.", vars: "Напряжение постоянно", example: { dano: "R1 = 10, R2 = 10", sol: "R = 10*10 / 20", ans: "5 Ом" }, calc: { vars: [{id:'r1',name:'R1'},{id:'r2',name:'R2'}], expr:'(r1*r2)/(r1+r2)', unit:'Ом' } },
                     { name: "Работа тока", formula: "A = U · I · t", desc: "Энергия.", vars: "В Джоулях", example: { dano: "U=12, I=2, t=10", sol: "A = 12 * 2 * 10", ans: "240 Дж" }, calc: { vars: [{id:'u',name:'U'},{id:'i',name:'I'},{id:'t',name:'t'}], expr:'u*i*t', unit:'Дж' } },
                     { name: "Мощность тока", formula: "P = U · I", desc: "Ватты.", vars: "Скорость работы", example: { dano: "U=220, I=5", sol: "P = 220 * 5", ans: "1100 Вт" }, calc: { vars: [{id:'u',name:'U'},{id:'i',name:'I'}], expr:'u*i', unit:'Вт' } },
                     { name: "Джоуль-Ленц", formula: "Q = I² · R · t", desc: "Теплота.", vars: "Нагрев проводника", example: { dano: "I=2, R=10, t=5", sol: "Q = 4 * 10 * 5", ans: "200 Дж" }, calc: { vars: [{id:'i',name:'I'},{id:'r',name:'R'},{id:'t',name:'t'}], expr:'i*i*r*t', unit:'Дж' } },
-                    { name: "Отражение света", formula: "Угол α = Угол β", desc: "Оптика.", vars: "Падение = Отражение", example: { dano: "Угол падения 30°", sol: "По закону отражения", ans: "30°" } }
+                    { name: "Отражение света", formula: "Угол 1 = Угол 2", desc: "Оптика.", vars: "Падение = Отражение", example: { dano: "Угол падения 30°", sol: "По закону отражения", ans: "30°" } }
                 ]
             },
             9: {
@@ -349,57 +318,56 @@
                     { name: "Скорость (ускоренная)", formula: "v = v0 + a · t", desc: "Мгновенная.", vars: "При разгоне", example: { dano: "v0 = 5, a = 2, t = 3", sol: "v = 5 + 2*3", ans: "11 м/с" }, calc: { vars: [{id:'v0',name:'v0'},{id:'a',name:'a'},{id:'t',name:'t'}], expr:'v0+a*t', unit:'м/с' } },
                     { name: "Перемещение", formula: "s = v0 · t + a · t² / 2", desc: "С ускорением.", vars: "Путь", example: { dano: "v0 = 2, a = 1, t = 4", sol: "s = 2*4 + 1*16/2", ans: "16 м" }, calc: { vars: [{id:'v0',name:'v0'},{id:'a',name:'a'},{id:'t',name:'t'}], expr:'v0*t+0.5*a*t*t', unit:'м' } },
                     { name: "Путь без t", formula: "s = (v² - v0²) / 2a", desc: "Для торможения.", vars: "Без времени", example: { dano: "v0 = 0, v = 10, a = 2", sol: "s = 100 / 4", ans: "25 м" }, calc: { vars: [{id:'v',name:'v'},{id:'v0',name:'v0'},{id:'a',name:'a'}], expr:'(v*v-v0*v0)/(2*a)', unit:'м' } },
-                    { name: "1 закон Ньютона", formula: "ΣF = 0 ⟹ v = const", desc: "Инерция.", vars: "Сумма сил равна 0", example: { dano: "Тело покоится", sol: "Ускорение равно 0", ans: "0 Н" } },
+                    { name: "1 закон Ньютона", formula: "Сумма F = 0 -> v = const", desc: "Инерция.", vars: "Сумма сил равна 0", example: { dano: "Тело покоится", sol: "Ускорение равно 0", ans: "0 Н" } },
                     { name: "2 закон Ньютона", formula: "F = m · a", desc: "Главный закон.", vars: "Сила и ускорение", example: { dano: "m = 5, a = 2", sol: "F = 5 * 2", ans: "10 Н" }, calc: { vars: [{id:'m',name:'m'},{id:'a',name:'a'}], expr:'m*a', unit:'Н' } },
                     { name: "3 закон Ньютона", formula: "F1 = -F2", desc: "Взаимодействие.", vars: "Действие = противодействию", example: { dano: "Я давлю с силой 50 Н", sol: "Стена давит в ответ", ans: "50 Н" } },
                     { name: "Свободное падение", formula: "h = g · t² / 2", desc: "Вниз.", vars: "g=9.8", example: { dano: "t = 3", sol: "h = 9.8 * 9 / 2", ans: "44.1 м" }, calc: { vars: [{id:'t',name:'t'}], expr:'9.8*t*t/2', unit:'м' } },
                     { name: "Вес тела с ускор.", formula: "P = m · (g ± a)", desc: "Перегрузка.", vars: "В лифте", example: { dano: "m=50, a=2 (вверх)", sol: "P = 50 * (9.8 + 2)", ans: "590 Н" }, calc: { vars: [{id:'m',name:'m'},{id:'a',name:'a'}], expr:'m*(9.8+a)', unit:'Н' } },
                     { name: "Центростремит. ускор.", formula: "a_ц = v² / R", desc: "По кругу.", vars: "R-радиус", example: { dano: "v=10, R=2", sol: "a = 100 / 2", ans: "50 м/с²" }, calc: { vars: [{id:'v',name:'v'},{id:'r',name:'R'}], expr:'v*v/r', unit:'м/с²' } },
-                    { name: "Гравитация", formula: "F = G · m1 · m2 / R²", desc: "Тяготение.", vars: "G=6.67e-11", example: { dano: "m1=m2=1e5, R=10", sol: "6.67e-11 * 1e10 / 100", ans: "6.67 мН" }, calc: { vars: [{id:'m1',name:'m1'},{id:'m2',name:'m2'},{id:'r',name:'R'}], expr:'6.67e-11*m1*m2/(r*r)', unit:'Н' } },
+                    { name: "Гравитация", formula: "F = G · m1 · m2 / R²", desc: "Тяготение.", vars: "G=6.67e-11", example: { dano: "m1=m2=1e5, R=10", sol: "F = 6.67e-11 * 1e10 / 100", ans: "6.67 мН" }, calc: { vars: [{id:'m1',name:'m1'},{id:'m2',name:'m2'},{id:'r',name:'R'}], expr:'6.67e-11*m1*m2/(r*r)', unit:'Н' } },
                     { name: "Импульс", formula: "p = m · v", desc: "Количество движения.", vars: "Вектор", example: { dano: "m = 1000, v = 20", sol: "p = 1000 * 20", ans: "20000 кг·м/с" }, calc: { vars: [{id:'m',name:'m'},{id:'v',name:'v'}], expr:'m*v', unit:'-' } },
                     { name: "ЗСИ", formula: "m1·v1 + m2·v2 = const", desc: "Столкновения.", vars: "Замкнутая система", example: { dano: "Неупругий удар", sol: "Импульс до = импульсу после", ans: "Уравнение" } },
                     { name: "Мат. маятник", formula: "T = 2π√(l / g)", desc: "Период.", vars: "Не зависит от массы", example: { dano: "l = 1 м, g = 9.8", sol: "T = 2*3.14*√(1/9.8)", ans: "2.01 с" }, calc: { vars: [{id:'l',name:'l'}], expr:'2*Math.PI*Math.sqrt(l/9.8)', unit:'с' } },
-                    { name: "Длина волны", formula: "λ = v / ν", desc: "Звук/свет.", vars: "ν - частота", example: { dano: "v=340, ν=170", sol: "λ = 340 / 170", ans: "2 м" }, calc: { vars: [{id:'v',name:'v'},{id:'nu',name:'ν'}], expr:'v/nu', unit:'м' } }
+                    { name: "Длина волны", formula: "L = v / v_частота", desc: "Звук/свет.", vars: "L - длина", example: { dano: "v=340, частота=170", sol: "L = 340 / 170", ans: "2 м" }, calc: { vars: [{id:'v',name:'v'},{id:'nu',name:'частота'}], expr:'v/nu', unit:'м' } }
                 ]
             },
             10: {
                 title: "10 класс: МКТ и Термодинамика",
                 topics: [
-                    { name: "Кол-во вещества", formula: "ν = m / M", desc: "Моли.", vars: "M-молярная", example: { dano: "m=36 г, M=18 г/моль", sol: "ν = 36 / 18", ans: "2 моль" }, calc: { vars: [{id:'m',name:'m'},{id:'M',name:'M'}], expr:'m/M', unit:'моль' } },
-                    { name: "Основное МКТ", formula: "p = 1/3 · n · m0 · v²", desc: "Давление.", vars: "n-концентрация", example: { dano: "Через энергию", sol: "p = 2/3 n Ek", ans: "-" } },
-                    { name: "Менделеев-К.", formula: "p · V = (m/M) · R · T", desc: "Ид. газ.", vars: "R=8.31", example: { dano: "m=M, T=300, V=0.083", sol: "p = 8.31*300/0.083", ans: "30000 Па" }, calc: { vars: [{id:'n',name:'ν'},{id:'t',name:'T'},{id:'v',name:'V'}], expr:'n*8.31*t/v', unit:'Па' } },
+                    { name: "Кол-во вещества", formula: "v = m / M", desc: "Моли.", vars: "M-молярная масса", example: { dano: "m=36 г, M=18 г/моль", sol: "v = 36 / 18", ans: "2 моль" }, calc: { vars: [{id:'m',name:'m'},{id:'M',name:'M'}], expr:'m/M', unit:'моль' } },
+                    { name: "Основное МКТ", formula: "p = 1/3 · n · m0 · v²", desc: "Давление газа.", vars: "n-концентрация", example: { dano: "В задаче дана энергия", sol: "p = 2/3 n Ek", ans: "Уравнение" } },
+                    { name: "Менделеев-К.", formula: "p · V = (m/M) · R · T", desc: "Ид. газ.", vars: "R=8.31", example: { dano: "m=M, T=300, V=0.083", sol: "p = 8.31*300/0.083", ans: "30000 Па" }, calc: { vars: [{id:'n',name:'моли'},{id:'t',name:'T'},{id:'v',name:'V'}], expr:'n*8.31*t/v', unit:'Па' } },
                     { name: "Изотерма", formula: "p1 · V1 = p2 · V2", desc: "T=const.", vars: "Бойль-Мариотт", example: { dano: "p1=100, V1=2, V2=1", sol: "p2 = 100 * 2 / 1", ans: "200" } },
                     { name: "Изобара", formula: "V1 / T1 = V2 / T2", desc: "p=const.", vars: "Гей-Люссак", example: { dano: "V1=2, T1=300, T2=600", sol: "V2 = 2 * 600 / 300", ans: "4" } },
                     { name: "Изохора", formula: "p1 / T1 = p2 / T2", desc: "V=const.", vars: "Шарль", example: { dano: "p1=100, T1=300, T2=600", sol: "p2 = 100 * 600 / 300", ans: "200" } },
-                    { name: "Внутр. энергия", formula: "U = 1.5 · ν · R · T", desc: "Одноатомный.", vars: "T в Кельвинах", example: { dano: "ν=1, T=300", sol: "U = 1.5 * 1 * 8.31 * 300", ans: "3740 Дж" }, calc: { vars: [{id:'n',name:'ν'},{id:'t',name:'T'}], expr:'1.5*n*8.31*t', unit:'Дж' } },
+                    { name: "Внутр. энергия", formula: "U = 1.5 · v · R · T", desc: "Одноатомный.", vars: "T в Кельвинах", example: { dano: "моли=1, T=300", sol: "U = 1.5 * 1 * 8.31 * 300", ans: "3740 Дж" }, calc: { vars: [{id:'n',name:'моли'},{id:'t',name:'T'}], expr:'1.5*n*8.31*t', unit:'Дж' } },
                     { name: "Работа газа", formula: "A = p · ΔV", desc: "Изобара.", vars: "Расширение", example: { dano: "p=1e5, ΔV=0.1", sol: "A = 100000 * 0.1", ans: "10000 Дж" }, calc: { vars: [{id:'p',name:'p'},{id:'dv',name:'ΔV'}], expr:'p*dv', unit:'Дж' } },
                     { name: "1 начало терм.", formula: "Q = ΔU + A", desc: "Энергия.", vars: "Теплота", example: { dano: "A=200, ΔU=300", sol: "Q = 200 + 300", ans: "500 Дж" }, calc: { vars: [{id:'du',name:'ΔU'},{id:'a',name:'A'}], expr:'du+a', unit:'Дж' } },
-                    { name: "КПД машины", formula: "η = (Q1 - Q2) / Q1", desc: "Тепловая.", vars: "Двигатель", example: { dano: "Q1=100, Q2=60", sol: "η = (100-60)/100", ans: "40 %" } },
-                    { name: "Цикл Карно", formula: "η = (T1 - T2) / T1", desc: "Идеал.", vars: "Максимум", example: { dano: "T1=600, T2=300", sol: "η = 300/600", ans: "50 %" }, calc: { vars: [{id:'t1',name:'T1'},{id:'t2',name:'T2'}], expr:'(t1-t2)/t1*100', unit:'%' } },
-                    { name: "Закон Кулона", formula: "F = k · |q1 · q2| / r²", desc: "Заряды.", vars: "k=9e9", example: { dano: "q=3мкКл, r=0.1", sol: "F = 9e9 * 9e-12 / 0.01", ans: "8.1 Н" }, calc: { vars: [{id:'q1',name:'q1'},{id:'q2',name:'q2'},{id:'r',name:'r'}], expr:'9e9*Math.abs(q1*q2)/(r*r)', unit:'Н' } },
-                    { name: "Напряженность", formula: "E = F / q", desc: "Поле.", vars: "Силовая", example: { dano: "F=0.05, q=1e-5", sol: "E = 0.05 / 1e-5", ans: "5000 В/м" }, calc: { vars: [{id:'f',name:'F'},{id:'q',name:'q'}], expr:'f/q', unit:'В/м' } }
+                    { name: "КПД машины", formula: "N = (Q1 - Q2) / Q1", desc: "Тепловая.", vars: "Двигатель", example: { dano: "Q1=100, Q2=60", sol: "N = (100-60)/100", ans: "40 %" } },
+                    { name: "Цикл Карно", formula: "N = (T1 - T2) / T1", desc: "Идеал.", vars: "Максимум", example: { dano: "T1=600, T2=300", sol: "N = 300/600", ans: "50 %" }, calc: { vars: [{id:'t1',name:'T1'},{id:'t2',name:'T2'}], expr:'(t1-t2)/t1*100', unit:'%' } },
+                    { name: "Закон Кулона", formula: "F = k · q1 · q2 / r²", desc: "Заряды.", vars: "k=9e9", example: { dano: "q=3мкКл, r=0.1", sol: "F = 9e9 * 9e-12 / 0.01", ans: "8.1 Н" }, calc: { vars: [{id:'q1',name:'q1'},{id:'q2',name:'q2'},{id:'r',name:'r'}], expr:'9e9*Math.abs(q1*q2)/(r*r)', unit:'Н' } },
+                    { name: "Напряженность", formula: "E = F / q", desc: "Поле.", vars: "Силовая характеристика", example: { dano: "F=0.05, q=1e-5", sol: "E = 0.05 / 1e-5", ans: "5000 В/м" }, calc: { vars: [{id:'f',name:'F'},{id:'q',name:'q'}], expr:'f/q', unit:'В/м' } }
                 ]
             },
             11: {
                 title: "11 класс: Электродинамика",
                 topics: [
-                    { name: "Сила Ампера", formula: "F_А = I · B · l · sin(α)", desc: "Магнит и ток.", vars: "B-индукция", example: { dano: "I=2, B=0.1, l=1", sol: "F = 2*0.1*1", ans: "0.2 Н" }, calc: { vars: [{id:'i',name:'I'},{id:'b',name:'B'},{id:'l',name:'l'}], expr:'i*b*l', unit:'Н' } },
-                    { name: "Сила Лоренца", formula: "F_Л = q · v · B · sin(α)", desc: "На заряд.", vars: "Окружность", example: { dano: "q=1, v=10, B=2", sol: "F = 1*10*2", ans: "20 Н" }, calc: { vars: [{id:'q',name:'q'},{id:'v',name:'v'},{id:'b',name:'B'}], expr:'q*v*b', unit:'Н' } },
-                    { name: "Радиус орбиты", formula: "r = m · v / (q · B)", desc: "Частица.", vars: "Магн. поле", example: { dano: "-", sol: "-", ans: "-" } },
-                    { name: "Магнитный поток", formula: "Φ = B · S · cos(α)", desc: "Линии.", vars: "Через контур", example: { dano: "B=0.2, S=0.5", sol: "Φ = 0.2 * 0.5", ans: "0.1 Вб" }, calc: { vars: [{id:'b',name:'B'},{id:'s',name:'S'}], expr:'b*s', unit:'Вб' } },
-                    { name: "ЭДС Индукции", formula: "ε = |ΔΦ / Δt|", desc: "Фарадей.", vars: "Ток", example: { dano: "ΔΦ=0.4, Δt=2", sol: "ε = 0.4 / 2", ans: "0.2 В" }, calc: { vars: [{id:'df',name:'ΔΦ'},{id:'dt',name:'Δt'}], expr:'df/dt', unit:'В' } },
-                    { name: "ЭДС движения", formula: "ε = v · B · l · sin(α)", desc: "Проводник.", vars: "Генератор", example: { dano: "v=100, B=5e-5, l=10", sol: "E = 100 * 5e-5 * 10", ans: "0.05 В" }, calc: { vars: [{id:'v',name:'v'},{id:'b',name:'B'},{id:'l',name:'l'}], expr:'v*b*l', unit:'В' } },
-                    { name: "Самоиндукция", formula: "ε = L · ΔI / Δt", desc: "Катушка.", vars: "L-Генри", example: { dano: "L=2, ΔI=5, Δt=1", sol: "E = 2 * 5 / 1", ans: "10 В" }, calc: { vars: [{id:'l',name:'L'},{id:'di',name:'ΔI'},{id:'dt',name:'Δt'}], expr:'l*di/dt', unit:'В' } },
-                    { name: "Энергия поля", formula: "W = L · I² / 2", desc: "Магнитного.", vars: "Внутри катушки", example: { dano: "L=2, I=3", sol: "W = 2 * 9 / 2", ans: "9 Дж" }, calc: { vars: [{id:'l',name:'L'},{id:'i',name:'I'}], expr:'l*i*i/2', unit:'Дж' } },
-                    { name: "Томсон", formula: "T = 2π√(L · C)", desc: "Контур.", vars: "Колебания", example: { dano: "L=1 Гн, C=1 мкФ", sol: "T = 2 * 3.14 * √(1 * 1e-6)", ans: "0.006 с" } },
+                    { name: "Сила Ампера", formula: "F_А = I · B · l", desc: "Магнит и ток.", vars: "B-индукция", example: { dano: "I=2, B=0.1, l=1", sol: "F = 2*0.1*1", ans: "0.2 Н" }, calc: { vars: [{id:'i',name:'I'},{id:'b',name:'B'},{id:'l',name:'l'}], expr:'i*b*l', unit:'Н' } },
+                    { name: "Сила Лоренца", formula: "F_Л = q · v · B", desc: "На заряд.", vars: "Движение в поле", example: { dano: "q=1, v=10, B=2", sol: "F = 1*10*2", ans: "20 Н" }, calc: { vars: [{id:'q',name:'q'},{id:'v',name:'v'},{id:'b',name:'B'}], expr:'q*v*b', unit:'Н' } },
+                    { name: "Радиус орбиты", formula: "r = m · v / (q · B)", desc: "Частица.", vars: "Следствие 2 закона", example: { dano: "Электрон влетает в поле", sol: "Зависит от его скорости", ans: "м" } },
+                    { name: "Магнитный поток", formula: "Ф = B · S", desc: "Линии.", vars: "Через площадку", example: { dano: "B=0.2, S=0.5", sol: "Ф = 0.2 * 0.5", ans: "0.1 Вб" }, calc: { vars: [{id:'b',name:'B'},{id:'s',name:'S'}], expr:'b*s', unit:'Вб' } },
+                    { name: "ЭДС Индукции", formula: "E = dФ / dt", desc: "Фарадей.", vars: "Явление индукции", example: { dano: "dФ=0.4, dt=2", sol: "E = 0.4 / 2", ans: "0.2 В" }, calc: { vars: [{id:'df',name:'dФ'},{id:'dt',name:'dt'}], expr:'df/dt', unit:'В' } },
+                    { name: "ЭДС движения", formula: "E = v · B · l", desc: "Проводник.", vars: "В движении", example: { dano: "v=100, B=5e-5, l=10", sol: "E = 100 * 5e-5 * 10", ans: "0.05 В" }, calc: { vars: [{id:'v',name:'v'},{id:'b',name:'B'},{id:'l',name:'l'}], expr:'v*b*l', unit:'В' } },
+                    { name: "Самоиндукция", formula: "E = L · dI / dt", desc: "Катушка.", vars: "L-Генри", example: { dano: "L=2, dI=5, dt=1", sol: "E = 2 * 5 / 1", ans: "10 В" }, calc: { vars: [{id:'l',name:'L'},{id:'di',name:'dI'},{id:'dt',name:'dt'}], expr:'l*di/dt', unit:'В' } },
+                    { name: "Энергия поля", formula: "W = L · I² / 2", desc: "Катушки.", vars: "Внутри катушки", example: { dano: "L=2, I=3", sol: "W = 2 * 9 / 2", ans: "9 Дж" }, calc: { vars: [{id:'l',name:'L'},{id:'i',name:'I'}], expr:'l*i*i/2', unit:'Дж' } },
+                    { name: "Томсон", formula: "T = 2π√(L · C)", desc: "Контур.", vars: "Электроколебания", example: { dano: "L=1, C=1 мкФ", sol: "T = 2 * 3.14 * √(1 * 1e-6)", ans: "0.006 с" } },
                     { name: "Трансформатор", formula: "k = U1 / U2", desc: "Напряжение.", vars: "Коэффициент", example: { dano: "U1=220, U2=11", sol: "k = 220 / 11", ans: "20" }, calc: { vars: [{id:'u1',name:'U1'},{id:'u2',name:'U2'}], expr:'u1/u2', unit:'-' } },
                     { name: "Тонкая линза", formula: "1/F = 1/d + 1/f", desc: "Оптика.", vars: "Фокус", example: { dano: "F=10, d=30", sol: "1/f = 1/10 - 1/30", ans: "15 см" } },
                     { name: "Опт. сила", formula: "D = 1 / F", desc: "Диоптрии.", vars: "F в метрах", example: { dano: "F=0.5", sol: "D = 1 / 0.5", ans: "2 дптр" }, calc: { vars: [{id:'f',name:'F'}], expr:'1/f', unit:'дптр' } },
-                    { name: "Увеличение", formula: "Γ = f / d", desc: "Линзы.", vars: "Отношение", example: { dano: "f=60, d=20", sol: "Γ = 60 / 20", ans: "3" }, calc: { vars: [{id:'f',name:'f'},{id:'d',name:'d'}], expr:'f/d', unit:'-' } },
-                    { name: "Дифракция", formula: "d · sin(φ) = k · λ", desc: "Решетка.", vars: "Спектр", example: { dano: "d=2 мкм, k=1, λ=0.5 мкм", sol: "sin(φ) = 1 * 0.5 / 2", ans: "0.25" } },
-                    { name: "Энергия фотона", formula: "E = h · ν = hc / λ", desc: "Свет.", vars: "h = 6.63e-34", example: { dano: "ν = 5e14 Гц", sol: "E = 6.63e-34 * 5e14", ans: "3.3e-19 Дж" }, calc: { vars: [{id:'n',name:'ν'}], expr:'6.63e-34*n', unit:'Дж' } },
-                    { name: "Фотоэффект", formula: "h · ν = A_вых + E_к", desc: "Эйнштейн.", vars: "Свет выбивает электрон", example: { dano: "hν = 3 эВ, A = 2 эВ", sol: "E = 3 - 2", ans: "1 эВ" } },
-                    { name: "Дефект масс", formula: "ΔE = Δm · c²", desc: "Ядро.", vars: "1 а.е.м. = 931.5 МэВ", example: { dano: "Δm = 1 а.е.м.", sol: "ΔE = 1 * 931.5", ans: "931.5 МэВ" }, calc: { vars: [{id:'m',name:'Δm'}], expr:'m*931.5', unit:'МэВ' } }
+                    { name: "Увеличение", formula: "Г = f / d", desc: "Линзы.", vars: "Отношение", example: { dano: "f=60, d=20", sol: "Г = 60 / 20", ans: "3" }, calc: { vars: [{id:'f',name:'f'},{id:'d',name:'d'}], expr:'f/d', unit:'-' } },
+                    { name: "Энергия фотона", formula: "E = h · v", desc: "Свет.", vars: "h = 6.63e-34", example: { dano: "v = 5e14 Гц", sol: "E = 6.63e-34 * 5e14", ans: "3.3e-19 Дж" }, calc: { vars: [{id:'n',name:'Частота'}], expr:'6.63e-34*n', unit:'Дж' } },
+                    { name: "Фотоэффект", formula: "h · v = A + E_к", desc: "Эйнштейн.", vars: "Выбивание электрона", example: { dano: "Свет 3 эВ, Работа 2 эВ", sol: "E = 3 - 2", ans: "1 эВ" } },
+                    { name: "Дефект масс", formula: "E = m · c²", desc: "Ядро.", vars: "1 аем = 931.5 МэВ", example: { dano: "m = 1 а.е.м.", sol: "E = 1 * 931.5", ans: "931.5 МэВ" }, calc: { vars: [{id:'m',name:'масса'}], expr:'m*931.5', unit:'МэВ' } }
                 ]
             }
         };
@@ -459,7 +427,6 @@
         }
 
         // --- УМНОЕ РАЗМЕЩЕНИЕ 3D ---
-        // Перемещает холст в нужный контейнер, чтобы он был там, где мы находимся
         function move3DTo(targetId) {
             const canvasWrapper = document.getElementById('model-3d-container');
             const target = document.getElementById(targetId);
@@ -472,8 +439,7 @@
             hideAll(); closeSidebarOnMobile();
             document.getElementById('welcome-section').classList.remove('hidden'); 
             document.getElementById('nav-main').classList.add('active');
-            move3DTo('target-main');
-            spawn3DModel('main'); renderPopularCards();
+            move3DTo('target-main'); spawn3DModel('main'); renderPopularCards();
             document.getElementById('main-scroll').scrollTo(0, 0); stopAllSims();
         }
 
@@ -500,8 +466,7 @@
             if(navBtn) navBtn.classList.add('active');
             
             document.getElementById('class-title').innerText = physicsData[grade].title;
-            move3DTo('target-content');
-            spawn3DModel(grade); stopAllSims();
+            move3DTo('target-content'); spawn3DModel(grade); stopAllSims();
             
             const data = physicsData[grade];
             let html = '';
@@ -543,8 +508,7 @@
             hideAll(); closeSidebarOnMobile();
             document.getElementById('tasks-section').classList.remove('hidden'); 
             document.getElementById('nav-tasks').classList.add('active');
-            move3DTo('target-tasks');
-            spawn3DModel('tasks'); stopAllSims(); document.getElementById('main-scroll').scrollTo(0,0);
+            move3DTo('target-tasks'); spawn3DModel('tasks'); stopAllSims(); document.getElementById('main-scroll').scrollTo(0,0);
             
             let html = '';
             tasksData.forEach((task, i) => {
@@ -556,7 +520,7 @@
         function checkTask(idx, correct) {
             const input = document.getElementById(`task-ans-${idx}`); const resDiv = document.getElementById(`task-res-${idx}`);
             if(parseFloat(input.value) === correct) {
-                resDiv.innerHTML = "✅ <b>Верно!</b>"; resDiv.className = "mt-4 p-3 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-sm block fade-in"; input.style.borderColor = "#10b981";
+                resDiv.innerHTML = "✅ <b>Верно!</b> Отличная работа."; resDiv.className = "mt-4 p-3 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-sm block fade-in"; input.style.borderColor = "#10b981";
             } else {
                 resDiv.innerHTML = "❌ <b>Ошибка.</b> Попробуй еще раз!"; resDiv.className = "mt-4 p-3 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30 text-sm block fade-in"; input.style.borderColor = "#ef4444";
             }
@@ -659,9 +623,23 @@
             ball.style.top = percentY + '%'; document.getElementById('sim2-t').innerText = sim2.t.toFixed(2); document.getElementById('sim2-cur-h').innerText = sim2.curH.toFixed(2);
         }
 
-        // --- КРУТОЙ 3D АТОМ И ФИГУРЫ ---
+        // --- КРУТОЙ 3D АТОМ ---
+        particlesJS("particles-js", {
+            "particles": { "number": { "value": 35 }, "color": { "value": "#3b82f6" }, "shape": { "type": "circle" }, "opacity": { "value": 0.3 }, "size": { "value": 2 }, "line_linked": { "enable": true, "distance": 150, "color": "#3b82f6", "opacity": 0.15, "width": 1 }, "move": { "enable": true, "speed": 1 } },
+            "interactivity": { "events": { "onhover": { "enable": true, "mode": "grab" } } }
+        });
+
         let scene, camera, renderer, currentMesh, pointLight;
+        let globalMouseX = window.innerWidth/2, globalMouseY = window.innerHeight/2;
+        let targetRotX = 0, targetRotY = 0;
         let atomElectrons = []; 
+
+        document.addEventListener('mousemove', (e) => {
+            globalMouseX = e.clientX; globalMouseY = e.clientY;
+            targetRotY = (globalMouseX - window.innerWidth/2)*0.002; targetRotX = (globalMouseY - window.innerHeight/2)*0.002;
+            document.getElementById('mouse-glow').style.opacity = '1';
+        });
+        document.addEventListener('mouseleave', () => document.getElementById('mouse-glow').style.opacity = '0');
 
         function init3D() {
             const container = document.getElementById('model-3d-container');
@@ -686,20 +664,24 @@
 
         function animate3D() {
             requestAnimationFrame(animate3D);
+            
             if (currentMesh) {
                 currentMesh.rotation.y += 0.005 + (targetRotY - currentMesh.rotation.y) * 0.05;
                 currentMesh.rotation.x += 0.005 + (targetRotX - currentMesh.rotation.x) * 0.05;
             }
+
             atomElectrons.forEach(el => {
                 el.angle += el.speed;
                 el.mesh.position.set(Math.cos(el.angle) * 2.2, Math.sin(el.angle) * 2.2, 0);
             });
+
             renderer.render(scene, camera);
+            document.getElementById('mouse-glow').style.transform = `translate3d(${globalMouseX}px, ${globalMouseY}px, 0)`;
         }
 
         function spawn3DModel(grade) {
             if (!scene) init3D();
-            if (currentMesh) scene.remove(currentMesh);
+            if (currentMesh) { scene.remove(currentMesh); }
             atomElectrons = []; 
 
             let colorHex = 0x3b82f6; 
@@ -715,30 +697,39 @@
 
                 for(let i=0; i<3; i++) {
                     let orbitGroup = new THREE.Group();
-                    orbitGroup.rotation.x = Math.random() * Math.PI; orbitGroup.rotation.y = Math.random() * Math.PI;
+                    orbitGroup.rotation.x = Math.random() * Math.PI;
+                    orbitGroup.rotation.y = Math.random() * Math.PI;
                     
-                    let orbitGeo = new THREE.TorusGeometry(2.2, 0.02, 8, 50);
-                    orbitGroup.add(new THREE.Mesh(orbitGeo, new THREE.MeshBasicMaterial({color: colorHex, transparent: true, opacity: 0.3})));
+                    let orbitGeo = new THREE.TorusGeometry(2.2, 0.01, 8, 50);
+                    let orbitMat = new THREE.MeshBasicMaterial({color: colorHex, transparent: true, opacity: 0.4});
+                    orbitGroup.add(new THREE.Mesh(orbitGeo, orbitMat));
 
-                    let eMesh = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), new THREE.MeshBasicMaterial({color: 0x10b981}));
-                    orbitGroup.add(eMesh);
-                    atomElectrons.push({ mesh: eMesh, angle: Math.random() * Math.PI * 2, speed: 0.02 + Math.random() * 0.03 });
+                    let electronGeo = new THREE.SphereGeometry(0.15, 8, 8);
+                    let electronMat = new THREE.MeshBasicMaterial({color: 0x10b981}); 
+                    let electronMesh = new THREE.Mesh(electronGeo, electronMat);
+                    orbitGroup.add(electronMesh);
+
+                    atomElectrons.push({ mesh: electronMesh, angle: Math.random() * Math.PI * 2, speed: 0.02 + Math.random() * 0.03 });
                     currentMesh.add(orbitGroup);
                 }
             } else {
-                let geo;
-                if (grade === 'lab') geo = new THREE.TorusKnotGeometry(1.2, 0.4, 100, 16); 
-                else if (grade === 'tasks') geo = new THREE.OctahedronGeometry(2, 0); 
-                else if (grade === 7) geo = new THREE.BoxGeometry(2.2, 2.2, 2.2); 
-                else if (grade === 8) geo = new THREE.TorusGeometry(1.4, 0.5, 16, 50); 
-                else if (grade === 9) geo = new THREE.ConeGeometry(1.8, 2.8, 16); 
-                else if (grade === 10) geo = new THREE.SphereGeometry(1.8, 16, 16); 
-                else if (grade === 11) geo = new THREE.TorusKnotGeometry(1.1, 0.35, 64, 16); 
-                else geo = new THREE.DodecahedronGeometry(1.8, 0); 
+                let geometry;
+                if (grade === 'lab') geometry = new THREE.TorusKnotGeometry(1.2, 0.4, 100, 16); 
+                else if (grade === 'tasks') geometry = new THREE.OctahedronGeometry(2, 0); 
+                else if (grade === 7) geometry = new THREE.BoxGeometry(2.2, 2.2, 2.2); 
+                else if (grade === 8) geometry = new THREE.TorusGeometry(1.4, 0.5, 16, 50); 
+                else if (grade === 9) geometry = new THREE.ConeGeometry(1.8, 2.8, 16); 
+                else if (grade === 10) geometry = new THREE.SphereGeometry(1.8, 16, 16); 
+                else if (grade === 11) geometry = new THREE.TorusKnotGeometry(1.1, 0.35, 64, 16); 
+                else geometry = new THREE.DodecahedronGeometry(1.8, 0); 
 
-                currentMesh.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: colorHex, wireframe: true, emissive: colorHex, emissiveIntensity: 0.6 })));
+                let mat = new THREE.MeshStandardMaterial({ color: colorHex, wireframe: true, emissive: colorHex, emissiveIntensity: 0.6 });
+                let mesh = new THREE.Mesh(geometry, mat);
+                currentMesh.add(mesh);
             }
-            pointLight.color.setHex(colorHex); scene.add(currentMesh);
+
+            pointLight.color.setHex(colorHex);
+            scene.add(currentMesh);
         }
 
         window.addEventListener('DOMContentLoaded', () => { init3D(); goHome(); });
