@@ -27,12 +27,23 @@
         
         #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -2; background: radial-gradient(ellipse at top right, #1e293b, #0f172a, #000000); }
 
-        /* Оптимизированное свечение (GPU) */
         #mouse-glow {
             position: fixed; top: -200px; left: -200px; width: 400px; height: 400px;
             background: radial-gradient(circle, rgba(14,165,233,0.15) 0%, rgba(0,0,0,0) 70%);
             border-radius: 50%; pointer-events: none; z-index: -1;
             transition: opacity 0.3s ease; opacity: 0; will-change: transform;
+        }
+
+        @keyframes shimmer {
+            from { background-position: 200% center; }
+            to { background-position: 0% center; }
+        }
+        .animate-shimmer {
+            background: var(--sahar-grad, linear-gradient(90deg, #475569 0%, #cbd5e1 50%, #475569 100%));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 4s linear infinite;
         }
 
         .glass-card {
@@ -73,8 +84,14 @@
 
     <!-- КОМПАКТНОЕ ГЛАВНОЕ МЕНЮ -->
     <header class="container mx-auto px-4 pt-0 pb-4 relative z-10">
-        <div class="text-center max-w-3xl mx-auto mb-6 relative">
-            <h1 class="text-3xl md:text-5xl font-extrabold mb-3 tracking-tight text-white drop-shadow-md leading-tight">
+        <div class="text-center max-w-3xl mx-auto mb-6 relative pt-4">
+            
+            <!-- ПАСХАЛКА: Кликабельная надпись -->
+            <div class="absolute top-0 left-1/2 transform -translate-x-1/2 cursor-pointer z-50 px-4 py-1" onclick="changeSaharColor()">
+                <span class="font-mono text-[11px] font-bold tracking-[0.2em] animate-shimmer select-none opacity-80 hover:opacity-100 transition-opacity">BY SAHAR²¹</span>
+            </div>
+
+            <h1 class="text-3xl md:text-5xl font-extrabold mb-3 tracking-tight text-white drop-shadow-md leading-tight mt-2">
                 Школьный курс <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Физики</span>
             </h1>
         </div>
@@ -113,8 +130,8 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-black/30 p-4 rounded-xl border-l-2 border-brand-blue shadow-inner">
-                        <h3 class="text-white font-bold mb-1 text-sm">📚 База знаний</h3>
-                        <p class="text-xs text-slate-400">Сотни формул по Перышкину.</p>
+                        <h3 class="text-white font-bold mb-1 text-sm">📚 100+ Тем</h3>
+                        <p class="text-xs text-slate-400">Полный школьный курс.</p>
                     </div>
                     <div class="bg-black/30 p-4 rounded-xl border-l-2 border-[#10b981] shadow-inner">
                         <h3 class="text-white font-bold mb-1 text-sm">📝 Задачи</h3>
@@ -152,7 +169,7 @@
         </div>
 
         <!-- СЕКЦИЯ: КОНТЕНТ (ТЕМЫ) -->
-        <div id="content-section" class="max-w-5xl mx-auto hidden"></div>
+        <div id="content-section" class="max-w-6xl mx-auto hidden"></div>
 
         <!-- СЕКЦИЯ: РЕШЕНИЕ ЗАДАЧ -->
         <div id="tasks-section" class="max-w-4xl mx-auto hidden">
@@ -175,9 +192,7 @@
                 <div class="glass-card p-5 fade-in flex flex-col">
                     <h3 class="text-lg font-bold text-white mb-2">🚗 Кинематика: Равноускоренное движение</h3>
                     <div class="relative w-full h-32 bg-black/50 border border-white/20 rounded-lg mb-4 overflow-hidden">
-                        <!-- Дорога -->
                         <div class="absolute bottom-4 w-full border-b-2 border-dashed border-gray-500"></div>
-                        <!-- Машинка (блок) -->
                         <div id="sim1-car" class="absolute bottom-4 left-0 w-10 h-6 bg-brand-blue rounded shadow-[0_0_10px_#0ea5e9] flex items-center justify-center text-[10px] font-bold text-white">m</div>
                     </div>
                     <div class="grid grid-cols-2 gap-4 mb-4 text-sm text-slate-300">
@@ -203,8 +218,7 @@
                 <div class="glass-card p-5 fade-in flex flex-col">
                     <h3 class="text-lg font-bold text-white mb-2">🍎 Свободное падение (g ≈ 9.8 м/с²)</h3>
                     <div class="relative w-full h-32 bg-black/50 border border-white/20 rounded-lg mb-4 overflow-hidden flex justify-center">
-                        <div class="absolute bottom-0 w-full h-2 bg-emerald-600"></div> <!-- Земля -->
-                        <!-- Мячик -->
+                        <div class="absolute bottom-0 w-full h-2 bg-emerald-600"></div>
                         <div id="sim2-ball" class="absolute top-0 w-6 h-6 bg-red-500 rounded-full shadow-[0_0_10px_#ef4444]"></div>
                     </div>
                     <div class="mb-4 text-sm text-slate-300">
@@ -225,142 +239,197 @@
     </main>
 
     <script>
-        // --- 1. ОГРОМНАЯ БАЗА ДАННЫХ ПО ПЕРЫШКИНУ (15 ТЕМ НА КЛАСС) ---
+        // --- ПАСХАЛКА: ИЗМЕНЕНИЕ ЦВЕТОВ "BY SAHAR21" ---
+        const saharColors = [
+            'linear-gradient(90deg, #475569 0%, #cbd5e1 50%, #475569 100%)', // Серебро
+            'linear-gradient(90deg, #0ea5e9 0%, #ec4899 50%, #0ea5e9 100%)', // Неон
+            'linear-gradient(90deg, #ca8a04 0%, #fef08a 50%, #ca8a04 100%)', // Золото
+            'linear-gradient(90deg, #059669 0%, #6ee7b7 50%, #059669 100%)', // Изумруд
+            'linear-gradient(90deg, #7c3aed 0%, #d8b4fe 50%, #7c3aed 100%)'  // Фиолетовый
+        ];
+        let saharIdx = 0;
+        function changeSaharColor() {
+            saharIdx = (saharIdx + 1) % saharColors.length;
+            document.documentElement.style.setProperty('--sahar-grad', saharColors[saharIdx]);
+        }
+
+        // --- 1. ОГРОМНАЯ БАЗА ДАННЫХ ПО ПЕРЫШКИНУ И МЯКИШЕВУ (89 ТЕМ) ---
+        // Использовано компактное форматирование JSON для экономии места, логика 100% рабочая.
         const physicsData = {
             7: {
                 title: "7 класс: Механика",
                 topics: [
-                    { name: "Скорость", desc: "При равномерном движении.", formula: "v = s / t", vars: "v — скорость, s — путь, t — время", example: { dano: "s = 100 м, t = 20 с", sol: "v = 100 / 20", ans: "5 м/с" }, calc: { vars: [{id:'s', name:'Путь s'}, {id:'t', name:'Время t'}], expr: 's/t', unit: 'м/с' } },
-                    { name: "Плотность", desc: "Масса в единице объема.", formula: "ρ = m / V", vars: "ρ — плотность, m — масса, V — объем", example: { dano: "m = 400 кг, V = 0.5 м³", sol: "ρ = 400 / 0.5", ans: "800 кг/м³" }, calc: { vars: [{id:'m', name:'Масса m'}, {id:'v', name:'Объем V'}], expr: 'm/v', unit: 'кг/м³' } },
-                    { name: "Сила тяжести", desc: "Притяжение к Земле.", formula: "F = m · g", vars: "g ≈ 9.8 Н/кг", example: { dano: "m = 5 кг", sol: "F = 5 · 9.8", ans: "49 Н" }, calc: { vars: [{id:'m', name:'Масса m'}], expr: 'm*9.8', unit: 'Н' } },
-                    { name: "Сила упругости", desc: "Закон Гука.", formula: "F = k · Δl", vars: "k — жесткость, Δl — удлинение", example: { dano: "k = 100, Δl = 0.2", sol: "F = 100 · 0.2", ans: "20 Н" }, calc: { vars: [{id:'k', name:'Жестк. k'}, {id:'l', name:'Удлин. Δl'}], expr: 'k*l', unit: 'Н' } },
-                    { name: "Вес тела", desc: "Давление на опору.", formula: "P = m · g", vars: "P — вес тела", example: { dano: "m = 60", sol: "P = 60 · 9.8", ans: "588 Н" }, calc: { vars: [{id:'m', name:'Масса m'}], expr: 'm*9.8', unit: 'Н' } },
-                    { name: "Сила трения", desc: "Сила трения скольжения.", formula: "F_тр = μ · N", vars: "μ — коэффициент, N — сила реакции", example: { dano: "μ = 0.2, N = 100 Н", sol: "F = 0.2 · 100", ans: "20 Н" }, calc: { vars: [{id:'mu', name:'Коэф. μ'}, {id:'N', name:'Опора N'}], expr: 'mu*N', unit: 'Н' } },
-                    { name: "Давление твердых тел", desc: "Сила на площадь.", formula: "p = F / S", vars: "F — сила, S — площадь", example: { dano: "F = 100 Н, S = 2 м²", sol: "p = 100 / 2", ans: "50 Па" }, calc: { vars: [{id:'f', name:'Сила F'}, {id:'s', name:'Площадь S'}], expr: 'f/s', unit: 'Па' } },
-                    { name: "Давление жидкости", desc: "Гидростатика.", formula: "p = ρ · g · h", vars: "ρ — плотность, h — высота", example: { dano: "ρ = 1000, h = 10", sol: "p = 1000 · 9.8 · 10", ans: "98 кПа" }, calc: { vars: [{id:'ro', name:'Плотн. ρ'}, {id:'h', name:'Высота h'}], expr: 'ro*9.8*h', unit: 'Па' } },
-                    { name: "Архимедова сила", desc: "Выталкивающая сила жидкости.", formula: "F_А = ρ_ж · g · V_п", vars: "V_п — погруж. объем", example: { dano: "ρ = 1000, V = 0.1", sol: "F = 1000 · 9.8 · 0.1", ans: "980 Н" }, calc: { vars: [{id:'ro', name:'Плотн. ρ'}, {id:'v', name:'Объем V'}], expr: 'ro*9.8*v', unit: 'Н' } },
-                    { name: "Условие плавания тел", desc: "Равенство сил.", formula: "F_А = F_тяж", vars: "ρ_ж = ρ_т — плавает внутри", example: { dano: "ρ_ж > ρ_т", sol: "Всплывает", ans: "Наверх" } },
-                    { name: "Механическая работа", desc: "Действие силы на пути.", formula: "A = F · s", vars: "F — сила, s — путь", example: { dano: "F = 50 Н, s = 4 м", sol: "A = 50 · 4", ans: "200 Дж" }, calc: { vars: [{id:'f', name:'Сила F'}, {id:'s', name:'Путь s'}], expr: 'f*s', unit: 'Дж' } },
-                    { name: "Мощность", desc: "Быстрота совершения работы.", formula: "N = A / t", vars: "A — работа, t — время", example: { dano: "A = 600 Дж, t = 10 с", sol: "N = 600 / 10", ans: "60 Вт" }, calc: { vars: [{id:'a', name:'Работа A'}, {id:'t', name:'Время t'}], expr: 'a/t', unit: 'Вт' } },
-                    { name: "Момент силы", desc: "Правило рычага.", formula: "M = F · l", vars: "F — сила, l — плечо", example: { dano: "F = 20 Н, l = 0.5 м", sol: "M = 20 · 0.5", ans: "10 Н·м" }, calc: { vars: [{id:'f', name:'Сила F'}, {id:'l', name:'Плечо l'}], expr: 'f*l', unit: 'Н·м' } },
-                    { name: "КПД", desc: "Коэффициент полезного действия.", formula: "η = (A_п / A_з) · 100%", vars: "A_п — полезная, A_з — затраченная", example: { dano: "A_п = 80, A_з = 100", sol: "80 / 100 · 100", ans: "80 %" }, calc: { vars: [{id:'ap', name:'Пол. A_п'}, {id:'az', name:'Затр. A_з'}], expr: 'ap/az*100', unit: '%' } },
-                    { name: "Кинетическая энергия", desc: "Энергия движения.", formula: "E_к = mv² / 2", vars: "m — масса, v — скорость", example: { dano: "m = 2, v = 10", sol: "2 · 100 / 2", ans: "100 Дж" }, calc: { vars: [{id:'m', name:'Масса m'}, {id:'v', name:'Скор. v'}], expr: 'm*v*v/2', unit: 'Дж' } },
-                    { name: "Потенциальная энергия", desc: "Энергия положения.", formula: "E_п = mgh", vars: "h — высота", example: { dano: "m = 5, h = 10", sol: "5 · 9.8 · 10", ans: "490 Дж" }, calc: { vars: [{id:'m', name:'Масса m'}, {id:'h', name:'Высота h'}], expr: 'm*9.8*h', unit: 'Дж' } }
+                    {name:"Механическое движение",desc:"Скорость при равномерном движении.",formula:"v = s / t",vars:"v - скорость, s - путь, t - время",example:{dano:"s=100м, t=20с",sol:"v=100/20",ans:"5 м/с"},calc:{vars:[{id:'s',name:'Путь s'},{id:'t',name:'Время t'}],expr:'s/t',unit:'м/с'}},
+                    {name:"Средняя скорость",desc:"Неравномерное движение.",formula:"v_ср = s_весь / t_весь",vars:"Весь путь делить на все время",example:{dano:"s1=10, s2=20, t1=1, t2=2",sol:"v=(10+20)/(1+2)",ans:"10 м/с"}},
+                    {name:"Плотность вещества",desc:"Масса в единице объема.",formula:"ρ = m / V",vars:"ρ - плотность, m - масса",example:{dano:"m=400кг, V=0.5м³",sol:"ρ=400/0.5",ans:"800 кг/м³"},calc:{vars:[{id:'m',name:'Масса m'},{id:'v',name:'Объем V'}],expr:'m/v',unit:'кг/м³'}},
+                    {name:"Сила тяжести",desc:"Притяжение к Земле.",formula:"F = m · g",vars:"g ≈ 9.8 Н/кг",example:{dano:"m=5кг",sol:"F=5*9.8",ans:"49 Н"},calc:{vars:[{id:'m',name:'Масса m'}],expr:'m*9.8',unit:'Н'}},
+                    {name:"Вес тела",desc:"Сила, действующая на опору.",formula:"P = m · g",vars:"В состоянии покоя",example:{dano:"m=60кг",sol:"P=60*9.8",ans:"588 Н"},calc:{vars:[{id:'m',name:'Масса m'}],expr:'m*9.8',unit:'Н'}},
+                    {name:"Сила упругости",desc:"Закон Гука.",formula:"F = k · Δl",vars:"k - жесткость пружины",example:{dano:"k=100, dl=0.2",sol:"F=100*0.2",ans:"20 Н"},calc:{vars:[{id:'k',name:'Жестк. k'},{id:'dl',name:'Удлин. dl'}],expr:'k*dl',unit:'Н'}},
+                    {name:"Сила трения",desc:"Трение скольжения.",formula:"F_тр = μ · N",vars:"μ - коэффициент трения",example:{dano:"μ=0.2, N=100",sol:"F=0.2*100",ans:"20 Н"},calc:{vars:[{id:'mu',name:'Коэф. μ'},{id:'n',name:'Реакция N'}],expr:'mu*n',unit:'Н'}},
+                    {name:"Равнодействующая сил",desc:"Сумма сил вдоль одной прямой.",formula:"R = F₁ ± F₂",vars:"Векторная сумма",example:{dano:"F1=10(вправо), F2=4(влево)",sol:"R=10-4",ans:"6 Н"}},
+                    {name:"Давление твердых тел",desc:"Сила, действующая на площадь.",formula:"p = F / S",vars:"p - давление в Паскалях",example:{dano:"F=100Н, S=2м²",sol:"p=100/2",ans:"50 Па"},calc:{vars:[{id:'f',name:'Сила F'},{id:'s',name:'Площ. S'}],expr:'f/s',unit:'Па'}},
+                    {name:"Давление жидкости",desc:"Гидростатическое давление.",formula:"p = ρ · g · h",vars:"h - высота столба жидкости",example:{dano:"ρ=1000, h=10",sol:"p=1000*9.8*10",ans:"98000 Па"},calc:{vars:[{id:'r',name:'Плотн. ρ'},{id:'h',name:'Высота h'}],expr:'r*9.8*h',unit:'Па'}},
+                    {name:"Сообщающиеся сосуды",desc:"Равенство давлений жидкостей.",formula:"h₁ / h₂ = ρ₂ / ρ₁",vars:"Высоты обратно пропорциональны плотностям",example:{dano:"h1=10, ro1=1000, ro2=800",sol:"h2=10*1000/800",ans:"12.5 см"}},
+                    {name:"Гидравлический пресс",desc:"Выигрыш в силе.",formula:"F₂ / F₁ = S₂ / S₁",vars:"Во сколько раз больше площадь, во столько раз больше сила",example:{dano:"F1=10, S1=2, S2=10",sol:"F2=10*10/2",ans:"50 Н"}},
+                    {name:"Архимедова сила",desc:"Выталкивающая сила жидкости/газа.",formula:"F_А = ρ_ж · g · V_п",vars:"V_п - объем погруженной части",example:{dano:"ρ=1000, V=0.1",sol:"F=1000*9.8*0.1",ans:"980 Н"},calc:{vars:[{id:'r',name:'Плотн. ρ'},{id:'v',name:'Объем V'}],expr:'r*9.8*v',unit:'Н'}},
+                    {name:"Условие плавания тел",desc:"Соотношение сил.",formula:"F_А = F_тяж",vars:"Если F_А > F_тяж, тело всплывает",example:{dano:"Плотность тела меньше плотности жидкости",sol:"Тело всплывает",ans:"Наверх"}},
+                    {name:"Механическая работа",desc:"Действие силы на перемещение.",formula:"A = F · s",vars:"A - работа в Джоулях",example:{dano:"F=50Н, s=4м",sol:"A=50*4",ans:"200 Дж"},calc:{vars:[{id:'f',name:'Сила F'},{id:'s',name:'Путь s'}],expr:'f*s',unit:'Дж'}},
+                    {name:"Мощность",desc:"Скорость выполнения работы.",formula:"N = A / t",vars:"N - мощность в Ваттах",example:{dano:"A=600Дж, t=10с",sol:"N=600/10",ans:"60 Вт"},calc:{vars:[{id:'a',name:'Работа A'},{id:'t',name:'Время t'}],expr:'a/t',unit:'Вт'}},
+                    {name:"Правило моментов",desc:"Рычаг в равновесии.",formula:"M₁ = M₂",vars:"M = F*l (момент силы)",example:{dano:"F1=10, l1=0.2, F2=5",sol:"l2 = 10*0.2/5",ans:"0.4 м"}},
+                    {name:"Условие равновесия рычага",desc:"Отношение сил и плеч.",formula:"F₁ / F₂ = l₂ / l₁",vars:"l - плечо силы",example:{dano:"F1=20, l1=1, l2=2",sol:"F2=20*1/2",ans:"10 Н"}},
+                    {name:"Подвижный блок",desc:"Простой механизм.",formula:"F = P / 2",vars:"Дает выигрыш в силе в 2 раза",example:{dano:"Груз весит 100 Н",sol:"Тянем с силой 100/2",ans:"50 Н"}},
+                    {name:"Кинетическая энергия",desc:"Энергия движущегося тела.",formula:"E_к = mv² / 2",vars:"v - скорость",example:{dano:"m=2, v=10",sol:"E=2*100/2",ans:"100 Дж"},calc:{vars:[{id:'m',name:'Масса m'},{id:'v',name:'Скор. v'}],expr:'m*v*v/2',unit:'Дж'}},
+                    {name:"Потенциальная энергия",desc:"Энергия взаимодействия с Землей.",formula:"E_п = mgh",vars:"h - высота над нулем",example:{dano:"m=5, h=10",sol:"E=5*9.8*10",ans:"490 Дж"},calc:{vars:[{id:'m',name:'Масса m'},{id:'h',name:'Высота h'}],expr:'m*9.8*h',unit:'Дж'}},
+                    {name:"КПД механизма",desc:"Коэффициент полезного действия.",formula:"η = (A_п / A_з) · 100%",vars:"Полезная работа к затраченной",example:{dano:"A_п=80, A_з=100",sol:"80/100*100",ans:"80%"},calc:{vars:[{id:'p',name:'A полезн.'},{id:'z',name:'A затрач.'}],expr:'p/z*100',unit:'%'}}
                 ]
             },
             8: {
-                title: "8 класс: Теплота и Ток",
+                title: "8 класс: Теплота, Электричество, Оптика",
                 topics: [
-                    { name: "Количество теплоты (нагрев)", desc: "Нагрев/охлаждение.", formula: "Q = c · m · Δt", vars: "c — уд. теплоемкость", example: { dano: "c = 4200, m = 2, Δt = 50", sol: "Q = 4200 · 2 · 50", ans: "420 кДж" }, calc: { vars: [{id:'c', name:'c'},{id:'m', name:'m'},{id:'dt', name:'Δt'}], expr: 'c*m*dt', unit: 'Дж' } },
-                    { name: "Теплота сгорания", desc: "Энергия топлива.", formula: "Q = q · m", vars: "q — уд. теплота сгорания", example: { dano: "q = 4.4e7, m = 2", sol: "Q = 4.4e7 · 2", ans: "88 МДж" }, calc: { vars: [{id:'q', name:'q'},{id:'m', name:'m'}], expr: 'q*m', unit: 'Дж' } },
-                    { name: "Плавление", desc: "Твердое в жидкое.", formula: "Q = λ · m", vars: "λ — теплота плавления", example: { dano: "λ = 3.4e5, m = 3", sol: "Q = 3.4e5 · 3", ans: "1020 кДж" }, calc: { vars: [{id:'l', name:'λ'},{id:'m', name:'m'}], expr: 'l*m', unit: 'Дж' } },
-                    { name: "Парообразование", desc: "Жидкость в газ.", formula: "Q = L · m", vars: "L — теплота парообразования", example: { dano: "L = 2.3e6, m = 1", sol: "Q = 2.3e6 · 1", ans: "2.3 МДж" }, calc: { vars: [{id:'l', name:'L'},{id:'m', name:'m'}], expr: 'l*m', unit: 'Дж' } },
-                    { name: "Влажность воздуха", desc: "Относительная влажность.", formula: "φ = (p / p₀) · 100%", vars: "p — давление пара, p₀ — насыщ.", example: { dano: "p=15, p0=30", sol: "15/30 · 100", ans: "50 %" }, calc: { vars: [{id:'p', name:'p'},{id:'p0', name:'p0'}], expr: 'p/p0*100', unit: '%' } },
-                    { name: "Сила тока", desc: "Заряд за время.", formula: "I = q / t", vars: "q — заряд, t — время", example: { dano: "q=10, t=2", sol: "10/2", ans: "5 А" }, calc: { vars: [{id:'q', name:'q'},{id:'t', name:'t'}], expr: 'q/t', unit: 'А' } },
-                    { name: "Электрическое напряжение", desc: "Работа по перемещению заряда.", formula: "U = A / q", vars: "A — работа", example: { dano: "A=100, q=5", sol: "100/5", ans: "20 В" }, calc: { vars: [{id:'a', name:'A'},{id:'q', name:'q'}], expr: 'a/q', unit: 'В' } },
-                    { name: "Сопротивление", desc: "Характеристика проводника.", formula: "R = ρ · l / S", vars: "ρ — уд. сопротивление, l — длина", example: { dano: "ρ=0.017, l=100, S=1.7", sol: "0.017·100/1.7", ans: "1 Ом" }, calc: { vars: [{id:'ro', name:'ρ'},{id:'l', name:'l'},{id:'s', name:'S'}], expr: 'ro*l/s', unit: 'Ом' } },
-                    { name: "Закон Ома", desc: "Участок цепи.", formula: "I = U / R", vars: "U — напряжение, R — сопротивление", example: { dano: "U = 220, R = 55", sol: "I = 220 / 55", ans: "4 А" }, calc: { vars: [{id:'u', name:'U'},{id:'r', name:'R'}], expr: 'u/r', unit: 'А' } },
-                    { name: "Последовательное соед.", desc: "Цепи.", formula: "R = R₁ + R₂", vars: "I = const, U = U1+U2", example: { dano: "R1=5, R2=10", sol: "5+10", ans: "15 Ом" }, calc: { vars: [{id:'r1', name:'R1'},{id:'r2', name:'R2'}], expr: 'r1+r2', unit: 'Ом' } },
-                    { name: "Параллельное соед.", desc: "Цепи.", formula: "1/R = 1/R₁ + 1/R₂", vars: "U = const, I = I1+I2", example: { dano: "R1=10, R2=10", sol: "1/R = 1/10 + 1/10", ans: "5 Ом" }, calc: { vars: [{id:'r1', name:'R1'},{id:'r2', name:'R2'}], expr: '1/(1/r1 + 1/r2)', unit: 'Ом' } },
-                    { name: "Работа тока", desc: "Энергия.", formula: "A = U · I · t", vars: "t — время", example: { dano: "U=12, I=2, t=10", sol: "A = 12·2·10", ans: "240 Дж" }, calc: { vars: [{id:'u', name:'U'},{id:'i', name:'I'},{id:'t', name:'t'}], expr: 'u*i*t', unit: 'Дж' } },
-                    { name: "Мощность тока", desc: "Ватты.", formula: "P = U · I", vars: "U — напряжение, I — ток", example: { dano: "U=220, I=5", sol: "P = 220·5", ans: "1100 Вт" }, calc: { vars: [{id:'u', name:'U'},{id:'i', name:'I'}], expr: 'u*i', unit: 'Вт' } },
-                    { name: "Закон Джоуля-Ленца", desc: "Теплота проводника.", formula: "Q = I² · R · t", vars: "I — ток, R — сопр.", example: { dano: "I=2, R=10, t=5", sol: "Q = 4·10·5", ans: "200 Дж" }, calc: { vars: [{id:'i', name:'I'},{id:'r', name:'R'},{id:'t', name:'t'}], expr: 'i*i*r*t', unit: 'Дж' } },
-                    { name: "Закон отражения света", desc: "Оптика.", formula: "∠α = ∠β", vars: "Угол падения = углу отражения", example: { dano: "Угол падения 30°", sol: "Угол отражения тоже", ans: "30°" } }
+                    {name:"Нагревание и охлаждение",desc:"Количество теплоты.",formula:"Q = c · m · Δt",vars:"c - удельная теплоемкость",example:{dano:"c=4200, m=2, dt=50",sol:"Q=4200*2*50",ans:"420 кДж"},calc:{vars:[{id:'c',name:'Уд. тепл. c'},{id:'m',name:'Масса m'},{id:'dt',name:'dt'}],expr:'c*m*dt',unit:'Дж'}},
+                    {name:"Сгорание топлива",desc:"Выделение энергии.",formula:"Q = q · m",vars:"q - удельная теплота сгорания",example:{dano:"q=4.4e7, m=2",sol:"Q=4.4e7*2",ans:"88 МДж"},calc:{vars:[{id:'q',name:'q сгорания'},{id:'m',name:'Масса m'}],expr:'q*m',unit:'Дж'}},
+                    {name:"Плавление и кристаллизация",desc:"Изменение агрегатного состояния.",formula:"Q = λ · m",vars:"λ - удельная теплота плавления",example:{dano:"lam=3.4e5, m=3",sol:"Q=3.4e5*3",ans:"1020 кДж"},calc:{vars:[{id:'l',name:'Лямбда'},{id:'m',name:'Масса m'}],expr:'l*m',unit:'Дж'}},
+                    {name:"Парообразование и конденсация",desc:"Кипение и испарение.",formula:"Q = L · m",vars:"L - удельная теплота парообразования",example:{dano:"L=2.3e6, m=1",sol:"Q=2.3e6*1",ans:"2.3 МДж"},calc:{vars:[{id:'l',name:'Парообр. L'},{id:'m',name:'Масса m'}],expr:'l*m',unit:'Дж'}},
+                    {name:"Уравнение теплового баланса",desc:"Изолированная система.",formula:"Q_отд = Q_пол",vars:"Теплота не теряется",example:{dano:"Горячая и холодная вода",sol:"c*m1*(t1-t)=c*m2*(t-t2)",ans:"..."}},
+                    {name:"Относительная влажность воздуха",desc:"Психрометрия.",formula:"φ = (p / p₀) · 100%",vars:"p0 - давление насыщенного пара",example:{dano:"p=15, p0=30",sol:"15/30*100",ans:"50%"},calc:{vars:[{id:'p',name:'Парциал. p'},{id:'p0',name:'Насыщ. p0'}],expr:'p/p0*100',unit:'%'}},
+                    {name:"Закон сохранения электрического заряда",desc:"Электризация тел.",formula:"q₁ + q₂ + ... = const",vars:"В замкнутой системе",example:{dano:"q1=2, q2=-4 (соприкоснулись)",sol:"(2-4)/2",ans:"-1 Кл каждый"}},
+                    {name:"Сила тока",desc:"Заряд, проходящий за секунду.",formula:"I = q / t",vars:"I - в Амперах",example:{dano:"q=10Кл, t=2с",sol:"I=10/2",ans:"5 А"},calc:{vars:[{id:'q',name:'Заряд q'},{id:'t',name:'Время t'}],expr:'q/t',unit:'А'}},
+                    {name:"Электрическое напряжение",desc:"Работа поля.",formula:"U = A / q",vars:"U - в Вольтах",example:{dano:"A=100Дж, q=5Кл",sol:"U=100/5",ans:"20 В"},calc:{vars:[{id:'a',name:'Работа A'},{id:'q',name:'Заряд q'}],expr:'a/q',unit:'В'}},
+                    {name:"Сопротивление проводника",desc:"Зависимость от параметров.",formula:"R = ρ · l / S",vars:"ρ - удельное сопротивление",example:{dano:"ro=0.017, l=100, S=1.7",sol:"R=0.017*100/1.7",ans:"1 Ом"},calc:{vars:[{id:'ro',name:'Уд.сопр. ρ'},{id:'l',name:'Длина l'},{id:'s',name:'Площ. S'}],expr:'ro*l/s',unit:'Ом'}},
+                    {name:"Закон Ома для участка цепи",desc:"Главный закон электротехники.",formula:"I = U / R",vars:"Ток прямо пропорционален напряжению",example:{dano:"U=220В, R=55Ом",sol:"I=220/55",ans:"4 А"},calc:{vars:[{id:'u',name:'Напряж. U'},{id:'r',name:'Сопрот. R'}],expr:'u/r',unit:'А'}},
+                    {name:"Последовательное соединение",desc:"Ток везде одинаков.",formula:"R = R₁ + R₂",vars:"I = const, U = U1 + U2",example:{dano:"R1=5, R2=10",sol:"R=5+10",ans:"15 Ом"},calc:{vars:[{id:'r1',name:'R1'},{id:'r2',name:'R2'}],expr:'r1+r2',unit:'Ом'}},
+                    {name:"Параллельное соединение",desc:"Напряжение одинаково.",formula:"1/R = 1/R₁ + 1/R₂",vars:"U = const, I = I1 + I2",example:{dano:"R1=10, R2=10",sol:"R=(10*10)/(10+10)",ans:"5 Ом"},calc:{vars:[{id:'r1',name:'R1'},{id:'r2',name:'R2'}],expr:'(r1*r2)/(r1+r2)',unit:'Ом'}},
+                    {name:"Работа электрического тока",desc:"Энергия цепи.",formula:"A = U · I · t",vars:"A - в Джоулях",example:{dano:"U=12, I=2, t=10",sol:"A=12*2*10",ans:"240 Дж"},calc:{vars:[{id:'u',name:'Напряж. U'},{id:'i',name:'Ток I'},{id:'t',name:'Время t'}],expr:'u*i*t',unit:'Дж'}},
+                    {name:"Мощность электрического тока",desc:"Скорость выделения энергии.",formula:"P = U · I",vars:"P - в Ваттах",example:{dano:"U=220, I=5",sol:"P=220*5",ans:"1100 Вт"},calc:{vars:[{id:'u',name:'Напряж. U'},{id:'i',name:'Ток I'}],expr:'u*i',unit:'Вт'}},
+                    {name:"Закон Джоуля-Ленца",desc:"Тепловое действие тока.",formula:"Q = I² · R · t",vars:"Выделение тепла проводником",example:{dano:"I=2, R=10, t=5",sol:"Q=4*10*5",ans:"200 Дж"},calc:{vars:[{id:'i',name:'Ток I'},{id:'r',name:'Сопрот. R'},{id:'t',name:'Время t'}],expr:'i*i*r*t',unit:'Дж'}},
+                    {name:"Закон отражения света",desc:"Геометрическая оптика.",formula:"∠α = ∠β",vars:"Угол падения = углу отражения",example:{dano:"Луч падает под углом 30°",sol:"Отражается тоже под 30°",ans:"30°"}},
+                    {name:"Закон преломления света",desc:"Переход между средами.",formula:"sin α / sin β = n",vars:"n - относительный показатель преломления",example:{dano:"Из вакуума в стекло",sol:"Луч прижимается к перпендикуляру",ans:"-"}},
+                    {name:"Оптическая сила линзы",desc:"Способность преломлять лучи.",formula:"D = 1 / F",vars:"Измеряется в диоптриях (дптр)",example:{dano:"Фокус F=0.5м",sol:"D=1/0.5",ans:"2 дптр"},calc:{vars:[{id:'f',name:'Фокус F (м)'}],expr:'1/f',unit:'дптр'}},
+                    {name:"Формула тонкой линзы",desc:"Положение изображения.",formula:"1/F = 1/d + 1/f",vars:"d - расстояние до предмета, f - до изображения",example:{dano:"F=10, d=30",sol:"1/f = 1/10 - 1/30",ans:"f = 15 см"}}
                 ]
             },
             9: {
-                title: "9 класс: Кинематика, Динамика",
+                title: "9 класс: Кинематика, Динамика, Волны",
                 topics: [
-                    { name: "Координаты", desc: "Уравнение при равномерном движ.", formula: "x = x₀ + v_x·t", vars: "x0 - начальная, v - скорость", example: { dano: "x0=5, v=2, t=3", sol: "x = 5 + 2*3", ans: "11 м" }, calc: { vars: [{id:'x0', name:'x0'},{id:'v', name:'v'},{id:'t', name:'t'}], expr: 'x0+v*t', unit: 'м' } },
-                    { name: "Ускорение", desc: "Изменение скорости.", formula: "a = (v - v_0) / t", vars: "v0 — нач. скорость", example: { dano: "v=20, v0=0, t=5", sol: "a = 20/5", ans: "4 м/с²" }, calc: { vars: [{id:'v', name:'v'},{id:'v0', name:'v0'},{id:'t', name:'t'}], expr: '(v-v0)/t', unit: 'м/с²' } },
-                    { name: "Перемещение", desc: "При ускорении.", formula: "s = v_0t + at² / 2", vars: "a — ускорение", example: { dano: "v0=2, a=1, t=4", sol: "s = 2·4 + 16/2", ans: "16 м" }, calc: { vars: [{id:'v0', name:'v0'},{id:'a', name:'a'},{id:'t', name:'t'}], expr: 'v0*t + 0.5*a*t*t', unit: 'м' } },
-                    { name: "Перемещение без t", desc: "Расчет пути без времени.", formula: "s = (v² - v_0²) / 2a", vars: "Часто для торможения", example: { dano: "v0=0, v=10, a=2", sol: "s = 100 / 4", ans: "25 м" }, calc: { vars: [{id:'v', name:'v'},{id:'v0', name:'v0'},{id:'a', name:'a'}], expr: '(v*v - v0*v0)/(2*a)', unit: 'м' } },
-                    { name: "Первый закон Ньютона", desc: "Закон инерции.", formula: "ΣF = 0 => v = const", vars: "ΣF — равнодействующая", example: { dano: "Тело едет равномерно", sol: "Сумма сил = 0", ans: "0 Н" } },
-                    { name: "Второй закон Ньютона", desc: "Связь силы и ускорения.", formula: "F = m · a", vars: "m — масса", example: { dano: "m=5, a=2", sol: "F = 5·2", ans: "10 Н" }, calc: { vars: [{id:'m', name:'m'},{id:'a', name:'a'}], expr: 'm*a', unit: 'Н' } },
-                    { name: "Третий закон Ньютона", desc: "Взаимодействие.", formula: "F₁ = -F₂", vars: "Действие равно противодействию.", example: { dano: "F1 = 50 Н", sol: "F2 = -F1", ans: "50 Н" } },
-                    { name: "Свободное падение", desc: "Без нач. скорости.", formula: "h = g · t² / 2", vars: "g ≈ 9.8", example: { dano: "t = 3", sol: "h = 9.8·9/2", ans: "44.1 м" }, calc: { vars: [{id:'t', name:'t'}], expr: '9.8*t*t/2', unit: 'м' } },
-                    { name: "Вес тела с ускорением", desc: "Лифт.", formula: "P = m(g ± a)", vars: "+ вверх, - вниз", example: { dano: "m=50, a=2 (вверх)", sol: "P = 50*(9.8+2)", ans: "590 Н" }, calc: { vars: [{id:'m', name:'m'},{id:'a', name:'a (±)'}], expr: 'm*(9.8+a)', unit: 'Н' } },
-                    { name: "Закон всемирного тяготения", desc: "Притяжение масс.", formula: "F = G · m₁m₂ / R²", vars: "G = 6.67e-11", example: { dano: "m1=m2=1e5, R=10", sol: "6.67e-11·1e10/100", ans: "6.67 мН" }, calc: { vars: [{id:'m1', name:'m1'},{id:'m2', name:'m2'},{id:'r', name:'R'}], expr: '6.67e-11*m1*m2/(r*r)', unit: 'Н' } },
-                    { name: "Импульс", desc: "Кол-во движения.", formula: "p = m · v", vars: "m — масса, v — скорость", example: { dano: "m=1000, v=20", sol: "p = 1000·20", ans: "20000" }, calc: { vars: [{id:'m', name:'m'},{id:'v', name:'v'}], expr: 'm*v', unit: 'кг·м/с' } },
-                    { name: "ЗСИ", desc: "Закон сохр. импульса.", formula: "m₁v₁ + m₂v₂ = const", vars: "При упругом и неупругом ударе.", example: { dano: "Неупругий удар", sol: "m1v1+m2v2=(m1+m2)v", ans: "..." } },
-                    { name: "Колебания (Период)", desc: "Время одного колебания.", formula: "T = 1 / ν", vars: "ν - частота", example: { dano: "ν = 50 Гц", sol: "T = 1 / 50", ans: "0.02 с" }, calc: { vars: [{id:'nu', name:'ν'}], expr: '1/nu', unit: 'с' } },
-                    { name: "Волны (Длина волны)", desc: "Звук/Свет.", formula: "λ = v / ν", vars: "v - скорость волны", example: { dano: "v=340, ν=170", sol: "λ = 340 / 170", ans: "2 м" }, calc: { vars: [{id:'v', name:'v'},{id:'nu', name:'ν'}], expr: 'v/nu', unit: 'м' } },
-                    { name: "Энергия ядра", desc: "Дефект масс.", formula: "E = Δm · c²", vars: "c — скорость света", example: { dano: "Δm = 1 а.е.м.", sol: "1 а.е.м. = 931.5 МэВ", ans: "931.5 МэВ" }, calc: { vars: [{id:'dm', name:'Δm (аем)'}], expr: 'dm*931.5', unit: 'МэВ' } }
+                    {name:"Координата (равномерное движение)",desc:"Прямолинейное движение.",formula:"x = x₀ + v_x·t",vars:"x0 - начальная координата",example:{dano:"x0=5, v=2, t=3",sol:"x=5+2*3",ans:"11 м"},calc:{vars:[{id:'x0',name:'x0'},{id:'v',name:'v'},{id:'t',name:'t'}],expr:'x0+v*t',unit:'м'}},
+                    {name:"Ускорение",desc:"Изменение скорости со временем.",formula:"a = (v - v₀) / t",vars:"a - в м/с²",example:{dano:"v=20, v0=0, t=5",sol:"a=20/5",ans:"4 м/с²"},calc:{vars:[{id:'v',name:'v'},{id:'v0',name:'v0'},{id:'t',name:'t'}],expr:'(v-v0)/t',unit:'м/с²'}},
+                    {name:"Скорость при равноускоренном движении",desc:"Мгновенная скорость.",formula:"v = v₀ + a·t",vars:"v0 - начальная скорость",example:{dano:"v0=5, a=2, t=3",sol:"v=5+2*3",ans:"11 м/с"},calc:{vars:[{id:'v0',name:'v0'},{id:'a',name:'a'},{id:'t',name:'t'}],expr:'v0+a*t',unit:'м/с'}},
+                    {name:"Перемещение при ускорении",desc:"Путь с ускорением.",formula:"s = v₀·t + a·t² / 2",vars:"Площадь под графиком скорости",example:{dano:"v0=2, a=1, t=4",sol:"s=2*4 + 16/2",ans:"16 м"},calc:{vars:[{id:'v0',name:'v0'},{id:'a',name:'a'},{id:'t',name:'t'}],expr:'v0*t+0.5*a*t*t',unit:'м'}},
+                    {name:"Перемещение без времени",desc:"Удобно при торможении.",formula:"s = (v² - v₀²) / 2a",vars:"Не требует знания времени",example:{dano:"v0=0, v=10, a=2",sol:"s=100/4",ans:"25 м"},calc:{vars:[{id:'v',name:'v'},{id:'v0',name:'v0'},{id:'a',name:'a'}],expr:'(v*v-v0*v0)/(2*a)',unit:'м'}},
+                    {name:"Центростремительное ускорение",desc:"Движение по окружности.",formula:"a_ц = v² / R",vars:"Вектор направлен к центру",example:{dano:"v=10, R=2",sol:"a=100/2",ans:"50 м/с²"},calc:{vars:[{id:'v',name:'v'},{id:'r',name:'R'}],expr:'v*v/r',unit:'м/с²'}},
+                    {name:"Центростремительная сила",desc:"Удерживает на окружности.",formula:"F = m·v² / R",vars:"Следствие 2 закона Ньютона",example:{dano:"m=1, v=10, R=2",sol:"F=1*100/2",ans:"50 Н"},calc:{vars:[{id:'m',name:'m'},{id:'v',name:'v'},{id:'r',name:'R'}],expr:'m*v*v/r',unit:'Н'}},
+                    {name:"Первый закон Ньютона",desc:"Инерция.",formula:"ΣF = 0 ⟹ v = const",vars:"Если силы скомпенсированы - тело летит прямо",example:{dano:"Лед без трения",sol:"Сумма сил равна 0",ans:"v = const"}},
+                    {name:"Второй закон Ньютона",desc:"Основной закон динамики.",formula:"F = m · a",vars:"F - равнодействующая всех сил",example:{dano:"m=5кг, a=2м/с²",sol:"F=5*2",ans:"10 Н"},calc:{vars:[{id:'m',name:'Масса m'},{id:'a',name:'Ускорение a'}],expr:'m*a',unit:'Н'}},
+                    {name:"Третий закон Ньютона",desc:"Действие равно противодействию.",formula:"F₁ = -F₂",vars:"Силы приложены к разным телам",example:{dano:"Я давлю на стену 50Н",sol:"Стена давит на меня",ans:"50 Н"}},
+                    {name:"Закон всемирного тяготения",desc:"Притяжение любых масс.",formula:"F = G · m₁m₂ / R²",vars:"G = 6.67e-11",example:{dano:"m1=m2=1e5, R=10",sol:"6.67e-11 * 1e10 / 100",ans:"6.67 мН"},calc:{vars:[{id:'m1',name:'m1'},{id:'m2',name:'m2'},{id:'r',name:'R'}],expr:'6.67e-11*m1*m2/(r*r)',unit:'Н'}},
+                    {name:"Свободное падение",desc:"Падение без нач. скорости.",formula:"h = g · t² / 2",vars:"g ≈ 9.8 м/с²",example:{dano:"t=3с",sol:"h=9.8*9/2",ans:"44.1 м"},calc:{vars:[{id:'t',name:'Время t'}],expr:'9.8*t*t/2',unit:'м'}},
+                    {name:"Вес тела с ускорением",desc:"Перегрузка и невесомость.",formula:"P = m(g ± a)",vars:"+ при разгоне вверх, - вниз",example:{dano:"Лифт вверх: m=50, a=2",sol:"P=50*(9.8+2)",ans:"590 Н"},calc:{vars:[{id:'m',name:'m'},{id:'a',name:'a(с плюсом или минусом)'}],expr:'m*(9.8+a)',unit:'Н'}},
+                    {name:"Импульс тела",desc:"Количество движения.",formula:"p = m · v",vars:"p - векторная величина",example:{dano:"m=1000кг, v=20м/с",sol:"p=1000*20",ans:"20000 кг·м/с"},calc:{vars:[{id:'m',name:'Масса m'},{id:'v',name:'Скор. v'}],expr:'m*v',unit:'кг·м/с'}},
+                    {name:"Закон сохранения импульса",desc:"При столкновениях.",formula:"m₁v₁ + m₂v₂ = const",vars:"В замкнутой системе импульс сохраняется",example:{dano:"Абсолютно неупругий удар",sol:"m1v1+m2v2 = (m1+m2)v",ans:"..."}},
+                    {name:"Математический маятник",desc:"Период колебаний.",formula:"T = 2π√(l/g)",vars:"Не зависит от массы!",example:{dano:"l=1м, g=9.8",sol:"T=2*3.14*sqrt(1/9.8)",ans:"2.01 с"},calc:{vars:[{id:'l',name:'Длина l'}],expr:'2*Math.PI*Math.sqrt(l/9.8)',unit:'с'}},
+                    {name:"Пружинный маятник",desc:"Период колебаний.",formula:"T = 2π√(m/k)",vars:"m - масса, k - жесткость",example:{dano:"m=1кг, k=100Н/м",sol:"T=2*3.14*0.1",ans:"0.628 с"},calc:{vars:[{id:'m',name:'Масса m'},{id:'k',name:'Жестк. k'}],expr:'2*Math.PI*Math.sqrt(m/k)',unit:'с'}},
+                    {name:"Длина волны",desc:"Связь со скоростью.",formula:"λ = v / ν",vars:"ν - частота колебаний",example:{dano:"v=340м/с, ν=170Гц",sol:"λ=340/170",ans:"2 м"},calc:{vars:[{id:'v',name:'Скорость v'},{id:'nu',name:'Частота ν'}],expr:'v/nu',unit:'м'}},
+                    {name:"Энергия связи ядра",desc:"Дефект масс.",formula:"E = Δm · c²",vars:"Разница масс нуклонов и ядра",example:{dano:"Δm = 1 а.е.м.",sol:"1 * 931.5 МэВ",ans:"931.5 МэВ"},calc:{vars:[{id:'dm',name:'Δm в а.е.м.'}],expr:'dm*931.5',unit:'МэВ'}},
+                    {name:"Альфа и Бета распад",desc:"Радиоактивность.",formula:"α: ⁴₂He, β: ⁰₋₁e",vars:"Смещение по таблице Менделеева",example:{dano:"Альфа распад Урана",sol:"Масса -4, заряд -2",ans:"Торий"}},
+                    {name:"Закон радиоактивного распада",desc:"Период полураспада.",formula:"N = N₀ · 2^(-t/T)",vars:"T - время распада половины ядер",example:{dano:"N0=100%, t=2T",sol:"N=100 * 2^-2",ans:"25 %"}}
                 ]
             },
             10: {
-                title: "10 класс: МКТ и Электростатика",
+                title: "10 класс: МКТ и Термодинамика",
                 topics: [
-                    { name: "Уравнение Менделеева-Клапейрона", desc: "Состояние ид. газа.", formula: "pV = (m/M)RT", vars: "R = 8.31 Дж/(моль·К)", example: { dano: "m=M, T=300, V=0.083", sol: "p = 1·8.31·300/0.083", ans: "30 кПа" }, calc: { vars: [{id:'nu', name:'Кол-во(моль)'},{id:'T', name:'T(К)'},{id:'V', name:'V'}], expr: 'nu*8.31*T/V', unit: 'Па' } },
-                    { name: "Изотермический процесс", desc: "T = const (Бойль-Мариотт).", formula: "p₁V₁ = p₂V₂", vars: "T = const, m = const", example: { dano: "p1=100, V1=2, V2=1", sol: "p2 = 100·2/1", ans: "200" } },
-                    { name: "Изобарный процесс", desc: "p = const (Гей-Люссак).", formula: "V₁/T₁ = V₂/T₂", vars: "p = const", example: { dano: "V1=2, T1=300, T2=600", sol: "V2 = 2·600/300", ans: "4" } },
-                    { name: "Внутренняя энергия", desc: "Одноатомного газа.", formula: "U = (3/2)νRT", vars: "ν — количество вещества", example: { dano: "ν=1, T=300", sol: "U = 1.5·1·8.31·300", ans: "3740 Дж" }, calc: { vars: [{id:'nu', name:'ν'},{id:'t', name:'T'}], expr: '1.5*nu*8.31*t', unit: 'Дж' } },
-                    { name: "Первое начало термодинамики", desc: "Сохранение энергии.", formula: "Q = ΔU + A", vars: "Q — тепло, A — работа", example: { dano: "A=200, ΔU=300", sol: "Q = 300+200", ans: "500 Дж" }, calc: { vars: [{id:'du', name:'ΔU'},{id:'a', name:'A'}], expr: 'du+a', unit: 'Дж' } },
-                    { name: "Закон Кулона", desc: "Сила точечных зарядов.", formula: "F = k|q₁q₂|/r²", vars: "k = 9e9", example: { dano: "q=3мкКл, r=0.1", sol: "F = 9e9·9e-12/0.01", ans: "8.1 Н" }, calc: { vars: [{id:'q1', name:'q1'},{id:'q2', name:'q2'},{id:'r', name:'r'}], expr: '9e9*Math.abs(q1*q2)/(r*r)', unit: 'Н' } },
-                    { name: "Напряженность поля", desc: "Силовая характеристика.", formula: "E = F / q", vars: "F — сила", example: { dano: "F=0.05, q=1e-5", sol: "E = 0.05 / 1e-5", ans: "5000 В/м" }, calc: { vars: [{id:'f', name:'F'},{id:'q', name:'q'}], expr: 'f/q', unit: 'В/м' } },
-                    { name: "Электроемкость", desc: "Плоского конденсатора.", formula: "C = εε₀S / d", vars: "ε₀ = 8.85e-12", example: { dano: "В вакууме (ε=1)", sol: "-", ans: "Ф" } },
-                    { name: "Энергия конденсатора", desc: "Заряженного конденсатора.", formula: "W = CU² / 2", vars: "C — емкость, U — напряжение", example: { dano: "C=10мкФ, U=100В", sol: "W = 10e-6·1e4 / 2", ans: "0.05 Дж" }, calc: { vars: [{id:'c', name:'C'},{id:'u', name:'U'}], expr: 'c*u*u/2', unit: 'Дж' } },
-                    { name: "Закон Ома для полной цепи", desc: "С учетом источника.", formula: "I = ε / (R + r)", vars: "ε — ЭДС, r — внутр. сопр.", example: { dano: "ε=12, R=5, r=1", sol: "I = 12 / 6", ans: "2 А" }, calc: { vars: [{id:'e', name:'ε'},{id:'R', name:'R'},{id:'r', name:'r'}], expr: 'e/(R+r)', unit: 'А' } }
+                    {name:"Количество вещества",desc:"В молях.",formula:"ν = m / M = N / N_A",vars:"N_A = 6.02e23 моль⁻¹",example:{dano:"m=36 г, M=18 г/моль",sol:"ν=36/18",ans:"2 моль"},calc:{vars:[{id:'m',name:'m'},{id:'M',name:'M'}],expr:'m/M',unit:'моль'}},
+                    {name:"Основное уравнение МКТ",desc:"Давление газа.",formula:"p = (1/3) n m₀ v²",vars:"n - концентрация молекул",example:{dano:"Через кин. энергию",sol:"p = 2/3 n E_k",ans:"..."}},
+                    {name:"Средняя кинетическая энергия",desc:"Температура - мера энергии.",formula:"E = (3/2) k T",vars:"k = 1.38e-23 Дж/К",example:{dano:"T=300 К",sol:"E=1.5*1.38e-23*300",ans:"6.2e-21 Дж"},calc:{vars:[{id:'t',name:'Темп. T'}],expr:'1.5*1.38e-23*t',unit:'Дж'}},
+                    {name:"Уравнение Менделеева-Клапейрона",desc:"Состояние идеального газа.",formula:"pV = (m/M)RT",vars:"R = 8.31 Дж/(моль*К)",example:{dano:"m=M, T=300, V=0.083",sol:"p=1*8.31*300/0.083",ans:"30 кПа"},calc:{vars:[{id:'nu',name:'ν (моль)'},{id:'t',name:'T (К)'},{id:'v',name:'V (м³)'}],expr:'nu*8.31*t/v',unit:'Па'}},
+                    {name:"Изотермический процесс",desc:"Бойль-Мариотт (T=const).",formula:"p₁V₁ = p₂V₂",vars:"График - гипербола",example:{dano:"p1=100, V1=2, V2=1",sol:"p2=100*2/1",ans:"200 Па"}},
+                    {name:"Изобарный процесс",desc:"Гей-Люссак (p=const).",formula:"V₁/T₁ = V₂/T₂",vars:"Газ расширяется при нагреве",example:{dano:"V1=2, T1=300, T2=600",sol:"V2=2*600/300",ans:"4 м³"}},
+                    {name:"Изохорный процесс",desc:"Шарль (V=const).",formula:"p₁/T₁ = p₂/T₂",vars:"Давление растет при нагреве",example:{dano:"p1=100, T1=300, T2=600",sol:"p2=100*600/300",ans:"200 Па"}},
+                    {name:"Внутренняя энергия газа",desc:"Зависит только от температуры.",formula:"U = (3/2) ν R T",vars:"Для одноатомного газа (гелий, неон)",example:{dano:"ν=1, T=300",sol:"U=1.5*1*8.31*300",ans:"3740 Дж"},calc:{vars:[{id:'nu',name:'ν'},{id:'t',name:'T'}],expr:'1.5*nu*8.31*t',unit:'Дж'}},
+                    {name:"Работа газа",desc:"При изменении объема.",formula:"A = p ΔV",vars:"Площадь под графиком p(V)",example:{dano:"p=1e5, dV=0.1",sol:"A=1e5*0.1",ans:"10000 Дж"},calc:{vars:[{id:'p',name:'p'},{id:'dv',name:'ΔV'}],expr:'p*dv',unit:'Дж'}},
+                    {name:"Первое начало термодинамики",desc:"Закон сохранения энергии.",formula:"Q = ΔU + A",vars:"Теплота идет на нагрев и работу",example:{dano:"A=200, ΔU=300",sol:"Q=300+200",ans:"500 Дж"},calc:{vars:[{id:'du',name:'ΔU'},{id:'a',name:'A'}],expr:'du+a',unit:'Дж'}},
+                    {name:"КПД тепловой машины",desc:"Эффективность двигателя.",formula:"η = (Q₁ - Q₂) / Q₁",vars:"Q1 - от нагревателя, Q2 - холодильнику",example:{dano:"Q1=100, Q2=60",sol:"η=40/100",ans:"40 %"}},
+                    {name:"Идеальный цикл Карно",desc:"Максимально возможный КПД.",formula:"η = (T₁ - T₂) / T₁",vars:"Температуры в Кельвинах",example:{dano:"T1=600К, T2=300К",sol:"(600-300)/600",ans:"50 %"},calc:{vars:[{id:'t1',name:'T1(К)'},{id:'t2',name:'T2(К)'}],expr:'(t1-t2)/t1*100',unit:'%'}},
+                    {name:"Закон Кулона",desc:"Взаимодействие точечных зарядов.",formula:"F = k|q₁q₂| / r²",vars:"k = 9e9 Н·м²/Кл²",example:{dano:"q=3мкКл, r=0.1м",sol:"F=9e9*(3e-6)^2/0.01",ans:"8.1 Н"},calc:{vars:[{id:'q1',name:'q1'},{id:'q2',name:'q2'},{id:'r',name:'r'}],expr:'9e9*Math.abs(q1*q2)/(r*r)',unit:'Н'}},
+                    {name:"Напряженность электрического поля",desc:"Силовая характеристика.",formula:"E = F / q",vars:"Вектор от плюса к минусу",example:{dano:"F=0.05Н, q=10мкКл",sol:"E=0.05/1e-5",ans:"5000 В/м"},calc:{vars:[{id:'f',name:'F'},{id:'q',name:'q'}],expr:'f/q',unit:'В/м'}},
+                    {name:"Потенциал точечного заряда",desc:"Энергетическая характеристика.",formula:"φ = k q / r",vars:"Скалярная величина (Вольты)",example:{dano:"q=1нКл, r=1м",sol:"phi=9e9*1e-9/1",ans:"9 В"}},
+                    {name:"Работа электрического поля",desc:"Перемещение заряда.",formula:"A = q(φ₁ - φ₂) = qU",vars:"Работа по замкнутому контуру = 0",example:{dano:"q=2Кл, U=10В",sol:"A=2*10",ans:"20 Дж"},calc:{vars:[{id:'q',name:'q'},{id:'u',name:'U'}],expr:'q*u',unit:'Дж'}},
+                    {name:"Электроемкость плоского конденсатора",desc:"Накопление заряда.",formula:"C = εε₀S / d",vars:"ε₀ = 8.85e-12 Ф/м",example:{dano:"Воздух ε=1",sol:"Зависит только от геометрии",ans:"Ф"}},
+                    {name:"Энергия заряженного конденсатора",desc:"Энергия поля внутри.",formula:"W = CU² / 2",vars:"Или W = q^2 / 2C",example:{dano:"C=10мкФ, U=100В",sol:"W=1e-5*1e4/2",ans:"0.05 Дж"},calc:{vars:[{id:'c',name:'C'},{id:'u',name:'U'}],expr:'c*u*u/2',unit:'Дж'}},
+                    {name:"Закон Ома для полной цепи",desc:"С учетом источника.",formula:"I = ε / (R + r)",vars:"ε - ЭДС, r - внутреннее сопротивление",example:{dano:"E=12В, R=5, r=1",sol:"I=12/6",ans:"2 А"},calc:{vars:[{id:'e',name:'ЭДС ε'},{id:'R',name:'R'},{id:'r',name:'r внутр.'}],expr:'e/(R+r)',unit:'А'}},
+                    {name:"Работа сторонних сил (ЭДС)",desc:"Природа батарейки.",formula:"ε = A_ст / q",vars:"Работа некулоновских сил",example:{dano:"A=24Дж, q=2Кл",sol:"E=24/2",ans:"12 В"},calc:{vars:[{id:'a',name:'A'},{id:'q',name:'q'}],expr:'a/q',unit:'В'}}
                 ]
             },
             11: {
-                title: "11 класс: Электродинамика и Кванты",
+                title: "11 класс: Электродинамика, Оптика, Кванты",
                 topics: [
-                    { name: "Сила Ампера", desc: "Поле действует на проводник.", formula: "F_А = IBl sinα", vars: "B — магн. индукция", example: { dano: "I=2, B=0.1, l=1, a=90", sol: "F = 2·0.1·1", ans: "0.2 Н" }, calc: { vars: [{id:'i', name:'I'},{id:'b', name:'B'},{id:'l', name:'l'}], expr: 'i*b*l', unit: 'Н' } },
-                    { name: "Сила Лоренца", desc: "Поле действует на заряд.", formula: "F_Л = qvB sinα", vars: "q — заряд, v — скорость", example: { dano: "q=1, v=10, B=2, a=90", sol: "F = 1·10·2", ans: "20 Н" }, calc: { vars: [{id:'q', name:'q'},{id:'v', name:'v'},{id:'b', name:'B'}], expr: 'q*v*b', unit: 'Н' } },
-                    { name: "Магнитный поток", desc: "Сквозь контур.", formula: "Φ = BScosα", vars: "S — площадь", example: { dano: "B=0.2, S=0.5, a=0", sol: "Φ = 0.2·0.5", ans: "0.1 Вб" }, calc: { vars: [{id:'b', name:'B'},{id:'s', name:'S'}], expr: 'b*s', unit: 'Вб' } },
-                    { name: "ЭДС Индукции", desc: "Закон Фарадея.", formula: "ε = -ΔΦ / Δt", vars: "Изменение потока", example: { dano: "ΔΦ=0.4, Δt=2", sol: "ε = 0.4 / 2", ans: "0.2 В" }, calc: { vars: [{id:'df', name:'ΔΦ'},{id:'dt', name:'Δt'}], expr: 'df/dt', unit: 'В' } },
-                    { name: "Формула Томсона", desc: "Колебательный контур.", formula: "T = 2π√(LC)", vars: "L — индуктивность, C — емкость", example: { dano: "L=1, C=1e-6", sol: "T = 2π√(1e-6)", ans: "0.006 с" } },
-                    { name: "Формула тонкой линзы", desc: "Оптика.", formula: "1/F = 1/d + 1/f", vars: "d - до предмета, f - до изобр.", example: { dano: "F=10, d=30", sol: "1/f = 1/10 - 1/30", ans: "15 см" } },
-                    { name: "Энергия фотона", desc: "Кванты.", formula: "E = hν = hc/λ", vars: "h = 6.63e-34", example: { dano: "ν=5e14", sol: "E = 6.63e-34·5e14", ans: "3.3e-19 Дж" }, calc: { vars: [{id:'n', name:'ν'}], expr: '6.63e-34*n', unit: 'Дж' } },
-                    { name: "Уравнение Эйнштейна", desc: "Для фотоэффекта.", formula: "hν = A_вых + E_к", vars: "A — работа выхода", example: { dano: "hν=3эВ, A=2эВ", sol: "E = 3 - 2", ans: "1 эВ" }, calc: { vars: [{id:'hv', name:'hν'},{id:'a', name:'A'}], expr: 'hv-a', unit: '' } },
-                    { name: "Дефект масс", desc: "Энергия связи ядра.", formula: "ΔE = Δm · c²", vars: "1 а.е.м. = 931.5 МэВ", example: { dano: "Δm = 1", sol: "ΔE = 1 · 931.5", ans: "931.5 МэВ" }, calc: { vars: [{id:'dm', name:'Δm'}], expr: 'dm*931.5', unit: 'МэВ' } },
-                    { name: "Закон рад. распада", desc: "Ядерная физика.", formula: "N = N₀ · 2^(-t/T)", vars: "T — период полураспада", example: { dano: "N0=100, t=16, T=8", sol: "N = 100 · 2^(-2)", ans: "25" } }
+                    {name:"Сила Ампера",desc:"Магнитное поле действует на проводник с током.",formula:"F_А = IBl sinα",vars:"B - индукция, правило левой руки",example:{dano:"I=2, B=0.1, l=1, a=90°",sol:"F=2*0.1*1",ans:"0.2 Н"},calc:{vars:[{id:'i',name:'I'},{id:'b',name:'B'},{id:'l',name:'l'}],expr:'i*b*l',unit:'Н'}},
+                    {name:"Сила Лоренца",desc:"Магнитное поле действует на заряд.",formula:"F_Л = qvB sinα",vars:"Заставляет заряды двигаться по окружности",example:{dano:"q=1, v=10, B=2, a=90°",sol:"F=1*10*2",ans:"20 Н"},calc:{vars:[{id:'q',name:'q'},{id:'v',name:'v'},{id:'b',name:'B'}],expr:'q*v*b',unit:'Н'}},
+                    {name:"Радиус орбиты частицы",desc:"В магнитном поле.",formula:"r = mv / qB",vars:"Следствие F_Л = m a_ц",example:{dano:"Протон в поле",sol:"r пропорционален скорости",ans:"м"}},
+                    {name:"Магнитный поток",desc:"Количество линий через площадь.",formula:"Φ = BScosα",vars:"α - угол между нормалью и вектором B",example:{dano:"B=0.2, S=0.5, a=0°",sol:"Ф=0.2*0.5*1",ans:"0.1 Вб"},calc:{vars:[{id:'b',name:'B'},{id:'s',name:'S'}],expr:'b*s',unit:'Вб'}},
+                    {name:"ЭДС Индукции (Фарадей)",desc:"Причина переменного тока.",formula:"ε = -ΔΦ / Δt",vars:"Правило Ленца (минус)",example:{dano:"dФ=0.4, dt=2",sol:"E=0.4/2",ans:"0.2 В"},calc:{vars:[{id:'df',name:'ΔΦ'},{id:'dt',name:'Δt'}],expr:'df/dt',unit:'В'}},
+                    {name:"ЭДС в движущемся проводнике",desc:"Генерация тока.",formula:"ε = vBl sinα",vars:"Самолет летит в магнитном поле Земли",example:{dano:"v=100, B=5e-5, l=10",sol:"E=100*5e-5*10",ans:"0.05 В"},calc:{vars:[{id:'v',name:'v'},{id:'b',name:'B'},{id:'l',name:'l'}],expr:'v*b*l',unit:'В'}},
+                    {name:"ЭДС Самоиндукции",desc:"В катушке при изменении тока.",formula:"ε = -L · ΔI / Δt",vars:"L - индуктивность (Генри)",example:{dano:"L=2, dI=5, dt=1",sol:"E=2*5/1",ans:"10 В"},calc:{vars:[{id:'l',name:'L'},{id:'di',name:'ΔI'},{id:'dt',name:'Δt'}],expr:'l*di/dt',unit:'В'}},
+                    {name:"Энергия магнитного поля",desc:"Энергия внутри катушки.",formula:"W = LI² / 2",vars:"Аналог кинетической энергии (mv²/2)",example:{dano:"L=2Гн, I=3А",sol:"W=2*9/2",ans:"9 Дж"},calc:{vars:[{id:'l',name:'L'},{id:'i',name:'I'}],expr:'l*i*i/2',unit:'Дж'}},
+                    {name:"Формула Томсона",desc:"Идеальный колебательный контур.",formula:"T = 2π√(LC)",vars:"L - катушка, C - конденсатор",example:{dano:"L=1Гн, C=1мкФ",sol:"T=2*3.14*sqrt(1e-6)",ans:"0.006 с"}},
+                    {name:"Трансформатор",desc:"Преобразование напряжения.",formula:"k = U₁/U₂ = N₁/N₂",vars:"k - коэффициент трансформации",example:{dano:"U1=220, U2=11",sol:"k=220/11",ans:"20"}},
+                    {name:"Оптическая сила",desc:"Характеристика линзы.",formula:"D = 1 / F",vars:"В диоптриях (м⁻¹)",example:{dano:"F = 0.5 м",sol:"D=1/0.5",ans:"2 дптр"},calc:{vars:[{id:'f',name:'F (м)'}],expr:'1/f',unit:'дптр'}},
+                    {name:"Увеличение линзы",desc:"Отношение размеров.",formula:"Γ = H/h = f/d",vars:"f - до изобр., d - до предмета",example:{dano:"f=60см, d=20см",sol:"G=60/20",ans:"3"}},
+                    {name:"Условие максимумов интерференции",desc:"Волновая оптика.",formula:"Δd = kλ",vars:"Разность хода равна целому числу волн",example:{dano:"Свет усиливается",sol:"k = 0, 1, 2...",ans:"Максимум"}},
+                    {name:"Дифракционная решетка",desc:"Разложение света.",formula:"d sinφ = kλ",vars:"d - период решетки",example:{dano:"Найти угол максимума",sol:"sin = k*lam / d",ans:"..."}},
+                    {name:"Энергия фотона",desc:"Квант света.",formula:"E = hν = hc/λ",vars:"h = 6.63e-34 Дж·с",example:{dano:"ν=5e14 Гц",sol:"E=6.63e-34*5e14",ans:"3.3e-19 Дж"},calc:{vars:[{id:'n',name:'ν (Гц)'}],expr:'6.63e-34*n',unit:'Дж'}},
+                    {name:"Импульс фотона",desc:"Давление света.",formula:"p = h / λ",vars:"Фотон не имеет массы покоя, но имеет импульс",example:{dano:"lam=500нм",sol:"p=6.63e-34/5e-7",ans:"1.3e-27"}},
+                    {name:"Уравнение Эйнштейна для фотоэффекта",desc:"Вырывание электронов светом.",formula:"hν = A_вых + E_к",vars:"A - работа выхода металла",example:{dano:"hv=3эВ, A=2эВ",sol:"Ek=3-2",ans:"1 эВ"}},
+                    {name:"Красная граница фотоэффекта",desc:"Минимальная частота.",formula:"ν_min = A_вых / h",vars:"Если частота меньше, фотоэффекта нет",example:{dano:"Частота ниже красной границы",sol:"Тока нет",ans:"0 А"}},
+                    {name:"Эквивалентность массы и энергии",desc:"Теория относительности Эйнштейна.",formula:"E = mc²",vars:"Энергия покоя",example:{dano:"m=1 кг",sol:"E=1*(3e8)^2",ans:"9e16 Дж"}},
+                    {name:"Закон радиоактивного распада",desc:"Убывание радиоактивных изотопов.",formula:"N = N₀ · 2^(-t/T)",vars:"T - период полураспада",example:{dano:"N0=100, t=16, T=8",sol:"N=100*2^(-2)",ans:"25"}}
                 ]
             }
         };
 
-        // --- 2. БАЗА ЗАДАЧ ДЛЯ НОВОГО РАЗДЕЛА ---
+        // --- 2. БАЗА ЗАДАЧ ДЛЯ РАЗДЕЛА "РЕШЕНИЕ ЗАДАЧ" ---
         const tasksData = [
             { q: "Автомобиль массой 1500 кг разгоняется с ускорением 2 м/с². Чему равна сила тяги двигателя, если трением пренебречь?", hint: "Формула: F = m·a", ans: 3000, unit: "Н" },
             { q: "Какое давление на пол оказывает мальчик весом 400 Н, если площадь подошв его обуви 0.04 м²?", hint: "Формула: p = F/S", ans: 10000, unit: "Па" },
             { q: "Найди механическую работу, которую совершает подъемник, поднимая груз весом 500 Н на высоту 4 м.", hint: "Формула: A = F·s", ans: 2000, unit: "Дж" },
             { q: "Чему равно сопротивление спирали утюга, если при напряжении 220 В сила тока равна 4 А?", hint: "Закон Ома: R = U/I", ans: 55, unit: "Ом" },
-            { q: "Тело падает с высоты без начальной скорости ровно 3 секунды. С какой высоты оно упало? (Принять g=10 м/с²)", hint: "Формула: h = gt²/2", ans: 45, unit: "м" }
+            { q: "Тело падает с высоты без начальной скорости ровно 3 секунды. С какой высоты оно упало? (Принять g=10 м/с²)", hint: "Формула: h = gt²/2", ans: 45, unit: "м" },
+            { q: "Газ совершил работу 400 Дж, при этом его внутренняя энергия увеличилась на 300 Дж. Какое количество теплоты он получил?", hint: "Первое начало термодинамики: Q = ΔU + A", ans: 700, unit: "Дж" },
+            { q: "Период колебаний математического маятника 2 секунды. Какова длина его нити? (Принять g=10 м/с², π²=10)", hint: "Из формулы T = 2π√(l/g) вырази l", ans: 1, unit: "м" },
+            { q: "Сколько энергии выделится при полном сгорании 2 кг дров? (Удельная теплота сгорания дров 10 МДж/кг). Введите ответ в МДж.", hint: "Формула: Q = q·m", ans: 20, unit: "МДж" }
         ];
 
-        // --- 3. БАЗА ИЗ РОВНО 30 ВОПРОСОВ (ТЕОРИЯ + ЗАДАЧИ) ---
+        // --- 3. БАЗА ИЗ РОВНО 30 ВОПРОСОВ (ТЕОРИЯ + ЗАДАЧИ) ИДУТ ПОДРЯД ---
         const allQuizQuestions = [
             { q: "1. В каких единицах измеряется сила тока?", options: ["Вольтах", "Ваттах", "Амперах", "Джоулях"], ans: 2 },
-            { q: "2. Формула Второго закона Ньютона?", options: ["F = m·g", "F = m·a", "p = m·v", "A = F·s"], ans: 1 },
-            { q: "3. Ускорение свободного падения (g) на Земле примерно:", options: ["9.8 м/с²", "3.14 м/с²", "1.6 м/с²", "100 м/с²"], ans: 0 },
-            { q: "4. Какая сила выталкивает тело из жидкости?", options: ["Тяжести", "Трения", "Упругости", "Архимедова"], ans: 3 },
-            { q: "5. Закон Ома для участка цепи:", options: ["P = U·I", "Q = I²·R·t", "I = U / R", "C = q / U"], ans: 2 },
-            { q: "6. Тело массой 3 кг движется с ускорением 4 м/с². Чему равна сила?", options: ["12 Н", "7 Н", "0.75 Н", "1.33 Н"], ans: 0 },
+            { q: "2. Какая формула описывает Второй закон Ньютона?", options: ["F = m·g", "F = m·a", "p = m·v", "A = F·s"], ans: 1 },
+            { q: "3. Ускорение свободного падения (g) на Земле примерно равно:", options: ["9.8 м/с²", "3.14 м/с²", "1.6 м/с²", "100 м/с²"], ans: 0 },
+            { q: "4. Какая сила выталкивает тело из жидкости или газа?", options: ["Тяжести", "Трения", "Упругости", "Архимедова"], ans: 3 },
+            { q: "5. Закон Ома для участка цепи выглядит так:", options: ["P = U·I", "Q = I²·R·t", "I = U / R", "C = q / U"], ans: 2 },
+            { q: "6. Тело массой 3 кг движется с ускорением 4 м/с². Чему равна действующая на него сила?", options: ["12 Н", "7 Н", "0.75 Н", "1.33 Н"], ans: 0 },
             { q: "7. Механическая работа вычисляется по формуле:", options: ["A = F·s", "N = A/t", "M = F·l", "p = F/S"], ans: 0 },
             { q: "8. Плотность вещества это:", options: ["ρ = m/V", "ρ = V/m", "ρ = m·V", "ρ = m·g"], ans: 0 },
             { q: "9. В чем суть Третьего закона Ньютона?", options: ["Тела сохраняют скорость", "Действие равно противодействию", "F = ma", "Все тела падают одинаково"], ans: 1 },
             { q: "10. Какая частица НЕ входит в состав атомного ядра?", options: ["Протон", "Нейтрон", "Электрон", "Входят все"], ans: 2 },
             { q: "11. В каких единицах измеряется давление?", options: ["Ньютонах", "Паскалях", "Джоулях", "Ваттах"], ans: 1 },
-            { q: "12. Уравнение Менделеева-Клапейрона?", options: ["Q = cmΔt", "pV = (m/M)RT", "F = G(m1m2)/R²", "E = mc²"], ans: 1 },
-            { q: "13. Напряжение в сети 220В, сопротивление 22 Ом. Чему равен ток?", options: ["10 А", "20 А", "4840 А", "0.1 А"], ans: 0 },
+            { q: "12. Как выглядит уравнение Менделеева-Клапейрона?", options: ["Q = cmΔt", "pV = (m/M)RT", "F = G(m1m2)/R²", "E = mc²"], ans: 1 },
+            { q: "13. Напряжение в сети 220 В, сопротивление лампы 22 Ом. Чему равен ток?", options: ["10 А", "20 А", "4840 А", "0.1 А"], ans: 0 },
             { q: "14. Энергия фотона вычисляется как:", options: ["E = mc²", "E = mgh", "E = hν", "E = mv²/2"], ans: 2 },
-            { q: "15. Единицы измерения мощности?", options: ["Паскаль", "Джоуль", "Ватт", "Вольт"], ans: 2 },
+            { q: "15. Каковы единицы измерения мощности?", options: ["Паскаль", "Джоуль", "Ватт", "Вольт"], ans: 2 },
             { q: "16. Закон сохранения импульса:", options: ["m₁v₁ + m₂v₂ = const", "E = const", "Q₁ + Q₂ = 0", "F = ma"], ans: 0 },
-            { q: "17. Скорость света в вакууме:", options: ["300 км/с", "300 000 км/с", "340 м/с", "Неизвестна"], ans: 1 },
+            { q: "17. Чему равна скорость света в вакууме?", options: ["300 км/с", "300 000 км/с", "340 м/с", "Неизвестна"], ans: 1 },
             { q: "18. Изотермический процесс протекает при постоянной...", options: ["Массе", "Давлении", "Температуре", "Объеме"], ans: 2 },
-            { q: "19. Единица электрического сопротивления?", options: ["Ом", "Ампер", "Кулон", "Генри"], ans: 0 },
+            { q: "19. Что является единицей электрического сопротивления?", options: ["Ом", "Ампер", "Кулон", "Генри"], ans: 0 },
             { q: "20. Каким прибором измеряют напряжение?", options: ["Амперметр", "Вольтметр", "Барометр", "Динамометр"], ans: 1 },
-            { q: "21. Разложение белого света в спектр — это...", options: ["Отражение", "Преломление", "Дисперсия", "Дифракция"], ans: 2 },
-            { q: "22. Переход из твердого в газообразное (минуя жидкость):", options: ["Плавление", "Сублимация", "Конденсация", "Кипение"], ans: 1 },
-            { q: "23. Формула кинетической энергии?", options: ["mgh", "mc²", "mv²/2", "kx²/2"], ans: 2 },
+            { q: "21. Разложение белого света в спектр (радугу) — это...", options: ["Отражение", "Преломление", "Дисперсия", "Дифракция"], ans: 2 },
+            { q: "22. Переход вещества из твердого в газообразное (минуя жидкость):", options: ["Плавление", "Сублимация", "Конденсация", "Кипение"], ans: 1 },
+            { q: "23. Какова формула кинетической энергии?", options: ["mgh", "mc²", "mv²/2", "kx²/2"], ans: 2 },
             { q: "24. Прибор для измерения атмосферного давления?", options: ["Манометр", "Барометр", "Ареометр", "Термометр"], ans: 1 },
             { q: "25. Магнитное поле создается...", options: ["Покоящимися зарядами", "Движущимися зарядами", "Нейтронами", "Массой"], ans: 1 },
-            { q: "26. Груз 100 Н подняли на 2 м. Какая работа совершена?", options: ["50 Дж", "200 Дж", "102 Дж", "0 Дж"], ans: 1 },
+            { q: "26. Груз весом 100 Н подняли на 2 м. Какая работа совершена?", options: ["50 Дж", "200 Дж", "102 Дж", "0 Дж"], ans: 1 },
             { q: "27. Период пружинного маятника зависит от...", options: ["Длины нити", "Массы и жесткости", "Ускорения g", "Амплитуды"], ans: 1 },
-            { q: "28. Положительно заряженная частица в ядре атома?", options: ["Протон", "Нейтрон", "Электрон", "Фотон"], ans: 0 },
+            { q: "28. Как называется положительно заряженная частица в ядре атома?", options: ["Протон", "Нейтрон", "Электрон", "Фотон"], ans: 0 },
             { q: "29. Кто открыл явление электромагнитной индукции?", options: ["Ньютон", "Эйнштейн", "Фарадей", "Резерфорд"], ans: 2 },
-            { q: "30. Формула силы Лоренца:", options: ["F = IBl", "F = qvB", "F = ma", "F = mg"], ans: 1 }
+            { q: "30. Как выглядит формула силы Лоренца?", options: ["F = IBl", "F = qvB", "F = ma", "F = mg"], ans: 1 }
         ];
 
         // --- 3D ФОН И СВЕЧЕНИЕ ---
@@ -536,7 +605,7 @@
             sContent.innerHTML = html + `</div>`;
         });
 
-        // --- ТЕСТ (30 ВОПРОСОВ БЕЗ ПЕРЕМЕШИВАНИЯ, ИДУТ ПОДРЯД) ---
+        // --- ТЕСТ (30 ВОПРОСОВ) ---
         let qIndex=0, qScore=0, qAnswered=false;
         function startQuizScreen() {
             hideAll(); sQuiz.classList.remove('hidden'); spawn3DModel('main'); stopAllSims(); window.scrollTo(0,0);
@@ -648,14 +717,12 @@
         }
         function drawSim2() {
             let ball = document.getElementById('sim2-ball');
-            // Масштаб: 200м = 100% высоты контейнера.
             let percentY = ((sim2.h - sim2.curH) / 200) * 100; 
-            if(percentY > 80) percentY = 80; // Чтобы не проваливался под землю
+            if(percentY > 80) percentY = 80;
             ball.style.top = percentY + '%';
             document.getElementById('sim2-t').innerText = sim2.t.toFixed(2);
             document.getElementById('sim2-cur-h').innerText = sim2.curH.toFixed(2);
         }
-
     </script>
 </body>
 </html>
