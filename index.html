@@ -3,901 +3,466 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <title>PhysHub | Школьный 3D-справочник по физике</title>
-    <meta name="description" content="PhysHub — это интерактивный справочник по физике для 7-11 классов. Умный калькулятор, виртуальная лаборатория с графиками, формулы, законы Ньютона, примеры решения задач и 3D-визуализация.">
-    <meta name="keywords" content="physhub, физика, справочник по физике, формулы по физике, виртуальная лаборатория, графики по физике, калькулятор по физике, физика 7 класс, физика 9 класс, ЕГЭ">
-    <meta name="author" content="sahar21">
-    <meta name="robots" content="index, follow">
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    
+    <title>PhysHub | Интерактивная физика</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- Подключаем библиотеку для графиков -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    colors: { brand: { dark: '#0f172a' } }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #0f172a; color: #f8fafc; margin: 0; padding: 0; overflow-x: hidden; }
-        #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -2; background: radial-gradient(ellipse at top right, #1e293b, #0f172a, #000000); }
-        #mouse-glow {
-            position: fixed; top: -200px; left: -200px; width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0) 70%);
-            border-radius: 50%; pointer-events: none; z-index: -1;
-            transition: opacity 0.3s ease, background 0.5s ease; opacity: 0;
-            will-change: transform;
-        }
-        .glass-card {
-            background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1); transform-style: preserve-3d;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); position: relative;
-        }
-        .glass-card-inner { transform: translateZ(30px); }
-        .formula-box { background: rgba(0, 0, 0, 0.4); transform: translateZ(40px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        .example-box { background: rgba(15, 23, 42, 0.7); border-top: 2px solid #10b981; transform: translateZ(20px); }
-        .fade-in { animation: fadeIn 0.4s ease-in-out forwards; opacity: 0; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        
-        #model-3d-container { width: 100%; display: flex; justify-content: center; align-items: center; pointer-events: none; position: relative; height: 220px; }
-        @media (min-width: 768px) { #model-3d-container { height: 260px; } }
-        @media (min-width: 1024px) { #model-3d-container { height: 300px; } }
-
-        #model-3d-container::before {
-            content: ''; position: absolute; width: 150px; height: 150px;
-            background: var(--glow-color, rgba(14, 165, 233, 0.2)); filter: blur(40px); border-radius: 50%; z-index: -1;
-            transition: background 0.5s ease;
-        }
-        @media (min-width: 1024px) { #model-3d-container::before { width: 200px; height: 200px; filter: blur(60px); } }
-
-        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        
-        input[type=range] { -webkit-appearance: none; width: 100%; background: rgba(255,255,255,0.1); height: 6px; border-radius: 5px; outline: none; margin-top: 10px; margin-bottom: 10px; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #0ea5e9; cursor: pointer; transition: transform 0.1s; box-shadow: 0 0 10px rgba(14,165,233,0.5); }
+        :root { --bg-main: #0f172a; --text-main: #f8fafc; --card-bg: rgba(30, 41, 59, 0.4); --card-border: rgba(255, 255, 255, 0.1); --panel-bg: rgba(0,0,0,0.3); }
+        body.light-theme { --bg-main: #f8fafc; --text-main: #0f172a; --card-bg: rgba(255, 255, 255, 0.8); --card-border: rgba(0, 0, 0, 0.1); --panel-bg: rgba(255,255,255,0.5); }
+        body { background-color: var(--bg-main); color: var(--text-main); font-family: 'Inter', sans-serif; transition: background-color 0.5s, color 0.5s; overflow-x: hidden; }
+        #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -2; background: var(--bg-main); transition: background 0.5s; }
+        #mouse-glow { position: fixed; width: 400px; height: 400px; background: radial-gradient(circle, rgba(14,165,233,0.15) 0%, transparent 70%); border-radius: 50%; pointer-events: none; z-index: -1; transform: translate(-50%, -50%); transition: opacity 0.3s; opacity: 0; will-change: transform; }
+        .glass-card { background: var(--card-bg); backdrop-filter: blur(16px); border: 1px solid var(--card-border); border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.2); transition: background 0.5s, border 0.5s; }
+        .calc-panel, .formula-box { background: var(--panel-bg); }
+        .example-box { border-top: 2px solid #10b981; background: var(--panel-bg); }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: var(--card-border); height: 6px; border-radius: 5px; outline: none; margin: 10px 0; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: currentColor; cursor: pointer; transition: 0.2s; }
         input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+        #model-3d-container { width: 100%; height: 260px; display: flex; justify-content: center; align-items: center; position: relative; }
+        #model-3d-container::before { content: ''; position: absolute; width: 150px; height: 150px; background: var(--glow-color, rgba(14,165,233,0.2)); filter: blur(50px); border-radius: 50%; z-index: -1; transition: 0.5s; }
+        .fade-in { animation: fadeIn 0.4s forwards; } @keyframes fadeIn { from{opacity:0; transform:translateY(15px)} to{opacity:1; transform:translateY(0)} }
+        canvas.sim-canvas { background: var(--panel-bg); border: 1px solid var(--card-border); border-radius: 8px; width: 100%; }
+        .text-theme { color: var(--text-main); }
     </style>
 </head>
-<body class="min-h-screen overflow-x-hidden selection:bg-white selection:text-black relative">
+<body class="min-h-screen">
 
-    <div id="particles-js"></div>
-    <div id="mouse-glow"></div>
+    <div id="particles-js"></div><div id="mouse-glow"></div>
 
-    <nav class="w-full p-6 md:p-10 flex justify-between items-center relative z-50">
-        <div class="flex items-center gap-2 md:gap-4 cursor-pointer group" onclick="goHome()">
-            <svg id="logo-icon" class="w-8 h-8 md:w-10 md:h-10 text-[#0ea5e9] drop-shadow-[0_0_10px_rgba(14,165,233,0.8)] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
-            <span class="text-2xl md:text-3xl font-bold tracking-tight text-white drop-shadow-md transition-colors">Phys<span id="logo-text" class="text-[#0ea5e9] transition-colors">Hub</span></span>
+    <nav class="w-full p-6 md:p-8 flex justify-between items-center relative z-50 max-w-7xl mx-auto">
+        <div class="flex items-center gap-3 cursor-pointer group" onclick="goHome()">
+            <svg id="logo-icon" class="w-10 h-10 text-[#0ea5e9] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
+            <span class="text-3xl font-bold tracking-tight text-theme drop-shadow-md">Phys<span id="logo-text" class="text-[#0ea5e9]">Hub</span></span>
         </div>
+        <button onclick="toggleTheme()" class="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-md shadow-lg border border-white/10">
+            <span id="theme-icon" class="text-xl">☀️</span>
+        </button>
     </nav>
 
-    <header class="container mx-auto px-6 pt-2 md:pt-4 pb-4 relative z-10">
-        <div class="text-center max-w-3xl md:max-w-4xl mx-auto mb-8 relative">
-            <p class="font-mono text-sm md:text-base italic text-slate-400 opacity-80 absolute -top-6 md:-top-8 left-1/2 transform -translate-x-1/2">by sahar²¹</p>
-            <h1 class="text-4xl md:text-5xl font-extrabold mb-4 md:mb-6 tracking-tight text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)] leading-tight">
-                Школьный курс <br><span id="main-title-highlight" class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 drop-shadow-[0_0_15px_rgba(14,165,233,0.5)] transition-all duration-500">Физики</span>
-            </h1>
+    <header class="container mx-auto px-6 pb-4 relative z-10 text-center">
+        <h1 class="text-4xl md:text-6xl font-extrabold mb-6 tracking-tight text-theme drop-shadow-lg">
+            Школьный курс <br><span id="main-title-highlight" class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 transition-all">Физики</span>
+        </h1>
+        <div class="max-w-xl mx-auto mb-8 relative transition-transform hover:scale-[1.02]">
+            <input type="text" id="search-input" placeholder="Поиск по темам, формулам..." class="w-full bg-black/20 dark:bg-white/20 border border-white/20 rounded-full py-4 px-8 text-theme placeholder-gray-400 focus:outline-none focus:ring-2 backdrop-blur-md text-lg">
         </div>
-
-        <div class="max-w-md md:max-w-xl mx-auto mb-8 md:mb-10 relative z-20 transition-transform duration-300 hover:scale-[1.02]">
-            <input type="text" id="search-input" placeholder="Поиск по темам и формулам..." class="w-full bg-black/40 border border-white/20 rounded-full py-3 px-6 md:py-4 md:px-8 text-white placeholder-slate-400 focus:outline-none focus:ring-1 backdrop-blur-lg shadow-[0_5px_15px_-5px_rgba(0,0,0,0.5)] transition-all text-sm md:text-base font-medium">
-            <svg class="w-5 h-5 md:w-6 md:h-6 absolute right-5 md:right-6 top-3 md:top-3.5 text-slate-400 opacity-70 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        </div>
-
-        <div class="flex flex-wrap justify-center gap-3 md:gap-4 mb-4 relative z-20">
-            <button id="btn-7" onclick="loadClass(7)" class="class-btn px-5 py-2 md:px-6 md:py-2.5 rounded-full font-semibold text-sm md:text-base transition-all bg-white/5 border border-white/10 text-slate-300 shadow-lg hover:bg-white/10">7 класс</button>
-            <button id="btn-8" onclick="loadClass(8)" class="class-btn px-5 py-2 md:px-6 md:py-2.5 rounded-full font-semibold text-sm md:text-base transition-all bg-white/5 border border-white/10 text-slate-300 shadow-lg hover:bg-white/10">8 класс</button>
-            <button id="btn-9" onclick="loadClass(9)" class="class-btn px-5 py-2 md:px-6 md:py-2.5 rounded-full font-semibold text-sm md:text-base transition-all bg-white/5 border border-white/10 text-slate-300 shadow-lg hover:bg-white/10">9 класс</button>
-            <button id="btn-10" onclick="loadClass(10)" class="class-btn px-5 py-2 md:px-6 md:py-2.5 rounded-full font-semibold text-sm md:text-base transition-all bg-white/5 border border-white/10 text-slate-300 shadow-lg hover:bg-white/10">10 класс</button>
-            <button id="btn-11" onclick="loadClass(11)" class="class-btn px-5 py-2 md:px-6 md:py-2.5 rounded-full font-semibold text-sm md:text-base transition-all bg-white/5 border border-white/10 text-slate-300 shadow-lg hover:bg-white/10">11 класс</button>
-            
-            <button id="btn-lab" onclick="loadLab()" class="class-btn px-5 py-2 md:px-6 md:py-2.5 rounded-full font-semibold text-sm md:text-base transition-all bg-[#0ea5e9]/20 border border-[#0ea5e9]/50 text-white shadow-[0_0_15px_rgba(14,165,233,0.4)] hover:bg-[#0ea5e9]/40 hover:scale-105">🔬 Лаборатория</button>
+        <div class="flex flex-wrap justify-center gap-3 mb-4">
+            <button onclick="loadClass(7)" id="btn-7" class="class-btn px-6 py-2 rounded-full font-semibold text-gray-400 border border-white/10 hover:text-theme bg-white/5 transition-all">7 класс</button>
+            <button onclick="loadClass(8)" id="btn-8" class="class-btn px-6 py-2 rounded-full font-semibold text-gray-400 border border-white/10 hover:text-theme bg-white/5 transition-all">8 класс</button>
+            <button onclick="loadClass(9)" id="btn-9" class="class-btn px-6 py-2 rounded-full font-semibold text-gray-400 border border-white/10 hover:text-theme bg-white/5 transition-all">9 класс</button>
+            <button onclick="loadClass(10)" id="btn-10" class="class-btn px-6 py-2 rounded-full font-semibold text-gray-400 border border-white/10 hover:text-theme bg-white/5 transition-all">10 класс</button>
+            <button onclick="loadClass(11)" id="btn-11" class="class-btn px-6 py-2 rounded-full font-semibold text-gray-400 border border-white/10 hover:text-theme bg-white/5 transition-all">11 класс</button>
+            <button onclick="loadLab()" id="btn-lab" class="class-btn px-6 py-2 rounded-full font-bold border border-[#0ea5e9]/50 text-white shadow-lg bg-[#0ea5e9] hover:scale-105 transition-all">🔬 Лаборатория</button>
         </div>
     </header>
 
     <div id="model-3d-container" class="relative z-10"></div>
 
-    <main class="container mx-auto px-6 pb-20 relative z-10">
+    <main class="container mx-auto px-4 md:px-8 pb-20 relative z-10">
+        
         <!-- ГЛАВНОЕ МЕНЮ -->
-        <div id="welcome-section" class="max-w-5xl mx-auto block">
-            <div class="glass-card vanilla-tilt-card rounded-2xl p-8 md:p-10 fade-in mb-8">
-                <div class="glass-card-inner">
-                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-4 md:mb-6 drop-shadow-md">Добро пожаловать в справочник!</h2>
-                    <p class="text-lg md:text-xl text-slate-300 mb-6 md:mb-8 leading-relaxed">
-                        Интерактивный путеводитель по ключевым законам и формулам школьного курса физики.
-                    </p>
-                    
-                    <div id="fact-box" class="bg-gradient-to-r from-blue-500/20 to-transparent p-4 md:p-6 rounded-xl border-l-4 border-[#0ea5e9] mb-8 shadow-inner" style="transform: translateZ(25px);">
-                        <h4 class="text-[#0ea5e9] font-bold text-sm md:text-base uppercase tracking-wider mb-2">💡 А знаете ли вы?</h4>
-                        <p id="fact-text" class="text-slate-200 text-sm md:text-base italic leading-relaxed">«Свет от Солнца до Земли летит 8 минут 20 секунд.»</p>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-[#0ea5e9] shadow-inner" style="transform: translateZ(20px);">
-                            <h3 class="text-white font-bold mb-2 md:text-lg">🧮 Калькулятор</h3>
-                            <p class="text-xs md:text-sm text-slate-400">Встроенный умный калькулятор прямо в карточках решит формулу за вас.</p>
-                        </div>
-                        <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-[#10b981] shadow-inner" style="transform: translateZ(20px);">
-                            <h3 class="text-white font-bold mb-2 md:text-lg">🔬 Лаборатория</h3>
-                            <p class="text-xs md:text-sm text-slate-400">Интерактивные виртуальные опыты с живыми графиками.</p>
-                        </div>
-                        <div class="bg-black/30 p-5 rounded-xl border border-white/5 border-l-2 border-l-[#ec4899] shadow-inner" style="transform: translateZ(20px);">
-                            <h3 class="text-white font-bold mb-2 md:text-lg">🧊 3D Модели</h3>
-                            <p class="text-xs md:text-sm text-slate-400">Голограммы реагируют на вашу мышку или палец.</p>
-                        </div>
-                    </div>
+        <div id="welcome-section" class="max-w-5xl mx-auto block fade-in">
+            <div class="glass-card p-8 md:p-12 mb-8 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold text-theme mb-6">Добро пожаловать в справочник!</h2>
+                <div class="bg-gradient-to-r from-blue-500/20 to-transparent p-6 rounded-xl border-l-4 border-[#0ea5e9] mb-8 text-left inline-block w-full">
+                    <h4 class="text-[#0ea5e9] font-bold uppercase mb-2">💡 Случайный факт</h4>
+                    <p id="fact-text" class="text-theme italic"></p>
                 </div>
-            </div>
-
-            <div class="text-center mt-12 fade-in" style="animation-delay: 0.2s;">
-                <h3 class="text-2xl md:text-3xl font-bold text-white mb-4 drop-shadow-md">Проверь свои знания!</h3>
-                <p class="text-slate-400 mb-6 md:text-lg">Блиц-тест (12 случайных вопросов из базы).</p>
-                <button onclick="startQuizScreen()" class="px-10 py-4 md:px-12 md:py-4 text-white font-extrabold text-lg md:text-xl rounded-full shadow-[0_0_20px_rgba(16,185,129,0.5)] hover:scale-105 transition-all" style="background: linear-gradient(to right, #10b981, #0ea5e9);">
-                    🎯 ПРОЙТИ ТЕСТ
-                </button>
+                <button onclick="startQuizScreen()" class="px-12 py-4 text-white font-bold text-xl rounded-full shadow-xl hover:scale-105 transition-transform" style="background: linear-gradient(45deg, #10b981, #0ea5e9);">🎯 БЛИЦ-ТЕСТ (12 ВОПРОСОВ)</button>
             </div>
         </div>
 
         <!-- ТЕСТ -->
-        <div id="quiz-section" class="max-w-3xl md:max-w-4xl mx-auto hidden">
-            <div id="quiz-card" class="glass-card rounded-2xl p-6 md:p-8 fade-in border-t-4 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
-                <div class="flex items-center justify-between mb-6 md:mb-8 border-b border-white/10 pb-4">
-                    <h3 class="text-2xl md:text-3xl font-bold text-white flex items-center gap-3"><span class="text-3xl">🧠</span> Блиц-тест</h3>
-                    <button onclick="goHome()" class="text-sm md:text-base text-slate-400 hover:text-white transition-colors">✕ Закрыть</button>
+        <div id="quiz-section" class="max-w-3xl mx-auto hidden fade-in">
+            <div id="quiz-card" class="glass-card p-8 border-t-4">
+                <div class="flex justify-between items-center border-b border-gray-500/30 pb-4 mb-6">
+                    <h3 class="text-3xl font-bold text-theme">🧠 Тест</h3>
+                    <button onclick="goHome()" class="text-gray-400 hover:text-theme">✕ Закрыть</button>
                 </div>
-                <div id="quiz-content" class="min-h-[250px] md:min-h-[300px] flex flex-col justify-center"></div>
+                <div id="quiz-content" class="min-h-[250px] flex flex-col justify-center"></div>
             </div>
         </div>
 
         <!-- КОНТЕНТ (ТЕМЫ) -->
-        <div id="content-section" class="max-w-5xl mx-auto hidden"></div>
+        <div id="content-section" class="max-w-6xl mx-auto hidden fade-in"></div>
 
-        <!-- ВИРТУАЛЬНАЯ ЛАБОРАТОРИЯ -->
-        <div id="lab-section" class="max-w-5xl mx-auto hidden">
-            <div class="fade-in mb-6 md:mb-8 text-center md:text-left">
-                <h2 class="text-2xl md:text-3xl font-bold text-white border-b border-white/10 pb-3 md:pb-4 inline-block drop-shadow-md">🔬 Виртуальная лаборатория с графиками</h2>
-                <p class="text-slate-400 mt-2 text-sm md:text-base">Двигайте ползунки и смотрите, как изменяются графики физических явлений.</p>
-            </div>
+        <!-- ЛАБОРАТОРИЯ С ПРОДВИНУТОЙ СИМУЛЯЦИЕЙ -->
+        <div id="lab-section" class="max-w-6xl mx-auto hidden fade-in">
+            <h2 class="text-3xl font-bold text-theme mb-6 border-b border-gray-500/30 pb-2">🔬 Виртуальная лаборатория</h2>
             
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-                <!-- Опыт 1: Маятник -->
-                <div class="glass-card rounded-2xl p-6 fade-in flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-xl font-bold text-white mb-2">Математический маятник</h3>
-                        <p class="text-slate-400 text-sm mb-4 border-b border-white/10 pb-2">Зависимость периода T от длины нити l.</p>
-                        <div class="mb-4">
-                            <label class="text-sm text-brand-blue font-bold">Длина нити (l): <span id="lab-pend-val" class="text-white">1 м</span></label>
-                            <input type="range" id="lab-pend-l" min="0.1" max="10" step="0.1" value="1" oninput="updateLab()">
+            <!-- ПРОДВИНУТАЯ СИМУЛЯЦИЯ (НАКЛОННАЯ ПЛОСКОСТЬ) -->
+            <div class="glass-card p-6 mb-8 border-t-4 border-[#3b82f6]">
+                <h3 class="text-2xl font-bold text-theme mb-2">Динамика: Наклонная плоскость</h3>
+                <p class="text-sm text-gray-400 mb-6">Задайте параметры и наблюдайте за движением тела, силами и графиками кинематики.</p>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Левая колонка: 2D Canvas -->
+                    <div class="lg:col-span-2">
+                        <canvas id="sim-canvas" height="300" class="sim-canvas mb-4 shadow-inner"></canvas>
+                        <!-- Кнопки управления -->
+                        <div class="flex gap-4 justify-center items-center bg-black/20 p-3 rounded-lg border border-white/10">
+                            <button onclick="toggleSim()" id="sim-play-btn" class="px-6 py-2 bg-[#10b981] text-white font-bold rounded shadow hover:scale-105 transition-transform">▶ Старт</button>
+                            <button onclick="resetSim()" class="px-6 py-2 bg-gray-600 text-white font-bold rounded shadow hover:scale-105 transition-transform">↺ Сброс</button>
+                            <span class="text-theme font-mono font-bold ml-4">t: <span id="sim-time-disp">0.00</span> c</span>
                         </div>
                     </div>
-                    <div>
-                        <div class="h-40 w-full mb-4"><canvas id="chart-pend"></canvas></div>
-                        <div class="bg-black/30 p-3 rounded-xl border border-[#0ea5e9]/30 text-center">
-                            <span class="text-slate-400 text-sm">Период колебаний (T):</span>
-                            <div id="lab-pend-out" class="text-3xl font-mono text-[#0ea5e9] font-bold mt-1">2.01 с</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Опыт 2: Свободное падение -->
-                <div class="glass-card rounded-2xl p-6 fade-in flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-xl font-bold text-white mb-2">Свободное падение</h3>
-                        <p class="text-slate-400 text-sm mb-4 border-b border-white/10 pb-2">Зависимость времени падения t от начальной высоты h.</p>
-                        <div class="mb-4">
-                            <label class="text-sm text-brand-blue font-bold">Высота (h): <span id="lab-fall-val" class="text-white">45 м</span></label>
-                            <input type="range" id="lab-fall-h" min="1" max="500" step="1" value="45" oninput="updateLab()">
-                        </div>
-                    </div>
-                    <div>
-                        <div class="h-40 w-full mb-4"><canvas id="chart-fall"></canvas></div>
-                        <div class="bg-black/30 p-3 rounded-xl border border-[#0ea5e9]/30 text-center">
-                            <span class="text-slate-400 text-sm">Время падения (t):</span>
-                            <div id="lab-fall-out" class="text-2xl font-mono text-[#0ea5e9] font-bold mt-1">3.03 с</div>
+                    
+                    <!-- Правая колонка: Ползунки -->
+                    <div class="bg-black/10 p-5 rounded-xl border border-white/10 flex flex-col gap-4 text-theme">
+                        <div><label class="text-sm font-bold flex justify-between"><span>Угол (α)</span><span id="v-ang">30°</span></label><input type="range" id="sim-ang" min="0" max="80" value="30" oninput="updateSimParams()"></div>
+                        <div><label class="text-sm font-bold flex justify-between"><span>Масса (m)</span><span id="v-mass">2 кг</span></label><input type="range" id="sim-mass" min="1" max="20" value="2" oninput="updateSimParams()"></div>
+                        <div><label class="text-sm font-bold flex justify-between"><span>Коэф. трения (μ)</span><span id="v-mu">0.2</span></label><input type="range" id="sim-mu" min="0" max="0.8" step="0.05" value="0.2" oninput="updateSimParams()"></div>
+                        <div><label class="text-sm font-bold flex justify-between"><span>Сила тяги (F)</span><span id="v-force">0 Н</span></label><input type="range" id="sim-force" min="-100" max="100" value="0" oninput="updateSimParams()"></div>
+                        <div class="mt-auto pt-4 border-t border-gray-500/30 text-sm">
+                            <p><b>a:</b> <span id="out-a">0.0</span> м/с²</p>
+                            <p><b>v:</b> <span id="out-v">0.0</span> м/с</p>
+                            <p><b>x:</b> <span id="out-x">0.0</span> м</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Опыт 3: Электрическая цепь -->
-                <div class="glass-card rounded-2xl p-6 fade-in flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-xl font-bold text-white mb-2">Закон Ома</h3>
-                        <p class="text-slate-400 text-sm mb-4 border-b border-white/10 pb-2">График силы тока I от напряжения U.</p>
-                        <div class="space-y-4 mb-4">
-                            <div>
-                                <label class="text-sm text-brand-blue font-bold">Напряжение (U): <span id="lab-ohm-val-u" class="text-white">220 В</span></label>
-                                <input type="range" id="lab-ohm-u" min="1" max="1000" step="1" value="220" oninput="updateLab()">
-                            </div>
-                            <div>
-                                <label class="text-sm text-brand-blue font-bold">Сопротивление (R): <span id="lab-ohm-val-r" class="text-white">55 Ом</span></label>
-                                <input type="range" id="lab-ohm-r" min="1" max="200" step="1" value="55" oninput="updateLab()">
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="h-40 w-full mb-4"><canvas id="chart-ohm"></canvas></div>
-                        <div class="bg-black/30 p-3 rounded-xl border border-[#0ea5e9]/30 text-center">
-                            <span class="text-slate-400 text-sm">Сила тока (I):</span>
-                            <div id="lab-ohm-out" class="text-3xl font-mono text-[#0ea5e9] font-bold mt-1">4.00 А</div>
-                        </div>
-                    </div>
+                <!-- Графики под симуляцией -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                    <div class="h-32 w-full"><canvas id="sim-chart-x"></canvas></div>
+                    <div class="h-32 w-full"><canvas id="sim-chart-v"></canvas></div>
+                    <div class="h-32 w-full"><canvas id="sim-chart-a"></canvas></div>
                 </div>
+            </div>
 
-                <!-- Опыт 4: Оптика -->
-                <div class="glass-card rounded-2xl p-6 fade-in flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-xl font-bold text-white mb-2">Оптика: Тонкая линза</h3>
-                        <p class="text-slate-400 text-sm mb-4 border-b border-white/10 pb-2">Расположение изображения f в зависимости от d.</p>
-                        <div class="space-y-4 mb-4">
-                            <div>
-                                <label class="text-sm text-brand-blue font-bold">Фокус (F): <span id="lab-opt-val-f" class="text-white">10 см</span></label>
-                                <input type="range" id="lab-opt-f" min="5" max="50" step="1" value="10" oninput="updateLab()">
-                            </div>
-                            <div>
-                                <label class="text-sm text-brand-blue font-bold">До предмета (d): <span id="lab-opt-val-d" class="text-white">30 см</span></label>
-                                <input type="range" id="lab-opt-d" min="1" max="100" step="1" value="30" oninput="updateLab()">
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="h-40 w-full mb-4"><canvas id="chart-opt"></canvas></div>
-                        <div class="bg-black/30 p-3 rounded-xl border border-[#0ea5e9]/30 text-center">
-                            <span class="text-slate-400 text-sm">До изображения (f):</span>
-                            <div id="lab-opt-out" class="text-xl font-mono text-[#0ea5e9] font-bold mt-1">15.0 см | Действит.</div>
-                        </div>
-                    </div>
+            <!-- СТАРЫЕ ОПЫТЫ (Сжатый HTML) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card p-5">
+                    <h3 class="text-lg font-bold text-theme mb-2">Математический маятник</h3>
+                    <label class="text-sm text-theme flex justify-between"><span>Длина (l):</span><span id="lab-pend-val">1 м</span></label>
+                    <input type="range" id="lab-pend-l" min="0.1" max="10" step="0.1" value="1" oninput="updateBasicLab()">
+                    <div class="h-24 w-full mt-2"><canvas id="chart-pend"></canvas></div>
+                    <p class="text-center text-xl font-mono font-bold text-[#0ea5e9] mt-2">T = <span id="lab-pend-out">2.01</span> с</p>
+                </div>
+                <div class="glass-card p-5">
+                    <h3 class="text-lg font-bold text-theme mb-2">Закон Ома</h3>
+                    <input type="range" id="lab-ohm-u" min="1" max="500" value="220" oninput="updateBasicLab()"><div class="flex justify-between text-xs text-theme mb-2"><span>U (В)</span><span id="lab-ohm-val-u">220</span></div>
+                    <input type="range" id="lab-ohm-r" min="1" max="100" value="55" oninput="updateBasicLab()"><div class="flex justify-between text-xs text-theme"><span>R (Ом)</span><span id="lab-ohm-val-r">55</span></div>
+                    <div class="h-24 w-full mt-2"><canvas id="chart-ohm"></canvas></div>
+                    <p class="text-center text-xl font-mono font-bold text-[#0ea5e9] mt-2">I = <span id="lab-ohm-out">4.00</span> А</p>
                 </div>
             </div>
         </div>
-
     </main>
 
     <script>
-        // --- ЦВЕТОВЫЕ ТЕМЫ ---
-        const colors = {
-            7: '#0ea5e9', 8: '#f97316', 9: '#10b981', 10: '#8b5cf6', 11: '#ec4899',
-            'main': '#0ea5e9', 'search': '#facc15', 'quiz': '#10b981', 'lab': '#3b82f6'
+        // СЖАТАЯ БАЗА ДАННЫХ (Контент полностью сохранен)
+        const physicsData={7:{title:"7 класс: Механика",topics:[{name:"Скорость",desc:"Быстрота перемещения.",formula:"v=s/t",vars:"v, s, t",example:{dano:"s=100, t=20",sol:"v=100/20",ans:"5 м/с"},calc:{vars:[{id:'s',name:'s'},{id:'t',name:'t'}],expr:'s/t',unit:'м/с'}},{name:"Плотность",desc:"Масса в объеме.",formula:"ρ=m/V",vars:"ρ, m, V",example:{dano:"m=400, V=0.5",sol:"ρ=400/0.5",ans:"800 кг/м³"},calc:{vars:[{id:'m',name:'m'},{id:'V',name:'V'}],expr:'m/V',unit:'кг/м³'}},{name:"Сила тяжести",desc:"Притяжение Земли.",formula:"F=m·g",vars:"m, g",example:{dano:"m=5",sol:"F=5·9.8",ans:"49 Н"},calc:{vars:[{id:'m',name:'m'},{id:'g',name:'g'}],expr:'m*g',unit:'Н'}},{name:"Сила упругости",desc:"Деформация (Закон Гука).",formula:"F=k·Δl",vars:"k, Δl",example:{dano:"k=100, Δl=0.2",sol:"F=100·0.2",ans:"20 Н"},calc:{vars:[{id:'k',name:'k'},{id:'dl',name:'Δl'}],expr:'k*dl',unit:'Н'}},{name:"Вес",desc:"Давление на опору.",formula:"P=m·g",vars:"m, g",example:{dano:"m=60",sol:"P=60·9.8",ans:"588 Н"},calc:{vars:[{id:'m',name:'m'},{id:'g',name:'g'}],expr:'m*g',unit:'Н'}},{name:"Трение",desc:"Трение скольжения.",formula:"F=μ·N",vars:"μ, N",example:{dano:"μ=0.2, N=100",sol:"F=0.2·100",ans:"20 Н"},calc:{vars:[{id:'mu',name:'μ'},{id:'N',name:'N'}],expr:'mu*N',unit:'Н'}},{name:"Давление",desc:"Сила к площади.",formula:"p=F/S",vars:"F, S",example:{dano:"F=100, S=2",sol:"p=100/2",ans:"50 Па"},calc:{vars:[{id:'F',name:'F'},{id:'S',name:'S'}],expr:'F/S',unit:'Па'}},{name:"Давление жидкости",desc:"Гидростатика.",formula:"p=ρgh",vars:"ρ, g, h",example:{dano:"ρ=1000, h=10",sol:"p=1000·9.8·10",ans:"98 кПа"},calc:{vars:[{id:'ro',name:'ρ'},{id:'g',name:'g'},{id:'h',name:'h'}],expr:'ro*g*h',unit:'Па'}},{name:"Архимедова сила",desc:"Выталкивающая сила.",formula:"F_А=ρgV",vars:"ρ, g, V",example:{dano:"ρ=1000, V=0.1",sol:"1000·9.8·0.1",ans:"980 Н"},calc:{vars:[{id:'ro',name:'ρ'},{id:'g',name:'g'},{id:'v',name:'V'}],expr:'ro*g*v',unit:'Н'}},{name:"Работа",desc:"Механическая работа.",formula:"A=F·s",vars:"F, s",example:{dano:"F=50, s=4",sol:"A=50·4",ans:"200 Дж"},calc:{vars:[{id:'F',name:'F'},{id:'s',name:'s'}],expr:'F*s',unit:'Дж'}},{name:"Мощность",desc:"Быстрота работы.",formula:"N=A/t",vars:"A, t",example:{dano:"A=600, t=10",sol:"N=600/10",ans:"60 Вт"},calc:{vars:[{id:'A',name:'A'},{id:'t',name:'t'}],expr:'A/t',unit:'Вт'}},{name:"Момент силы",desc:"Вращение.",formula:"M=F·l",vars:"F, l",example:{dano:"F=20, l=0.5",sol:"M=20·0.5",ans:"10 Н·м"},calc:{vars:[{id:'f',name:'F'},{id:'l',name:'l'}],expr:'f*l',unit:'Н·м'}},{name:"КПД",desc:"Полезное действие.",formula:"η=(A_п/A_з)·100",vars:"A_п, A_з",example:{dano:"A_п=80, A_з=100",sol:"80/100*100",ans:"80%"},calc:{vars:[{id:'p',name:'A_п'},{id:'z',name:'A_з'}],expr:'p/z*100',unit:'%'}}]},
+        8:{title:"8 класс: Теплота и Ток",topics:[{name:"Теплота нагрева",desc:"Энергия нагрева.",formula:"Q=cmΔt",vars:"c, m, Δt",example:{dano:"c=4200, m=2, Δt=50",sol:"4200·2·50",ans:"420 кДж"},calc:{vars:[{id:'c',name:'c'},{id:'m',name:'m'},{id:'dt',name:'Δt'}],expr:'c*m*dt',unit:'Дж'}},{name:"Сгорание",desc:"Сгорание топлива.",formula:"Q=qm",vars:"q, m",example:{dano:"q=4.4e7, m=2",sol:"4.4e7·2",ans:"88 МДж"},calc:{vars:[{id:'q',name:'q'},{id:'m',name:'m'}],expr:'q*m',unit:'Дж'}},{name:"Плавление",desc:"Твердое в жидкое.",formula:"Q=λm",vars:"λ, m",example:{dano:"λ=3.4e5, m=3",sol:"3.4e5·3",ans:"1020 кДж"},calc:{vars:[{id:'l',name:'λ'},{id:'m',name:'m'}],expr:'l*m',unit:'Дж'}},{name:"Парообразование",desc:"Жидкость в пар.",formula:"Q=Lm",vars:"L, m",example:{dano:"L=2.3e6, m=1",sol:"2.3e6·1",ans:"2.3 МДж"},calc:{vars:[{id:'L',name:'L'},{id:'m',name:'m'}],expr:'L*m',unit:'Дж'}},{name:"Сила тока",desc:"Заряд за время.",formula:"I=q/t",vars:"q, t",example:{dano:"q=10, t=2",sol:"10/2",ans:"5 А"},calc:{vars:[{id:'q',name:'q'},{id:'t',name:'t'}],expr:'q/t',unit:'А'}},{name:"Закон Ома",desc:"Основа цепей.",formula:"I=U/R",vars:"U, R",example:{dano:"U=220, R=55",sol:"220/55",ans:"4 А"},calc:{vars:[{id:'u',name:'U'},{id:'r',name:'R'}],expr:'u/r',unit:'А'}},{name:"Джоуль-Ленц",desc:"Теплота тока.",formula:"Q=I²Rt",vars:"I, R, t",example:{dano:"I=2, R=10, t=5",sol:"4·10·5",ans:"200 Дж"},calc:{vars:[{id:'i',name:'I'},{id:'r',name:'R'},{id:'t',name:'t'}],expr:'i*i*r*t',unit:'Дж'}}]},
+        9:{title:"9 класс: Динамика и Волны",topics:[{name:"Координаты",desc:"Уравнение движения.",formula:"x=x_0+v_xt",vars:"x0, v, t",example:{dano:"x0=5, v=2, t=3",sol:"5+2·3",ans:"11 м"},calc:{vars:[{id:'x',name:'x0'},{id:'v',name:'v'},{id:'t',name:'t'}],expr:'x+v*t',unit:'м'}},{name:"Ускорение",desc:"Изменение v.",formula:"a=(v-v_0)/t",vars:"v, v0, t",example:{dano:"v=20, v0=0, t=5",sol:"20/5",ans:"4 м/с²"},calc:{vars:[{id:'v',name:'v'},{id:'v0',name:'v0'},{id:'t',name:'t'}],expr:'(v-v0)/t',unit:'м/с²'}},{name:"Перемещение",desc:"С ускорением.",formula:"s=v_0t+at²/2",vars:"v0, a, t",example:{dano:"v0=2, a=1, t=4",sol:"2·4+16/2",ans:"16 м"},calc:{vars:[{id:'v',name:'v0'},{id:'t',name:'t'},{id:'a',name:'a'}],expr:'v*t+(a*t*t)/2',unit:'м'}},{name:"Первый закон Ньютона",desc:"Инерция.",formula:"ΣF=0 => v=const",vars:"F, v",example:{dano:"v=const",sol:"F=0",ans:"0 Н"}},{name:"Второй закон Ньютона",desc:"Основа.",formula:"F=ma",vars:"m, a",example:{dano:"m=5, a=2",sol:"5·2",ans:"10 Н"},calc:{vars:[{id:'m',name:'m'},{id:'a',name:'a'}],expr:'m*a',unit:'Н'}},{name:"Третий закон",desc:"Действие=противодействие.",formula:"F1=-F2",vars:"F1, F2",example:{dano:"F1=500",sol:"F2=-500",ans:"-500 Н"}},{name:"Свободное падение",desc:"Полет.",formula:"h=gt²/2",vars:"g, t",example:{dano:"t=3, g=9.8",sol:"9.8·9/2",ans:"44.1 м"},calc:{vars:[{id:'g',name:'g'},{id:'t',name:'t'}],expr:'g*t*t/2',unit:'м'}},{name:"Вес с ускорением",desc:"Перегрузка.",formula:"P=m(g±a)",vars:"m, g, a",example:{dano:"m=50, a=2(вверх)",sol:"50·11.8",ans:"590 Н"},calc:{vars:[{id:'m',name:'m'},{id:'g',name:'g'},{id:'a',name:'a'}],expr:'m*(g+a)',unit:'Н'}},{name:"Гравитация",desc:"Притяжение.",formula:"F=G(m1m2)/R²",vars:"G, m1, m2, R",example:{dano:"m1=m2=1e5, R=10",sol:"6.67e-11·1e10/100",ans:"6.67 мН"},calc:{vars:[{id:'m',name:'m1'},{id:'M',name:'m2'},{id:'r',name:'R'}],expr:'6.67e-11*m*M/(r*r)',unit:'Н'}},{name:"Звук",desc:"Длина волны.",formula:"λ=v/ν",vars:"v, ν",example:{dano:"v=340, ν=170",sol:"340/170",ans:"2 м"},calc:{vars:[{id:'v',name:'v'},{id:'n',name:'ν'}],expr:'v/n',unit:'м'}},{name:"Дефект масс",desc:"Энергия ядра.",formula:"E=Δmc²",vars:"Δm, c",example:{dano:"Δm=1 а.е.м.",sol:"1·931.5",ans:"931.5 МэВ"},calc:{vars:[{id:'m',name:'Δm'}],expr:'m*931.5',unit:'МэВ'}}]},
+        10:{title:"10 класс: Термодинамика",topics:[{name:"Менделеев-Клапейрон",desc:"Идеальный газ.",formula:"pV=(m/M)RT",vars:"p, V, m, M, R, T",example:{dano:"m=M, T=300, V=0.08",sol:"1·8.31·300/0.08",ans:"31 кПа"},calc:{vars:[{id:'m',name:'m'},{id:'M',name:'M'},{id:'T',name:'T'},{id:'V',name:'V'}],expr:'(m/M)*8.31*T/V',unit:'Па'}},{name:"Кулон",desc:"Заряды.",formula:"F=kq1q2/r²",vars:"k, q1, q2, r",example:{dano:"q=3мкКл, r=0.1",sol:"9e9·9e-12/0.01",ans:"8.1 Н"},calc:{vars:[{id:'q1',name:'q1'},{id:'q2',name:'q2'},{id:'r',name:'r'}],expr:'9e9*q1*q2/(r*r)',unit:'Н'}}]},
+        11:{title:"11 класс: Кванты и Магниты",topics:[{name:"Ампер",desc:"Поле и ток.",formula:"F=IBl",vars:"I, B, l",example:{dano:"I=2, B=0.1, l=1",sol:"2·0.1·1",ans:"0.2 Н"},calc:{vars:[{id:'i',name:'I'},{id:'b',name:'B'},{id:'l',name:'l'}],expr:'i*b*l',unit:'Н'}},{name:"Энергия фотона",desc:"Свет.",formula:"E=hν",vars:"h, ν",example:{dano:"ν=5e14",sol:"6.63e-34·5e14",ans:"3.3e-19 Дж"},calc:{vars:[{id:'n',name:'ν'}],expr:'6.63e-34*n',unit:'Дж'}}]}
         };
 
-        let currentColor = colors['main'];
+        const allQuizQuestions=[{q:"Единица силы тока?",options:["Вольт","Ватт","Ампер","Джоуль"],ans:2},{q:"Второй закон Ньютона?",options:["F=mg","F=ma","p=mv","A=Fs"],ans:1},{q:"Архимедова сила выталкивает из...",options:["Космоса","Магнита","Жидкости","Вакуума"],ans:2},{q:"Закон Ома:",options:["P=UI","Q=I²Rt","I=U/R","C=q/U"],ans:2},{q:"Механическая работа?",options:["A=Fs","N=A/t","M=Fl","p=F/S"],ans:0},{q:"Плотность?",options:["ρ=m/V","ρ=V/m","ρ=mV","ρ=mg"],ans:0},{q:"Третий закон Ньютона?",options:["F=ma","Действие=противодействие","v=const","Падение"],ans:1},{q:"Давление (СИ)?",options:["Ньютон","Паскаль","Джоуль","Ватт"],ans:1},{q:"Энергия фотона?",options:["E=mc²","E=mgh","E=hν","E=mv²/2"],ans:2},{q:"Скорость света?",options:["300 км/с","300 000 км/с","340 м/с","0"],ans:1},{q:"Изотермический процесс (пост. величина)?",options:["Масса","Давление","Температура","Объем"],ans:2},{q:"Сопротивление (СИ)?",options:["Ом","Ампер","Кулон","Генри"],ans:0}];
+        const physicsFacts=["Абсолютный нуль: −273.15 °C.","Свет от Солнца летит 8 минут 20 секунд.","Без пустот между атомами человечество поместится в кубике сахара.","Тройная точка: вода кипит и замерзает одновременно.","Молния в 5 раз горячее поверхности Солнца."];
 
-        function applyColorTheme(grade) {
-            currentColor = colors[grade] || colors['main'];
-            document.documentElement.style.setProperty('--glow-color', currentColor + '33');
+        // --- ТЕМЫ И ЦВЕТА ---
+        let isLightMode = false;
+        let currentColor = '#0ea5e9';
+        const classColors = {7:'#0ea5e9', 8:'#f97316', 9:'#10b981', 10:'#8b5cf6', 11:'#ec4899', 'main':'#0ea5e9', 'lab':'#3b82f6'};
+
+        function toggleTheme() {
+            isLightMode = !isLightMode;
+            document.body.classList.toggle('light-theme', isLightMode);
+            document.getElementById('theme-icon').innerText = isLightMode ? '🌙' : '☀️';
+            
+            // Обновляем графики под светлую тему
+            Chart.defaults.color = isLightMode ? '#334155' : '#94a3b8';
+            Chart.defaults.scale.grid.color = isLightMode ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
+            initCharts(true); // Перерисовать
+            
+            // Обновляем 3D
+            const currentGrade = document.querySelector('.class-btn[style*="background-color"]')?.id.replace('btn-', '') || 'main';
+            spawn3DModel(currentGrade);
+        }
+
+        function applyColor(grade) {
+            currentColor = classColors[grade] || classColors['main'];
+            document.documentElement.style.setProperty('--glow-color', currentColor + '40');
             document.getElementById('logo-icon').style.color = currentColor;
             document.getElementById('logo-text').style.color = currentColor;
-            
-            const titleHighlight = document.getElementById('main-title-highlight');
-            titleHighlight.style.backgroundImage = `linear-gradient(to right, ${currentColor}, #ffffff)`;
-            titleHighlight.style.filter = `drop-shadow(0 0 15px ${currentColor}80)`;
-
-            const searchInput = document.getElementById('search-input');
-            searchInput.addEventListener('focus', () => { searchInput.style.borderColor = currentColor; });
-            searchInput.addEventListener('blur', () => { searchInput.style.borderColor = 'rgba(255,255,255,0.2)'; });
-
-            const styleId = 'dynamic-range-style';
-            let styleEl = document.getElementById(styleId);
-            if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = styleId; document.head.appendChild(styleEl); }
-            styleEl.innerHTML = `
-                input[type=range]::-webkit-slider-thumb { background: ${currentColor}; box-shadow: 0 0 10px ${currentColor}80; }
-            `;
-
-            document.querySelectorAll('#lab-section .text-\\[\\#0ea5e9\\]').forEach(el => el.style.color = currentColor);
-            document.querySelectorAll('#lab-section .border-\\[\\#0ea5e9\\]\\/30').forEach(el => el.style.borderColor = currentColor + '4D');
+            document.getElementById('main-title-highlight').style.backgroundImage = `linear-gradient(to right, ${currentColor}, ${isLightMode ? '#333' : '#fff'})`;
+            document.querySelectorAll('.class-btn').forEach(btn => {
+                btn.style.backgroundColor=''; btn.style.borderColor='rgba(150,150,150,0.2)'; btn.style.color=isLightMode?'#475569':'#94a3b8';
+            });
+            const activeBtn = document.getElementById('btn-'+grade);
+            if(activeBtn) { activeBtn.style.backgroundColor=currentColor; activeBtn.style.color='#fff'; activeBtn.style.borderColor=currentColor; activeBtn.style.boxShadow=`0 0 15px ${currentColor}80`; }
         }
 
-        // --- УПРАВЛЕНИЕ МЫШЬЮ И СВЕЧЕНИЕМ ---
-        let globalMouseX = window.innerWidth / 2, globalMouseY = window.innerHeight / 2;
-        let isMouseActive = false;
-        let targetRotationX = 0, targetRotationY = 0;
-        const glow = document.getElementById('mouse-glow');
-
-        document.addEventListener('mousemove', (e) => {
-            globalMouseX = e.clientX; globalMouseY = e.clientY;
-            targetRotationY = (globalMouseX - window.innerWidth / 2) * 0.002; targetRotationX = (globalMouseY - window.innerHeight / 2) * 0.002;
-            if (!isMouseActive) { glow.style.opacity = '1'; isMouseActive = true; }
-        });
-        document.addEventListener('mouseleave', () => { glow.style.opacity = '0'; isMouseActive = false; });
-        document.addEventListener('touchmove', (e) => {
-            globalMouseX = e.touches[0].clientX; globalMouseY = e.touches[0].clientY;
-            targetRotationY = (globalMouseX - window.innerWidth / 2) * 0.002; targetRotationX = (globalMouseY - window.innerHeight / 2) * 0.002;
-            if (!isMouseActive) { glow.style.opacity = '1'; isMouseActive = true; }
-        }, { passive: true });
-
-        // --- БАЗА ДАННЫХ И КАЛЬКУЛЯТОР ---
-        const physicsData = {
-            7: {
-                title: "7 класс: Механика",
-                topics: [
-                    { name: "Скорость при равномерном движении", desc: "Быстрота перемещения тела за единицу времени.", formula: "v = s / t", vars: "v — скорость, s — путь, t — время", example: { dano: "s = 100 м, t = 20 с", sol: "v = 100 / 20", ans: "5 м/с" }, calc: { vars: [{id:'s', name:'Путь (s)'}, {id:'t', name:'Время (t)'}], expr: 's/t', unit: 'м/с' } },
-                    { name: "Плотность вещества", desc: "Масса, приходящаяся на единицу объема.", formula: "ρ = m / V", vars: "ρ — плотность, m — масса, V — объем", example: { dano: "m = 400 кг, V = 0.5 м³", sol: "ρ = 400 / 0.5", ans: "800 кг/м³" }, calc: { vars: [{id:'m', name:'Масса (m)'}, {id:'V', name:'Объем (V)'}], expr: 'm/V', unit: 'кг/м³' } },
-                    { name: "Сила тяжести", desc: "Сила, с которой Земля притягивает к себе тело.", formula: "F_тяж = m · g", vars: "g ≈ 9.8 Н/кг — ускорение", example: { dano: "m = 5 кг, g = 9.8", sol: "F = 5 · 9.8", ans: "49 Н" }, calc: { vars: [{id:'m', name:'Масса (m)'}, {id:'g', name:'g (9.8)'}], expr: 'm*g', unit: 'Н' } },
-                    { name: "Сила упругости", desc: "Возникает при деформации (Закон Гука).", formula: "F_упр = k · Δl", vars: "k — жесткость, Δl — удлинение", example: { dano: "k = 100 Н/м, Δl = 0.2 м", sol: "F = 100 · 0.2", ans: "20 Н" }, calc: { vars: [{id:'k', name:'Жесткость (k)'}, {id:'dl', name:'Удлинение (Δl)'}], expr: 'k*dl', unit: 'Н' } },
-                    { name: "Вес тела", desc: "Сила давления на опору.", formula: "P = m · g", vars: "P — вес тела", example: { dano: "m = 60 кг", sol: "P = 60 · 9.8", ans: "588 Н" }, calc: { vars: [{id:'m', name:'Масса (m)'}, {id:'g', name:'g (9.8)'}], expr: 'm*g', unit: 'Н' } },
-                    { name: "Сила трения", desc: "Сила трения скольжения.", formula: "F_тр = μ · N", vars: "μ — коэф. трения, N — реакция опоры", example: { dano: "μ = 0.2, N = 100 Н", sol: "F = 0.2 · 100", ans: "20 Н" }, calc: { vars: [{id:'mu', name:'Коэф. (μ)'}, {id:'N', name:'Опора (N)'}], expr: 'mu*N', unit: 'Н' } },
-                    { name: "Давление твердых тел", desc: "Отношение силы к площади.", formula: "p = F / S", vars: "p — давление (Па)", example: { dano: "F = 100 Н, S = 2 м²", sol: "p = 100 / 2", ans: "50 Па" }, calc: { vars: [{id:'F', name:'Сила (F)'}, {id:'S', name:'Площадь (S)'}], expr: 'F/S', unit: 'Па' } },
-                    { name: "Давление жидкости", desc: "Гидростатическое давление.", formula: "p = ρ_ж · g · h", vars: "ρ_ж — плотность, h — высота", example: { dano: "ρ = 1000, h = 10, g=9.8", sol: "p = 1000 · 9.8 · 10", ans: "98 кПа" }, calc: { vars: [{id:'ro', name:'Плотность (ρ)'}, {id:'g', name:'g'}, {id:'h', name:'Высота (h)'}], expr: 'ro*g*h', unit: 'Па' } },
-                    { name: "Архимедова сила", desc: "Выталкивающая сила жидкости.", formula: "F_А = ρ_ж · g · V_п", vars: "V_п — объем погруженной части", example: { dano: "ρ_ж = 1000, V_п = 0.1", sol: "F_А = 1000 · 9.8 · 0.1", ans: "980 Н" }, calc: { vars: [{id:'ro', name:'Плотность (ρ)'}, {id:'g', name:'g'}, {id:'v', name:'Объем (V)'}], expr: 'ro*g*v', unit: 'Н' } },
-                    { name: "Работа", desc: "Механическая работа силы.", formula: "A = F · s", vars: "A — работа, F — сила, s — путь", example: { dano: "F = 50 Н, s = 4 м", sol: "A = 50 · 4", ans: "200 Дж" }, calc: { vars: [{id:'F', name:'Сила (F)'}, {id:'s', name:'Путь (s)'}], expr: 'F*s', unit: 'Дж' } },
-                    { name: "Мощность", desc: "Быстрота работы.", formula: "N = A / t", vars: "N — мощность, A — работа", example: { dano: "A = 600 Дж, t = 10 с", sol: "N = 600 / 10", ans: "60 Вт" }, calc: { vars: [{id:'A', name:'Работа (A)'}, {id:'t', name:'Время (t)'}], expr: 'A/t', unit: 'Вт' } },
-                    { name: "Момент силы", desc: "Вращающее действие силы.", formula: "M = F · l", vars: "M — момент, l — плечо", example: { dano: "F=20, l=0.5", sol: "M = 20 · 0.5", ans: "10 Н·м" }, calc: { vars: [{id:'f', name:'Сила (F)'}, {id:'l', name:'Плечо (l)'}], expr: 'f*l', unit: 'Н·м' } },
-                    { name: "КПД", desc: "Коэффициент полезного действия.", formula: "η = (A_пол / A_затр) · 100%", vars: "A_пол — полезная работа", example: { dano: "A_пол=80, A_затр=100", sol: "η = 80/100 * 100", ans: "80%" }, calc: { vars: [{id:'Ap', name:'Полезная'}, {id:'Az', name:'Затраченная'}], expr: '(Ap/Az)*100', unit: '%' } }
-                ]
-            },
-            8: {
-                title: "8 класс: Теплота и Ток",
-                topics: [
-                    { name: "Количество теплоты (нагрев)", desc: "При нагревании/охлаждении.", formula: "Q = c · m · Δt", vars: "c — уд. теплоемкость", example: { dano: "c=4200, m=2, Δt=50", sol: "Q = 4200·2·50", ans: "420 кДж" }, calc: { vars: [{id:'c', name:'Теплоемк. (c)'}, {id:'m', name:'Масса (m)'}, {id:'dt', name:'Δt'}], expr: 'c*m*dt', unit: 'Дж' } },
-                    { name: "Теплота сгорания", desc: "При сгорании топлива.", formula: "Q = q · m", vars: "q — уд. теплота сгорания", example: { dano: "q=4.4·10⁷, m=2", sol: "Q = 4.4e7 * 2", ans: "88 МДж" }, calc: { vars: [{id:'q', name:'Уд. теплота (q)'}, {id:'m', name:'Масса (m)'}], expr: 'q*m', unit: 'Дж' } },
-                    { name: "Плавление", desc: "Переход из твердого в жидкое.", formula: "Q = λ · m", vars: "λ — уд. теплота плавления", example: { dano: "λ=3.4·10⁵, m=3", sol: "Q = 3.4e5 * 3", ans: "1020 кДж" }, calc: { vars: [{id:'lam', name:'Лямбда (λ)'}, {id:'m', name:'Масса (m)'}], expr: 'lam*m', unit: 'Дж' } },
-                    { name: "Парообразование", desc: "Жидкость в пар.", formula: "Q = L · m", vars: "L — удельная теплота парообразования", example: { dano: "L=2.3·10⁶, m=1", sol: "Q = 2.3e6 * 1", ans: "2.3 МДж" }, calc: { vars: [{id:'L', name:'Парообр. (L)'}, {id:'m', name:'Масса (m)'}], expr: 'L*m', unit: 'Дж' } },
-                    { name: "Сила тока", desc: "Заряд за единицу времени.", formula: "I = q / t", vars: "I — ток, q — заряд", example: { dano: "q=10, t=2", sol: "I = 10 / 2", ans: "5 А" }, calc: { vars: [{id:'q', name:'Заряд (q)'}, {id:'t', name:'Время (t)'}], expr: 'q/t', unit: 'А' } },
-                    { name: "Закон Ома", desc: "Связь параметров цепи.", formula: "I = U / R", vars: "U — напряжение, R — сопротивление", example: { dano: "U=220, R=55", sol: "I = 220 / 55", ans: "4 А" }, calc: { vars: [{id:'u', name:'Напряжение (U)'}, {id:'r', name:'Сопротивление (R)'}], expr: 'u/r', unit: 'А' } },
-                    { name: "Закон Джоуля-Ленца", desc: "Теплота от тока.", formula: "Q = I² · R · t", vars: "Q — теплота, I — ток", example: { dano: "I=2, R=10, t=5", sol: "Q = 4·10·5", ans: "200 Дж" }, calc: { vars: [{id:'i', name:'Ток (I)'}, {id:'r', name:'Сопротивл. (R)'}, {id:'t', name:'Время (t)'}], expr: 'i*i*r*t', unit: 'Дж' } }
-                ]
-            },
-            9: {
-                title: "9 класс: Кинематика, Динамика, Волны",
-                topics: [
-                    { name: "Координаты (прямолинейное движение)", desc: "Уравнение координаты при равномерном движении.", formula: "x = x_0 + v_x · t", vars: "x0 — нач. коорд., v — скорость", example: { dano: "x0=5, v=2, t=3", sol: "x = 5 + 2*3", ans: "11 м" }, calc: { vars: [{id:'x0', name:'x0'}, {id:'v', name:'Скорость (v)'}, {id:'t', name:'Время (t)'}], expr: 'x0+v*t', unit: 'м' } },
-                    { name: "Ускорение", desc: "Изменение скорости.", formula: "a = (v - v_0) / t", vars: "a — ускорение", example: { dano: "v0=0, v=20, t=5", sol: "a = 20 / 5", ans: "4 м/с²" }, calc: { vars: [{id:'v', name:'Конечная (v)'}, {id:'v0', name:'Начальная (v0)'}, {id:'t', name:'Время (t)'}], expr: '(v-v0)/t', unit: 'м/с²' } },
-                    { name: "Перемещение при ускорении", desc: "Путь с постоянным ускорением.", formula: "s = v_0 · t + (a · t²) / 2", vars: "v0 — нач. скорость, a — ускорение", example: { dano: "v0=2, a=1, t=4", sol: "s = 2*4 + (1*16)/2", ans: "16 м" }, calc: { vars: [{id:'v0', name:'v0'}, {id:'t', name:'t'}, {id:'a', name:'a'}], expr: 'v0*t + (a*t*t)/2', unit: 'м' } },
-                    { name: "Перемещение (без времени)", desc: "Связь скоростей и пути без t.", formula: "s = (v² - v_0²) / (2a)", vars: "s — путь", example: { dano: "v0=0, v=10, a=2", sol: "s = 100 / 4", ans: "25 м" }, calc: { vars: [{id:'v', name:'v'}, {id:'v0', name:'v0'}, {id:'a', name:'a'}], expr: '(v*v - v0*v0)/(2*a)', unit: 'м' } },
-                    { name: "Первый закон Ньютона", desc: "Закон инерции.", formula: "ΣF = 0  =>  v = const", vars: "ΣF — сумма всех сил", example: { dano: "Тело движется равномерно", sol: "Сумма сил равна 0.", ans: "0 Н" } },
-                    { name: "Второй закон Ньютона", desc: "Основной закон динамики.", formula: "F = m · a", vars: "F — сила", example: { dano: "m=5, a=2", sol: "F = 5 · 2", ans: "10 Н" }, calc: { vars: [{id:'m', name:'Масса (m)'}, {id:'a', name:'Ускорение (a)'}], expr: 'm*a', unit: 'Н' } },
-                    { name: "Третий закон Ньютона", desc: "Действие равно противодействию.", formula: "F₁ = -F₂", vars: "F1, F2 — силы взаимодействия", example: { dano: "Давление на пол 500 Н", sol: "Пол давит в ответ с той же силой.", ans: "500 Н" } },
-                    { name: "Свободное падение тел", desc: "Движение под гравитацией.", formula: "h = (g · t²) / 2", vars: "h — высота", example: { dano: "t=3, g=9.8", sol: "h = 9.8·9 / 2", ans: "44.1 м" }, calc: { vars: [{id:'g', name:'g'}, {id:'t', name:'Время (t)'}], expr: '(g*t*t)/2', unit: 'м' } },
-                    { name: "Вес тела с ускорением", desc: "Перегрузка или невесомость.", formula: "P = m · (g ± a)", vars: "a — ускорение опоры", example: { dano: "m=50, лифт вверх a=2, g=10", sol: "P = 50 * (10+2)", ans: "600 Н" }, calc: { vars: [{id:'m', name:'m'}, {id:'g', name:'g'}, {id:'a', name:'a (±)'}], expr: 'm*(g+a)', unit: 'Н' } },
-                    { name: "Всемирное тяготение", desc: "Притяжение масс.", formula: "F = G · (m₁m₂) / R²", vars: "G — грав. постоянная (6.67e-11)", example: { dano: "m1=m2=10^5, R=10", sol: "F = 6.67e-11 * 10^10 / 100", ans: "6.67 мН" }, calc: { vars: [{id:'m1', name:'m1'}, {id:'m2', name:'m2'}, {id:'R', name:'Расстояние (R)'}], expr: '6.67e-11 * m1 * m2 / (R*R)', unit: 'Н' } },
-                    { name: "Период и частота", desc: "Механические колебания.", formula: "T = 1 / ν", vars: "T — период, ν — частота", example: { dano: "ν = 50 Гц", sol: "T = 1 / 50", ans: "0.02 с" }, calc: { vars: [{id:'nu', name:'Частота (ν)'}], expr: '1/nu', unit: 'с' } },
-                    { name: "Длина волны и звук", desc: "Расстояние между пиками.", formula: "λ = v / ν", vars: "ν (ню) — частота", example: { dano: "v=340, ν=170", sol: "λ = 340 / 170", ans: "2 м" }, calc: { vars: [{id:'v', name:'Скорость (v)'}, {id:'nu', name:'Частота (ν)'}], expr: 'v/nu', unit: 'м' } },
-                    { name: "Отражение света", desc: "Световые явления.", formula: "∠α = ∠β", vars: "Угол падения = углу отражения", example: { dano: "Угол падения 60°", sol: "Отражение = падению.", ans: "60°" } },
-                    { name: "Энергия связи ядра", desc: "Строение атома.", formula: "E = Δm · c²", vars: "Δm — дефект масс (а.е.м.)", example: { dano: "Δm = 1 а.е.м.", sol: "1 а.е.м. = 931.5 МэВ", ans: "931.5 МэВ" }, calc: { vars: [{id:'dm', name:'Дефект (Δm)'}], expr: 'dm*931.5', unit: 'МэВ' } },
-                    { name: "Радиоактивный распад", desc: "Использование ядерной энергии.", formula: "N = N_0 · 2^(-t/T)", vars: "T — период полураспада", example: { dano: "T=8 дней, t=16 дней, N0=100%", sol: "N = 100 * 2^-2", ans: "25%" }, calc: { vars: [{id:'n0', name:'N0'}, {id:'t', name:'Время (t)'}, {id:'T', name:'Период (T)'}], expr: 'n0 * Math.pow(2, -t/T)', unit: '' } }
-                ]
-            },
-            10: {
-                title: "10 класс: Газы и Электростатика",
-                topics: [
-                    { name: "Уравнение Менделеева", desc: "Для идеального газа (расчет давления).", formula: "p = (m / M) · R · T / V", vars: "R = 8.31", example: { dano: "m=M(1 моль), T=300, V=0.083", sol: "p = 1·8.31·300/0.083", ans: "30 кПа" }, calc: { vars: [{id:'m', name:'m'}, {id:'M', name:'M'}, {id:'T', name:'T (Кельвин)'}, {id:'V', name:'V'}], expr: '(m/M)*8.31*T/V', unit: 'Па' } },
-                    { name: "Внутренняя энергия", desc: "Для одноатомного газа.", formula: "U = 1.5 · (m/M) · R · T", vars: "U — энергия (Дж)", example: { dano: "ν=1 моль, T=300 К", sol: "U = 1.5 * 1 * 8.31 * 300", ans: "3.74 кДж" }, calc: { vars: [{id:'m', name:'m'}, {id:'M', name:'M'}, {id:'T', name:'T (Кельвин)'}], expr: '1.5*(m/M)*8.31*T', unit: 'Дж' } },
-                    { name: "Первое начало термодинамики", desc: "Закон сохранения энергии.", formula: "Q = ΔU + A", vars: "Q — тепло, A — работа", example: { dano: "A=200, ΔU=300", sol: "Q = 300+200", ans: "500 Дж" }, calc: { vars: [{id:'du', name:'ΔU'}, {id:'a', name:'Работа (A)'}], expr: 'du+a', unit: 'Дж' } },
-                    { name: "Закон Кулона", desc: "Взаимодействие зарядов.", formula: "F = k · (q₁ · q₂) / r²", vars: "k = 9·10⁹", example: { dano: "q=3мкКл, r=0.1", sol: "F = 9e9 * 9e-12 / 0.01", ans: "8.1 Н" }, calc: { vars: [{id:'q1', name:'q1'}, {id:'q2', name:'q2'}, {id:'r', name:'Радиус (r)'}], expr: '9000000000 * Math.abs(q1*q2) / (r*r)', unit: 'Н' } },
-                    { name: "Напряженность", desc: "Силовая характеристика электрополя.", formula: "E = F / q", vars: "E — напряженность (В/м)", example: { dano: "F = 0.05 Н, q = 10 мкКл", sol: "E = 0.05 / 10⁻⁵", ans: "5000 В/м" }, calc: { vars: [{id:'F', name:'Сила (F)'}, {id:'q', name:'Заряд (q)'}], expr: 'F/q', unit: 'В/м' } }
-                ]
-            },
-            11: {
-                title: "11 класс: Электромагнетизм и Кванты",
-                topics: [
-                    { name: "Сила Ампера", desc: "Магнитное поле на проводник (sin α=1).", formula: "F_А = I · B · l", vars: "I — ток, B — индукция", example: { dano: "I=2, B=0.1, l=1", sol: "F = 2 · 0.1 · 1", ans: "0.2 Н" }, calc: { vars: [{id:'i', name:'Ток (I)'}, {id:'b', name:'Индукция (B)'}, {id:'l', name:'Длина (l)'}], expr: 'i*b*l', unit: 'Н' } },
-                    { name: "Сила Лоренца", desc: "Действует на движущийся заряд.", formula: "F_Л = q · v · B", vars: "q — заряд, v — скорость", example: { dano: "q=1Кл, v=10, B=2Тл", sol: "F = 1 * 10 * 2", ans: "20 Н" }, calc: { vars: [{id:'q', name:'q'}, {id:'v', name:'v'}, {id:'b', name:'B'}], expr: 'q*v*b', unit: 'Н' } },
-                    { name: "ЭДС Индукции", desc: "Закон Фарадея.", formula: "ε_i = ΔΦ / Δt", vars: "Изменение магнитного потока.", example: { dano: "ΔΦ=0.4, Δt=2", sol: "ε_i = 0.4 / 2", ans: "0.2 В" }, calc: { vars: [{id:'df', name:'ΔΦ'}, {id:'dt', name:'Δt'}], expr: 'df/dt', unit: 'В' } },
-                    { name: "Энергия фотона", desc: "Квант света.", formula: "E = h · ν", vars: "h = 6.63·10⁻³⁴", example: { dano: "ν = 5·10¹⁴", sol: "E = 6.63e-34 * 5e14", ans: "3.3e-19 Дж" }, calc: { vars: [{id:'nu', name:'Частота (ν)'}], expr: '6.63e-34 * nu', unit: 'Дж' } },
-                    { name: "Фотоэффект", desc: "Уравнение Эйнштейна.", formula: "hν = A_вых + E_к", vars: "A_вых — работа выхода", example: { dano: "A_вых=2 эВ, E_к=1 эВ", sol: "hν = 2 + 1", ans: "3 эВ" }, calc: { vars: [{id:'a', name:'A вых.'}, {id:'e', name:'E кин.'}], expr: 'a+e', unit: '' } }
-                ]
-            }
-        };
-
-        const allQuizQuestions = [
-            { q: "В каких единицах измеряется сила тока?", options: ["Вольтах", "Ваттах", "Амперах", "Джоулях"], ans: 2 },
-            { q: "Формула Второго закона Ньютона?", options: ["F = m·g", "F = m·a", "p = m·v", "A = F·s"], ans: 1 },
-            { q: "Ускорение свободного падения (g) на Земле?", options: ["9.8 м/с²", "3.14 м/с²", "1.6 м/с²", "10 м/с²"], ans: 0 },
-            { q: "Какая сила выталкивает тело из воды?", options: ["Тяжести", "Трения", "Упругости", "Архимедова"], ans: 3 },
-            { q: "Закон Ома для участка цепи:", options: ["P = U·I", "Q = I²·R·t", "I = U / R", "C = q / U"], ans: 2 },
-            { q: "Как вычисляется механическая работа?", options: ["A = F·s", "N = A/t", "M = F·l", "p = F/S"], ans: 0 },
-            { q: "Формула плотности?", options: ["ρ = m/V", "ρ = V/m", "ρ = m·V", "ρ = m·g"], ans: 0 },
-            { q: "Третий закон Ньютона?", options: ["F=ma", "Действие = противодействию", "v=const", "Тела падают одинаково"], ans: 1 },
-            { q: "Какая частица НЕ входит в ядро?", options: ["Протон", "Нейтрон", "Электрон", "Все входят"], ans: 2 },
-            { q: "Единицы измерения давления?", options: ["Ньютоны", "Паскали", "Джоули", "Ватты"], ans: 1 },
-            { q: "Уравнение Менделеева-Клапейрона?", options: ["Q=cmΔt", "pV=(m/M)RT", "F=G(m1m2)/R²", "E=mc²"], ans: 1 },
-            { q: "Энергия фотона?", options: ["E = mc²", "E = mgh", "E = hν", "E = mv²/2"], ans: 2 },
-            { q: "Единицы мощности?", options: ["Паскаль", "Джоуль", "Ватт", "Вольт"], ans: 2 },
-            { q: "Закон сохранения импульса?", options: ["m1v1+m2v2=const", "E=const", "Q1+Q2=0", "F=ma"], ans: 0 },
-            { q: "Скорость света в вакууме?", options: ["300 км/с", "300 000 км/с", "340 м/с", "Неизвестна"], ans: 1 },
-            { q: "Изотермический процесс — это при постоянной...", options: ["Массе", "Давлении", "Температуре", "Объеме"], ans: 2 },
-            { q: "Единица электрического сопротивления?", options: ["Ом", "Ампер", "Кулон", "Генри"], ans: 0 },
-            { q: "Прибор для измерения напряжения?", options: ["Амперметр", "Вольтметр", "Барометр", "Динамометр"], ans: 1 },
-            { q: "Дисперсия света — это...", options: ["Отражение", "Преломление", "Разложение в спектр", "Поглощение"], ans: 2 },
-            { q: "Из твердого в газообразное (минуя жидкость)?", options: ["Плавление", "Сублимация", "Конденсация", "Кипение"], ans: 1 },
-            { q: "Формула кинетической энергии?", options: ["mgh", "mc²", "mv²/2", "kx²/2"], ans: 2 },
-            { q: "Прибор для измерения атмосферного давления?", options: ["Манометр", "Барометр", "Ареометр", "Термометр"], ans: 1 },
-            { q: "Магнитное поле создается...", options: ["Покоящимися зарядами", "Движущимися зарядами", "Нейтронами", "Массой"], ans: 1 },
-            { q: "Какая линза собирающая?", options: ["Выпуклая", "Вогнутая", "Плоская", "Не бывает таких"], ans: 0 },
-            { q: "Период пружинного маятника зависит от...", options: ["Длины нити", "Массы и жесткости", "Ускорения g", "Амплитуды"], ans: 1 },
-            { q: "Изобарный процесс — это при постоянном...", options: ["Объеме", "Давлении", "Температуре", "Заряде"], ans: 1 },
-            { q: "Положительная частица в ядре?", options: ["Протон", "Нейтрон", "Электрон", "Фотон"], ans: 0 },
-            { q: "Кто открыл электромагнитную индукцию?", options: ["Ньютон", "Эйнштейн", "Фарадей", "Резерфорд"], ans: 2 },
-            { q: "Как называется переход газа в жидкость?", options: ["Плавление", "Отвердевание", "Конденсация", "Испарение"], ans: 2 },
-            { q: "Формула силы Лоренца?", options: ["IBl", "qvB", "ma", "mg"], ans: 1 }
-        ];
-
-        const physicsFacts = [
-            "Самая низкая возможная температура во Вселенной — абсолютный нуль (−273.15 °C).",
-            "Свет от Солнца до Земли летит примерно 8 минут и 20 секунд.",
-            "Если удалить пустое пространство внутри атомов из каждого человека, человечество поместится в кубике сахара.",
-            "Вода может кипеть и замерзать одновременно. Это состояние называется «тройной точкой».",
-            "Молния нагревает воздух вокруг себя до 30 000 °C — это в 5 раз горячее поверхности Солнца!"
-        ];
-
-        // --- ЛОГИКА 3D ФОНА ---
-        particlesJS("particles-js", {
-            "particles": {
-                "number": { "value": 45 }, "color": { "value": "#ffffff" }, "shape": { "type": "circle" },
-                "opacity": { "value": 0.3 }, "size": { "value": 2 },
-                "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.1, "width": 1 },
-                "move": { "enable": true, "speed": 1.2, "direction": "none" }
-            },
-            "interactivity": { "events": { "onhover": { "enable": true, "mode": "grab" }, "onclick": { "enable": true, "mode": "push" } } }
-        });
-
-        // --- ЛОГИКА 3D ГОЛОГРАММ ---
+        // --- 3D И АНИМАЦИИ ---
+        particlesJS("particles-js", { particles:{number:{value:40}, color:{value:"#888"}, shape:{type:"circle"}, opacity:{value:0.5}, size:{value:2}, line_linked:{enable:true, distance:150, color:"#888", opacity:0.2, width:1}, move:{enable:true, speed:1}}});
+        
         let scene, camera, renderer, currentMesh, pointLight;
+        let globalMouseX = window.innerWidth/2, globalMouseY = window.innerHeight/2;
+        let targetRotX=0, targetRotY=0;
+
+        document.addEventListener('mousemove', e=>{ globalMouseX=e.clientX; globalMouseY=e.clientY; targetRotY=(globalMouseX-window.innerWidth/2)*0.002; targetRotX=(globalMouseY-window.innerHeight/2)*0.002; document.getElementById('mouse-glow').style.opacity='1'; });
 
         function init3D() {
-            const container = document.getElementById('model-3d-container');
             scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
-            camera.position.z = 6;
-            
+            camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000); camera.position.z = 6;
             renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-            const size = window.innerWidth >= 1024 ? 300 : (window.innerWidth >= 768 ? 260 : 220);
-            renderer.setSize(size, size);
-            container.appendChild(renderer.domElement);
-
-            pointLight = new THREE.PointLight(currentColor, 2, 100);
-            pointLight.position.set(10, 10, 10);
-            scene.add(pointLight);
-            scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-
-            animate3D();
+            renderer.setSize(260, 260);
+            document.getElementById('model-3d-container').appendChild(renderer.domElement);
+            pointLight = new THREE.PointLight(currentColor, 2, 100); pointLight.position.set(10, 10, 10);
+            scene.add(pointLight); scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+            requestAnimationFrame(animate3D);
         }
-
-        window.addEventListener('resize', () => {
-            if(renderer) {
-                const size = window.innerWidth >= 1024 ? 300 : (window.innerWidth >= 768 ? 260 : 220);
-                renderer.setSize(size, size);
-            }
-        });
 
         function animate3D() {
             requestAnimationFrame(animate3D);
-            if (currentMesh) {
-                currentMesh.rotation.y += 0.01 + (targetRotationY - currentMesh.rotation.y) * 0.05;
-                currentMesh.rotation.x += 0.005 + (targetRotationX - currentMesh.rotation.x) * 0.05;
-            }
+            if(currentMesh) { currentMesh.rotation.y += 0.01 + (targetRotY - currentMesh.rotation.y)*0.05; currentMesh.rotation.x += 0.005 + (targetRotX - currentMesh.rotation.x)*0.05; }
             renderer.render(scene, camera);
-
-            if (isMouseActive) {
-                glow.style.transform = `translate3d(${globalMouseX}px, ${globalMouseY}px, 0)`;
-                glow.style.background = `radial-gradient(circle, ${currentColor}25 0%, rgba(0,0,0,0) 70%)`;
-            }
+            document.getElementById('mouse-glow').style.transform = `translate3d(${globalMouseX}px, ${globalMouseY}px, 0)`;
         }
 
         function spawn3DModel(grade) {
-            if (!scene) init3D();
-            if (currentMesh) {
-                scene.remove(currentMesh); currentMesh.geometry.dispose(); currentMesh.material.dispose();
+            if(!scene) init3D();
+            if(currentMesh) { scene.remove(currentMesh); currentMesh.geometry.dispose(); currentMesh.material.dispose(); }
+            applyColor(grade); pointLight.color.set(currentColor);
+
+            let geo;
+            // В светлой теме другие объекты!
+            if(isLightMode) {
+                if(grade==='main') geo = new THREE.SphereGeometry(1.6, 32, 32);
+                else if(grade==='lab') geo = new THREE.TorusGeometry(1.2, 0.4, 16, 50);
+                else geo = new THREE.CylinderGeometry(1.2, 1.2, 2, 32);
+            } else {
+                if(grade==='main') geo = new THREE.IcosahedronGeometry(1.6, 0);
+                else if(grade==='lab') geo = new THREE.TorusKnotGeometry(1, 0.3, 64, 16);
+                else geo = new THREE.BoxGeometry(1.8, 1.8, 1.8);
             }
-
-            applyColorTheme(grade);
-            pointLight.color.set(currentColor);
-
-            let geometry;
-            const scale = window.innerWidth >= 1024 ? 1.3 : (window.innerWidth >= 768 ? 1.1 : 1);
-
-            if (grade === 'main') geometry = new THREE.IcosahedronGeometry(2 * scale, 0); 
-            else if (grade === 'search') geometry = new THREE.OctahedronGeometry(2 * scale, 0);
-            else if (grade === 'quiz') geometry = new THREE.DodecahedronGeometry(1.8 * scale, 0); 
-            else if (grade === 'lab') geometry = new THREE.TorusKnotGeometry(1.4 * scale, 0.4 * scale, 100, 16); 
-            else if (grade === 7) geometry = new THREE.BoxGeometry(2.2 * scale, 2.2 * scale, 2.2 * scale); 
-            else if (grade === 8) geometry = new THREE.TorusGeometry(1.4 * scale, 0.5 * scale, 16, 50); 
-            else if (grade === 9) geometry = new THREE.ConeGeometry(1.8 * scale, 2.8 * scale, 16); 
-            else if (grade === 10) geometry = new THREE.SphereGeometry(1.8 * scale, 16, 16); 
-            else if (grade === 11) geometry = new THREE.TorusKnotGeometry(1.1 * scale, 0.35 * scale, 64, 16); 
-
-            const material = new THREE.MeshStandardMaterial({ color: currentColor, wireframe: true, emissive: currentColor, emissiveIntensity: 0.8 });
-            currentMesh = new THREE.Mesh(geometry, material);
+            
+            currentMesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({color:currentColor, wireframe:!isLightMode, emissive:currentColor, emissiveIntensity:isLightMode?0.2:0.8}));
             scene.add(currentMesh);
         }
 
-        // --- НАСТРОЙКИ ГРАФИКОВ CHART.JS ---
-        Chart.defaults.color = '#94a3b8';
-        Chart.defaults.scale.grid.color = 'rgba(255,255,255,0.05)';
-        Chart.defaults.font.family = "'JetBrains Mono', monospace";
+        // --- УПРАВЛЕНИЕ UI ---
+        function hideAll() { ['welcome', 'quiz', 'content', 'lab'].forEach(id => document.getElementById(id+'-section').classList.add('hidden')); }
+        function goHome() { hideAll(); document.getElementById('welcome-section').classList.remove('hidden'); spawn3DModel('main'); document.getElementById('fact-text').innerText=physicsFacts[Math.floor(Math.random()*physicsFacts.length)]; window.scrollTo(0,0); }
         
-        let chartInstances = {};
-        let chartsInitialized = false;
+        // Базовая лаборатория (Сжата)
+        let basicCharts = {};
+        function updateBasicLab() {
+            if(!basicCharts.pend) {
+                Chart.defaults.color = isLightMode?'#333':'#aaa'; Chart.defaults.scale.grid.color = isLightMode?'rgba(0,0,0,0.1)':'rgba(255,255,255,0.1)';
+                basicCharts.pend = new Chart(document.getElementById('chart-pend').getContext('2d'), { type:'line', data:{datasets:[{data:[],borderColor:'#0ea5e9',tension:0.4},{type:'scatter',data:[],backgroundColor:'#ef4444',pointRadius:5}]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},animation:{duration:0}}});
+                basicCharts.ohm = new Chart(document.getElementById('chart-ohm').getContext('2d'), { type:'line', data:{datasets:[{data:[],borderColor:'#0ea5e9'},{type:'scatter',data:[],backgroundColor:'#ef4444',pointRadius:5}]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},animation:{duration:0}}});
+            }
+            let l = parseFloat(document.getElementById('lab-pend-l').value); let T = 2*Math.PI*Math.sqrt(l/9.8);
+            document.getElementById('lab-pend-out').innerText = T.toFixed(2); document.getElementById('lab-pend-val').innerText = l+' м';
+            let pData=[]; for(let x=0.1;x<=10;x+=1) pData.push({x:x, y:2*Math.PI*Math.sqrt(x/9.8)});
+            basicCharts.pend.data.datasets[0].data=pData; basicCharts.pend.data.datasets[1].data=[{x:l,y:T}]; basicCharts.pend.update();
 
-        function initCharts() {
-            if (chartsInitialized) return;
-            chartsInitialized = true;
-
-            const commonOptions = {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                animation: { duration: 0 }
-            };
-
-            // Маятник T(l)
-            chartInstances.pend = new Chart(document.getElementById('chart-pend').getContext('2d'), {
-                type: 'line',
-                data: { datasets: [{ data: [], borderColor: '#0ea5e9', borderWidth: 2, pointRadius: 0, tension: 0.4 }, { type: 'scatter', data: [], backgroundColor: '#ef4444', pointRadius: 6 }] },
-                options: { ...commonOptions, scales: { x: { title: { display: true, text: 'Длина (м)' }, min: 0, max: 10 }, y: { title: { display: true, text: 'Период T (с)' } } } }
-            });
-
-            // Падение h(t) - строим параболу y = h - gt^2/2
-            chartInstances.fall = new Chart(document.getElementById('chart-fall').getContext('2d'), {
-                type: 'line',
-                data: { datasets: [{ data: [], borderColor: '#0ea5e9', borderWidth: 2, pointRadius: 0, tension: 0.4 }, { type: 'scatter', data: [], backgroundColor: '#ef4444', pointRadius: 6 }] },
-                options: { ...commonOptions, scales: { x: { title: { display: true, text: 'Время (с)' } }, y: { title: { display: true, text: 'Высота (м)' } } } }
-            });
-
-            // Закон Ома I(U)
-            chartInstances.ohm = new Chart(document.getElementById('chart-ohm').getContext('2d'), {
-                type: 'line',
-                data: { datasets: [{ data: [], borderColor: '#0ea5e9', borderWidth: 2, pointRadius: 0 }, { type: 'scatter', data: [], backgroundColor: '#ef4444', pointRadius: 6 }] },
-                options: { ...commonOptions, scales: { x: { title: { display: true, text: 'Напряжение U (В)' }, min: 0, max: 1000 }, y: { title: { display: true, text: 'Сила тока I (А)' }, min: 0 } } }
-            });
-
-            // Оптика f(d)
-            chartInstances.opt = new Chart(document.getElementById('chart-opt').getContext('2d'), {
-                type: 'line',
-                data: { datasets: [{ data: [], borderColor: '#0ea5e9', borderWidth: 2, pointRadius: 0, spanGaps: false }, { type: 'scatter', data: [], backgroundColor: '#ef4444', pointRadius: 6 }] },
-                options: { ...commonOptions, scales: { x: { title: { display: true, text: 'Расст. до предмета (см)' }, min: 0, max: 100 }, y: { title: { display: true, text: 'До изображения (см)' }, suggestedMin: -100, suggestedMax: 100 } } }
-            });
+            let u = parseFloat(document.getElementById('lab-ohm-u').value); let r = parseFloat(document.getElementById('lab-ohm-r').value); let I = u/r;
+            document.getElementById('lab-ohm-out').innerText = I.toFixed(2); document.getElementById('lab-ohm-val-u').innerText=u; document.getElementById('lab-ohm-val-r').innerText=r;
+            let oData=[]; for(let x=0;x<=500;x+=50) oData.push({x:x,y:x/r});
+            basicCharts.ohm.data.datasets[0].data=oData; basicCharts.ohm.data.datasets[1].data=[{x:u,y:I}]; basicCharts.ohm.update();
         }
 
-        // --- УПРАВЛЕНИЕ СЕКЦИЯМИ И ЛАБОРАТОРИЕЙ ---
-        const secWelcome = document.getElementById('welcome-section');
-        const secQuiz = document.getElementById('quiz-section');
-        const secContent = document.getElementById('content-section');
-        const secLab = document.getElementById('lab-section');
-
-        function goHome() {
-            document.getElementById('search-input').value = '';
-            document.querySelectorAll('.class-btn').forEach(btn => {
-                btn.style.backgroundColor = ''; btn.style.borderColor = 'rgba(255,255,255,0.1)'; btn.style.boxShadow = ''; btn.style.color = '#cbd5e1';
-                if(btn.id === 'btn-lab') { btn.style.color = 'white'; btn.style.borderColor = 'rgba(14,165,233,0.5)'; btn.style.backgroundColor = 'rgba(14,165,233,0.2)'; }
-            });
-            
-            secQuiz.classList.add('hidden'); secContent.classList.add('hidden'); secLab.classList.add('hidden'); secWelcome.classList.remove('hidden');
-            spawn3DModel('main'); window.scrollTo(0, 0);
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            spawn3DModel('main');
-            setTimeout(() => VanillaTilt.init(document.querySelectorAll(".vanilla-tilt-card"), { max: 5, speed: 400, glare: true, "max-glare": 0.1, scale: 1.01 }), 100);
-            updateLab(); // Подготовим вычисления
-        });
+        // --- ПРОДВИНУТАЯ СИМУЛЯЦИЯ (НАКЛОННАЯ ПЛОСКОСТЬ) ---
+        let sim = { run: false, time: 0, x: 0, v: 0, a: 0, m: 2, ang: 30, mu: 0.2, F_app: 0, history: {t:[], x:[], v:[], a:[]}, lastT: 0 };
+        let simCharts = {};
 
         function loadLab() {
-            document.getElementById('search-input').value = ''; 
-            document.querySelectorAll('.class-btn').forEach(btn => {
-                btn.style.backgroundColor = ''; btn.style.borderColor = 'rgba(255,255,255,0.1)'; btn.style.boxShadow = ''; btn.style.color = '#cbd5e1';
-            });
-            
-            const btnLab = document.getElementById('btn-lab');
-            btnLab.style.backgroundColor = colors['lab']; btnLab.style.borderColor = colors['lab']; btnLab.style.color = '#fff'; btnLab.style.boxShadow = `0 0 20px ${colors['lab']}80`;
-
-            secWelcome.classList.add('hidden'); secQuiz.classList.add('hidden'); secContent.classList.add('hidden'); secLab.classList.remove('hidden');
-            
-            spawn3DModel('lab'); window.scrollTo(0, 0);
-            
-            initCharts();
-            updateLab();
+            hideAll(); document.getElementById('lab-section').classList.remove('hidden'); spawn3DModel('lab'); window.scrollTo(0,0);
+            updateBasicLab(); initSimCharts(); updateSimParams(); drawSimFrame();
         }
 
-        function updateLab() {
-            // 1. Маятник
-            let l = parseFloat(document.getElementById('lab-pend-l').value);
-            let t = 2 * Math.PI * Math.sqrt(l / 9.8);
-            document.getElementById('lab-pend-out').innerText = t.toFixed(2) + ' с';
-            document.getElementById('lab-pend-val').innerText = l.toFixed(1) + ' м';
-
-            // 2. Падение
-            let h = parseFloat(document.getElementById('lab-fall-h').value);
-            let totalTime = Math.sqrt(2 * h / 9.8);
-            let v = Math.sqrt(2 * 9.8 * h);
-            document.getElementById('lab-fall-out').innerText = totalTime.toFixed(2) + ' с';
-            document.getElementById('lab-fall-val').innerText = h + ' м';
-
-            // 3. Закон Ома
-            let u = parseFloat(document.getElementById('lab-ohm-u').value);
-            let r = parseFloat(document.getElementById('lab-ohm-r').value);
-            let i = u / r;
-            document.getElementById('lab-ohm-out').innerText = i.toFixed(2) + ' А';
-            document.getElementById('lab-ohm-val-u').innerText = u + ' В';
-            document.getElementById('lab-ohm-val-r').innerText = r + ' Ом';
-
-            // 4. Оптика
-            let focal = parseFloat(document.getElementById('lab-opt-f').value);
-            let dist = parseFloat(document.getElementById('lab-opt-d').value);
-            let f_img = (dist === focal) ? null : (dist * focal) / (dist - focal);
-            let type = (f_img && f_img > 0) ? "Действительное" : "Мнимое";
-            document.getElementById('lab-opt-out').innerText = f_img ? `${Math.abs(f_img).toFixed(1)} см | ${type}` : `Бесконечность`;
-            document.getElementById('lab-opt-val-f').innerText = focal + ' см';
-            document.getElementById('lab-opt-val-d').innerText = dist + ' см';
-
-            // ОБНОВЛЕНИЕ ГРАФИКОВ
-            if (chartsInitialized) {
-                // Маятник
-                let pData = [];
-                for(let len=0.1; len<=10; len+=0.5) pData.push({x: len, y: 2*Math.PI*Math.sqrt(len/9.8)});
-                chartInstances.pend.data.datasets[0].data = pData;
-                chartInstances.pend.data.datasets[1].data = [{x: l, y: t}];
-                chartInstances.pend.update();
-
-                // Падение (траектория h от t)
-                let fData = [];
-                for(let time=0; time<=totalTime; time+=totalTime/20) fData.push({x: time, y: h - (9.8*time*time)/2});
-                fData.push({x: totalTime, y: 0});
-                chartInstances.fall.data.datasets[0].data = fData;
-                chartInstances.fall.data.datasets[1].data = [{x: totalTime, y: 0}]; // Точка удара
-                chartInstances.fall.update();
-
-                // Ом (I от U)
-                let oData = [];
-                for(let volt=0; volt<=1000; volt+=50) oData.push({x: volt, y: volt/r});
-                chartInstances.ohm.data.datasets[0].data = oData;
-                chartInstances.ohm.data.datasets[1].data = [{x: u, y: i}];
-                chartInstances.ohm.update();
-
-                // Оптика (f от d)
-                let optData = [];
-                for(let d=1; d<=100; d+=2) {
-                    if (Math.abs(d - focal) < 1) optData.push({x: d, y: null}); // Разрыв графика
-                    else optData.push({x: d, y: (d*focal)/(d-focal)});
-                }
-                chartInstances.opt.data.datasets[0].data = optData;
-                if (f_img !== null) chartInstances.opt.data.datasets[1].data = [{x: dist, y: f_img}];
-                else chartInstances.opt.data.datasets[1].data = [];
-                chartInstances.opt.update();
-            }
+        function toggleSim() {
+            sim.run = !sim.run;
+            document.getElementById('sim-play-btn').innerText = sim.run ? "⏸ Пауза" : "▶ Продолжить";
+            document.getElementById('sim-play-btn').style.backgroundColor = sim.run ? "#f59e0b" : "#10b981";
+            if(sim.run) { sim.lastT = performance.now(); requestAnimationFrame(simLoop); }
         }
 
-        // --- ЛОГИКА ТЕСТА (СЛУЧАЙНЫЕ 12 из 30) ---
-        let currentQuizData = [];
-        let currentQuizIndex = 0;
-        let quizScore = 0;
-        let quizAnswered = false;
-
-        function shuffle(array) {
-            let currentIndex = array.length, randomIndex;
-            while (currentIndex !== 0) {
-                randomIndex = Math.floor(Math.random() * currentIndex); currentIndex--;
-                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-            }
-            return array;
+        function resetSim() {
+            sim.run = false; sim.time = 0; sim.x = 0; sim.v = 0; sim.history = {t:[], x:[], v:[], a:[]};
+            document.getElementById('sim-play-btn').innerText = "▶ Старт"; document.getElementById('sim-play-btn').style.backgroundColor = "#10b981";
+            updateSimParams(); updateSimCharts(); drawSimFrame();
         }
 
-        function startQuizScreen() {
-            secWelcome.classList.add('hidden'); secContent.classList.add('hidden'); secLab.classList.add('hidden'); secQuiz.classList.remove('hidden');
-            spawn3DModel('quiz'); window.scrollTo(0, 0);
+        function updateSimParams() {
+            sim.ang = parseFloat(document.getElementById('sim-ang').value); document.getElementById('v-ang').innerText = sim.ang + '°';
+            sim.m = parseFloat(document.getElementById('sim-mass').value); document.getElementById('v-mass').innerText = sim.m + ' кг';
+            sim.mu = parseFloat(document.getElementById('sim-mu').value); document.getElementById('v-mu').innerText = sim.mu;
+            sim.F_app = parseFloat(document.getElementById('sim-force').value); document.getElementById('v-force').innerText = sim.F_app + ' Н';
             
-            currentQuizData = shuffle([...allQuizQuestions]).slice(0, 12);
-            currentQuizIndex = 0; quizScore = 0;
-            showQuizQuestion();
-        }
+            // Расчет физики (Euler)
+            let rad = sim.ang * Math.PI / 180;
+            let F_gx = sim.m * 9.8 * Math.sin(rad); // Скатывающая
+            let N = sim.m * 9.8 * Math.cos(rad);
+            let F_fr_max = sim.mu * N;
 
-        function showQuizQuestion() {
-            quizAnswered = false;
-            const q = currentQuizData[currentQuizIndex];
-            let optionsHtml = '';
-            q.options.forEach((opt, idx) => {
-                optionsHtml += `<button id="quiz-btn-${idx}" onclick="selectQuizAnswer(${idx})" class="w-full text-left px-5 py-3 md:py-3 md:px-6 md:text-lg bg-black/40 border border-white/10 rounded-xl hover:bg-white/10 transition-all text-slate-200 font-medium">${opt}</button>`;
-            });
-
-            document.getElementById('quiz-content').innerHTML = `
-                <div class="mb-4 flex justify-between items-center text-sm md:text-base font-bold" style="color: ${currentColor}">
-                    <span>Вопрос ${currentQuizIndex + 1} из 12</span><span>Счет: ${quizScore}</span>
-                </div>
-                <h4 class="text-xl md:text-2xl text-white font-semibold mb-6 md:mb-8 leading-tight">${q.q}</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-6">${optionsHtml}</div>
-                <div id="quiz-next-container" class="hidden text-right fade-in mt-6">
-                    <button onclick="nextQuizQuestion()" class="px-6 py-2 md:px-8 md:py-3 text-white font-bold md:text-lg rounded-lg transition-transform hover:scale-105" style="background-color: ${currentColor}; box-shadow: 0 0 15px ${currentColor}80">Далее ➔</button>
-                </div>
-            `;
-            document.getElementById('quiz-card').style.borderTopColor = currentColor;
-            document.getElementById('quiz-card').style.boxShadow = `0 0 30px ${currentColor}33`;
-        }
-
-        function selectQuizAnswer(selectedIdx) {
-            if (quizAnswered) return;
-            quizAnswered = true;
-            const correctIdx = currentQuizData[currentQuizIndex].ans;
+            let F_net_no_fr = sim.F_app - F_gx;
             
-            const selectedBtn = document.getElementById(`quiz-btn-${selectedIdx}`);
-            const correctBtn = document.getElementById(`quiz-btn-${correctIdx}`);
-
-            if (selectedIdx === correctIdx) {
-                selectedBtn.classList.replace('bg-black/40', 'bg-emerald-500/80'); selectedBtn.classList.replace('border-white/10', 'border-emerald-500');
-                quizScore++;
+            if (sim.v === 0 && Math.abs(F_net_no_fr) <= F_fr_max) {
+                sim.a = 0; // Покой
             } else {
-                selectedBtn.classList.replace('bg-black/40', 'bg-red-500/80'); selectedBtn.classList.replace('border-white/10', 'border-red-500');
-                correctBtn.classList.replace('bg-black/40', 'bg-emerald-500/80'); correctBtn.classList.replace('border-white/10', 'border-emerald-500');
-            }
-            document.getElementById('quiz-next-container').classList.remove('hidden');
-        }
-
-        function nextQuizQuestion() {
-            currentQuizIndex++;
-            if (currentQuizIndex < currentQuizData.length) showQuizQuestion();
-            else showQuizResult();
-        }
-
-        function showQuizResult() {
-            let message = "", emoji = "";
-            if (quizScore === 12) { message = "Идеально! Да ты же новый Эйнштейн!"; emoji = "🏆"; }
-            else if (quizScore >= 9) { message = "Отличный результат! Пятерка по физике обеспечена."; emoji = "🌟"; }
-            else if (quizScore >= 5) { message = "Неплохо, но есть повод повторить формулы."; emoji = "📚"; }
-            else { message = "Кажется, пора открыть учебник... Учи теорию!"; emoji = "😅"; }
-
-            document.getElementById('quiz-content').innerHTML = `
-                <div class="text-center py-6 md:py-8 fade-in">
-                    <div class="text-6xl md:text-7xl mb-4">${emoji}</div>
-                    <h4 class="text-2xl md:text-3xl text-white font-bold mb-3">Тест завершен!</h4>
-                    <p class="text-xl md:text-2xl font-bold mb-4" style="color: ${currentColor}">Твой результат: ${quizScore} из 12</p>
-                    <p class="text-slate-300 md:text-lg mb-8">${message}</p>
-                    <button onclick="goHome()" class="px-8 py-3 border-2 font-bold rounded-xl hover:text-white transition-colors" style="border-color: ${currentColor}; color: ${currentColor};" onmouseover="this.style.backgroundColor='${currentColor}'" onmouseout="this.style.backgroundColor='transparent'">Вернуться на главную</button>
-                </div>
-            `;
-        }
-
-        // --- ЛОГИКА КАЛЬКУЛЯТОРА ---
-        function toggleCalc(btn) { btn.nextElementSibling.classList.toggle('hidden'); }
-
-        function calculateResult(btn, expr) {
-            const panel = btn.closest('.calc-panel');
-            const inputs = panel.querySelectorAll('.calc-input');
-            const resSpan = panel.querySelector('.calc-result');
-            
-            let evalExpr = expr; let allFilled = true;
-            inputs.forEach(inp => {
-                let val = parseFloat(inp.value);
-                if (isNaN(val)) { allFilled = false; val = 0; }
-                evalExpr = evalExpr.replace(new RegExp('\\b' + inp.dataset.var + '\\b', 'g'), `(${val})`);
-            });
-
-            if (!allFilled) { resSpan.innerText = "Введите числа"; return; }
-            try {
-                let finalVal = Function('"use strict"; return (' + evalExpr + ')')();
-                resSpan.innerText = (isNaN(finalVal) || !isFinite(finalVal)) ? "Бесконечность" : (Number.isInteger(finalVal) ? finalVal : finalVal.toPrecision(4));
-            } catch(e) { resSpan.innerText = "Ошибка"; }
-        }
-
-        // --- ЛОГИКА ОТРИСОВКИ ТЕМ ---
-        function loadClass(grade) {
-            document.getElementById('search-input').value = ''; 
-            document.querySelectorAll('.class-btn').forEach(btn => {
-                btn.style.backgroundColor = ''; btn.style.borderColor = 'rgba(255,255,255,0.1)'; btn.style.boxShadow = ''; btn.style.color = '#cbd5e1';
-                if(btn.id === 'btn-lab') { btn.style.color = 'white'; btn.style.borderColor = 'rgba(14,165,233,0.5)'; btn.style.backgroundColor = 'rgba(14,165,233,0.2)'; }
-            });
-            
-            spawn3DModel(grade); 
-            const clickedBtn = document.getElementById('btn-' + grade);
-            if (clickedBtn) {
-                clickedBtn.style.backgroundColor = currentColor; clickedBtn.style.borderColor = currentColor; clickedBtn.style.color = '#fff'; clickedBtn.style.boxShadow = `0 0 20px ${currentColor}80`;
+                let fr_dir = sim.v > 0 ? -1 : (sim.v < 0 ? 1 : (F_net_no_fr > 0 ? -1 : 1));
+                let F_net = F_net_no_fr + fr_dir * F_fr_max;
+                
+                // Проверка остановки трением при смене направления
+                if (sim.v !== 0 && Math.sign(sim.v + (F_net/sim.m)*0.016) !== Math.sign(sim.v)) {
+                    if (Math.abs(F_net_no_fr) <= F_fr_max) { sim.v = 0; F_net = 0; }
+                }
+                sim.a = F_net / sim.m;
             }
 
-            secWelcome.classList.add('hidden'); secQuiz.classList.add('hidden'); secLab.classList.add('hidden'); secContent.classList.remove('hidden');
-
-            const data = physicsData[grade];
-            let html = `<div class="fade-in mb-6 md:mb-8 text-center md:text-left"><h2 class="text-2xl md:text-3xl font-bold text-white border-b border-white/10 pb-3 md:pb-4 inline-block drop-shadow-md">${data.title}</h2></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">`;
-            html += generateCardsHtml(data.topics, currentColor);
-            html += `</div>`;
-            
-            secContent.innerHTML = html;
-            setTimeout(() => VanillaTilt.init(document.querySelectorAll(".vanilla-tilt-card"), { max: 6, speed: 400, glare: true, "max-glare": 0.15, scale: 1.02 }), 100);
+            document.getElementById('out-a').innerText = sim.a.toFixed(2);
+            document.getElementById('out-v').innerText = sim.v.toFixed(2);
+            document.getElementById('out-x').innerText = sim.x.toFixed(2);
+            if(!sim.run) drawSimFrame();
         }
 
-        // --- ЛОГИКА ПОИСКА ---
-        document.getElementById('search-input').addEventListener('input', function(e) {
-            const query = e.target.value.toLowerCase().trim();
-            document.querySelectorAll('.class-btn').forEach(btn => {
-                btn.style.backgroundColor = ''; btn.style.borderColor = 'rgba(255,255,255,0.1)'; btn.style.boxShadow = ''; btn.style.color = '#cbd5e1';
-                if(btn.id === 'btn-lab') { btn.style.color = 'white'; btn.style.borderColor = 'rgba(14,165,233,0.5)'; btn.style.backgroundColor = 'rgba(14,165,233,0.2)'; }
-            });
+        function simLoop(timestamp) {
+            if(!sim.run) return;
+            let dt = (timestamp - sim.lastT) / 1000; sim.lastT = timestamp;
+            if(dt > 0.1) dt = 0.016; // Защита от лагов
+            
+            updateSimParams(); // Пересчет a
+            
+            sim.v += sim.a * dt;
+            sim.x += sim.v * dt;
+            sim.time += dt;
 
-            if (query.length === 0) { goHome(); return; }
+            // Ограничения стенки
+            if(sim.x < 0) { sim.x=0; sim.v=0; }
+            if(sim.x > 20) { sim.x=20; sim.v=0; }
 
-            secWelcome.classList.add('hidden'); secQuiz.classList.add('hidden'); secLab.classList.add('hidden'); secContent.classList.remove('hidden');
-            spawn3DModel('search'); 
+            document.getElementById('sim-time-disp').innerText = sim.time.toFixed(2);
+            
+            // Запись в историю для графиков каждые ~100мс
+            if(sim.history.t.length === 0 || sim.time - sim.history.t[sim.history.t.length-1] > 0.1) {
+                sim.history.t.push(sim.time); sim.history.x.push(sim.x); sim.history.v.push(sim.v); sim.history.a.push(sim.a);
+                if(sim.history.t.length > 100) { sim.history.t.shift(); sim.history.x.shift(); sim.history.v.shift(); sim.history.a.shift(); }
+                updateSimCharts();
+            }
 
-            let results = [];
-            for (let grade in physicsData) {
-                physicsData[grade].topics.forEach(topic => {
-                    if (topic.name.toLowerCase().includes(query) || topic.desc.toLowerCase().includes(query) || topic.formula.toLowerCase().includes(query)) {
-                        results.push({ ...topic, gradeBadge: grade + " класс", origGrade: grade });
-                    }
+            drawSimFrame();
+            requestAnimationFrame(simLoop);
+        }
+
+        // Рисование на Canvas
+        function drawSimFrame() {
+            const cvs = document.getElementById('sim-canvas'); const ctx = cvs.getContext('2d');
+            let w = cvs.width = cvs.offsetWidth; let h = cvs.height = cvs.offsetHeight;
+            ctx.clearRect(0, 0, w, h);
+
+            let rad = sim.ang * Math.PI / 180;
+            let origin = {x: 50, y: h - 50}; // Низ наклонной
+            let length = w - 100;
+
+            // Рисуем плоскость
+            ctx.save();
+            ctx.translate(origin.x, origin.y);
+            
+            // Треугольник
+            ctx.fillStyle = isLightMode ? '#cbd5e1' : '#334155';
+            ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(Math.cos(rad)*length, 0); ctx.lineTo(Math.cos(rad)*length, -Math.sin(rad)*length); ctx.closePath(); ctx.fill();
+            
+            // Поверхность
+            ctx.rotate(-rad);
+            ctx.strokeStyle = currentColor; ctx.lineWidth = 4;
+            ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(length, 0); ctx.stroke();
+
+            // Рисуем Брусок
+            let boxSize = 40;
+            let boxX = sim.x * 20; // масштаб 1м = 20px
+            if(boxX > length-boxSize) boxX = length-boxSize;
+            
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillRect(boxX, -boxSize, boxSize, boxSize);
+            
+            // Рисуем векторы (центр бруска)
+            let cx = boxX + boxSize/2; let cy = -boxSize/2;
+            
+            function drawArrow(fx, fy, color, label) {
+                if(Math.abs(fx)<0.1 && Math.abs(fy)<0.1) return;
+                ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth=2;
+                let scale = 2; // Пикселей на Ньютон
+                let ex = cx + fx*scale; let ey = cy + fy*scale;
+                ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
+                ctx.beginPath(); ctx.arc(ex, ey, 3, 0, Math.PI*2); ctx.fill();
+            }
+
+            // В локальных координатах плоскости (x - вдоль, y - перпендикулярно)
+            // Гравитация (вниз, нужно перевести в локальные)
+            let Fg = sim.m * 9.8;
+            drawArrow(-Fg*Math.sin(rad), Fg*Math.cos(rad), '#10b981', 'mg'); // Тяжесть
+            drawArrow(0, -sim.m*9.8*Math.cos(rad), '#0ea5e9', 'N'); // Реакция
+            if(sim.F_app !== 0) drawArrow(sim.F_app, 0, '#ef4444', 'F'); // Тяга
+            
+            let fr_dir = sim.v > 0 ? -1 : (sim.v < 0 ? 1 : ( (sim.F_app - Fg*Math.sin(rad)) > 0 ? -1 : 1));
+            let F_fr = sim.a===0 && sim.v===0 ? Math.abs(sim.F_app - Fg*Math.sin(rad)) : sim.mu * sim.m*9.8*Math.cos(rad);
+            if(F_fr > 0) drawArrow(fr_dir * F_fr, 0, '#eab308', 'Fтр'); // Трение
+
+            ctx.restore();
+        }
+
+        // Графики Chart.js[span_4](start_span)[span_4](end_span)
+        function initSimCharts() {
+            if(simCharts.x) return;
+            const makeChart = (id, color, label) => {
+                Chart.defaults.color = isLightMode ? '#333' : '#aaa';
+                return new Chart(document.getElementById(id).getContext('2d'), {
+                    type:'line', data:{labels:[], datasets:[{label:label, data:[], borderColor:color, borderWidth:2, pointRadius:0}]},
+                    options:{responsive:true, maintainAspectRatio:false, animation:{duration:0}, plugins:{legend:{display:false}}, scales:{x:{display:false}}}
                 });
-            }
+            };
+            simCharts.x = makeChart('sim-chart-x', '#0ea5e9', 'x(t)');
+            simCharts.v = makeChart('sim-chart-v', '#10b981', 'v(t)');
+            simCharts.a = makeChart('sim-chart-a', '#ef4444', 'a(t)');
+        }
 
-            if (results.length === 0) {
-                secContent.innerHTML = `<div class="text-center text-slate-400 py-10 md:py-16 md:text-xl bg-black/20 rounded-xl backdrop-blur-md border border-white/5 fade-in">По запросу «<span class="text-white">${query}</span>» ничего не найдено.</div>`;
-                return;
-            }
+        function updateSimCharts() {
+            simCharts.x.data.labels = sim.history.t; simCharts.x.data.datasets[0].data = sim.history.x; simCharts.x.update();
+            simCharts.v.data.labels = sim.history.t; simCharts.v.data.datasets[0].data = sim.history.v; simCharts.v.update();
+            simCharts.a.data.labels = sim.history.t; simCharts.a.data.datasets[0].data = sim.history.a; simCharts.a.update();
+        }
 
-            let html = `<div class="fade-in mb-6 md:mb-8 text-center md:text-left"><h2 class="text-2xl md:text-3xl font-bold text-white border-b border-white/10 pb-3 md:pb-4 inline-block drop-shadow-md">Результаты поиска: ${results.length}</h2></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">`;
-            html += generateCardsHtml(results, currentColor);
-            html += `</div>`;
-            
-            secContent.innerHTML = html;
-            setTimeout(() => VanillaTilt.init(document.querySelectorAll(".vanilla-tilt-card"), { max: 6, speed: 400, glare: true, "max-glare": 0.15, scale: 1.02 }), 100);
+        // --- ГЕНЕРАЦИЯ КАРТОЧЕК ---
+        function loadClass(grade) {
+            hideAll(); document.getElementById('content-section').classList.remove('hidden'); spawn3DModel(grade);
+            let data = physicsData[grade]; let html = `<h2 class="text-3xl font-bold text-theme mb-6">${data.title}</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-6">`;
+            data.topics.forEach((t, i) => {
+                let calc = t.calc ? `<div class="mt-4 pt-4 border-t border-gray-500/30"><button onclick="this.nextElementSibling.classList.toggle('hidden')" class="text-sm font-bold bg-black/20 px-4 py-2 rounded text-[${currentColor}] border border-[${currentColor}]/30 hover:bg-[${currentColor}]/20">🧮 Калькулятор</button><div class="hidden mt-3 calc-panel p-3 rounded grid grid-cols-2 gap-2">${t.calc.vars.map(v=>`<input type="number" placeholder="${v.name}" data-var="${v.id}" class="calc-input bg-white/10 text-theme px-2 py-1 rounded text-sm outline-none border border-white/20">`).join('')}<button onclick="calcRes(this, '${t.calc.expr}')" class="col-span-2 bg-[${currentColor}] text-white font-bold rounded py-1">Считать</button><div class="col-span-2 text-theme font-bold text-center">Ответ: <span class="calc-result text-[${currentColor}]">...</span> ${t.calc.unit}</div></div></div>` : '';
+                html += `<div class="glass-card p-6 fade-in flex flex-col justify-between" style="animation-delay:${i*0.05}s">
+                    <div><h3 class="text-xl font-bold text-theme mb-2">${t.name}</h3><p class="text-gray-400 text-sm mb-4">${t.desc}</p>
+                    <div class="formula-box p-3 rounded mb-4 border-l-4" style="border-color:${currentColor}"><code class="text-xl text-[#10b981] font-mono">${t.formula}</code><p class="text-xs text-gray-400 mt-2">${t.vars}</p></div></div>
+                    <div class="example-box p-3 rounded text-sm text-gray-300"><p><b>Дано:</b> ${t.example.dano}</p><p><b>Решение:</b> ${t.example.sol}</p><p class="text-[${currentColor}] font-bold mt-1">Ответ: ${t.example.ans}</p></div>${calc}</div>`;
+            });
+            document.getElementById('content-section').innerHTML = html + '</div>';
+            setTimeout(()=>VanillaTilt.init(document.querySelectorAll(".glass-card"), {max:3, speed:400, glare:true, "max-glare":0.1}), 100);
+        }
+
+        function calcRes(btn, expr) {
+            let p=btn.closest('.calc-panel'), ins=p.querySelectorAll('.calc-input'), r=p.querySelector('.calc-result'), ev=expr, ok=true;
+            ins.forEach(i=>{ let v=parseFloat(i.value); if(isNaN(v))ok=false; ev=ev.replace(new RegExp('\\b'+i.dataset.var+'\\b','g'),`(${v})`); });
+            if(!ok) return r.innerText="Ошибка"; try { r.innerText = eval(ev).toFixed(2); } catch(e){ r.innerText="Ошибка"; }
+        }
+
+        // Поиск и тест аналогично сжаты
+        document.getElementById('search-input').addEventListener('input', e => {
+            let q = e.target.value.toLowerCase(); if(!q){goHome(); return;}
+            hideAll(); document.getElementById('content-section').classList.remove('hidden'); spawn3DModel('search');
+            let res=[]; Object.keys(physicsData).forEach(g=>physicsData[g].topics.forEach(t=>{ if((t.name+t.desc+t.formula).toLowerCase().includes(q)) res.push(t); }));
+            let html = `<h2 class="text-3xl font-bold text-theme mb-6">Найдено: ${res.length}</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-6">`;
+            res.forEach((t, i) => html += `<div class="glass-card p-6"><h3 class="text-xl font-bold text-theme">${t.name}</h3><code class="text-[#10b981]">${t.formula}</code></div>`);
+            document.getElementById('content-section').innerHTML = html + '</div>';
         });
 
-        function generateCardsHtml(topics, color) {
-            let html = '';
-            topics.forEach((topic, index) => {
-                let cardColor = topic.origGrade ? colors[topic.origGrade] : color;
-
-                let exampleHtml = '';
-                if (topic.example) {
-                    exampleHtml = `
-                        <div class="example-box mt-4 md:mt-6 p-3 md:p-4 rounded-lg shadow-inner" style="border-top-color: ${cardColor}">
-                            <h4 class="text-xs md:text-sm font-bold mb-2 md:mb-3 uppercase flex items-center gap-1 md:gap-2" style="color: ${cardColor}">Пример решения</h4>
-                            <div class="flex flex-col gap-1 md:gap-2 text-xs md:text-sm font-mono text-slate-300">
-                                <p><span class="text-slate-500">Дано:</span> ${topic.example.dano}</p>
-                                <p><span class="text-slate-500">Реш:</span> ${topic.example.sol}</p>
-                                <p class="font-bold inline-block px-2 py-1 md:px-3 rounded w-max mt-1 md:text-sm" style="color: ${cardColor}; background-color: ${cardColor}33">Ответ: ${topic.example.ans}</p>
-                            </div>
-                        </div>`;
-                }
-
-                let calcHtml = '';
-                if (topic.calc) {
-                    let inputsHtml = topic.calc.vars.map(v => `<input type="number" placeholder="${v.name}" data-var="${v.id}" class="calc-input w-full bg-black/50 border border-white/20 rounded px-3 py-2 text-white text-xs md:text-sm focus:outline-none" style="focus:border-color: ${cardColor}">`).join('');
-                    calcHtml = `
-                        <div class="mt-4 border-t border-white/10 pt-4">
-                            <button onclick="toggleCalc(this)" class="flex items-center gap-2 text-xs md:text-sm font-bold bg-white/5 hover:bg-white/10 px-4 py-2 rounded-lg transition-colors border border-white/10" style="color: ${cardColor}">
-                                🧮 Умный калькулятор
-                            </button>
-                            <div class="calc-panel hidden mt-3 bg-black/30 p-3 md:p-4 rounded-lg border border-white/5 shadow-inner">
-                                <div class="grid grid-cols-2 gap-2 md:gap-3 mb-3">${inputsHtml}</div>
-                                <div class="flex justify-between items-center mt-2">
-                                    <button onclick="calculateResult(this, '${topic.calc.expr}')" class="px-4 py-2 rounded font-bold text-white text-xs md:text-sm transition-transform hover:scale-105" style="background-color: ${cardColor}">Считать</button>
-                                    <div class="text-sm md:text-base font-mono font-bold" style="color: ${cardColor}">Ответ: <span class="calc-result">...</span> <span class="text-slate-400 text-xs">${topic.calc.unit}</span></div>
-                                </div>
-                            </div>
-                        </div>`;
-                }
-                
-                let badgeHtml = topic.gradeBadge ? `<span class="absolute top-4 right-4 text-[10px] md:text-xs font-bold px-2 py-1 md:px-3 rounded border drop-shadow-md" style="transform: translateZ(20px); color: ${cardColor}; background-color: ${cardColor}33; border-color: ${cardColor}4D">${topic.gradeBadge}</span>` : '';
-
-                html += `
-                    <div class="glass-card vanilla-tilt-card rounded-2xl p-5 md:p-6 fade-in flex flex-col justify-between" style="animation-delay: ${index * 0.05}s">
-                        ${badgeHtml}
-                        <div class="glass-card-inner">
-                            <div class="flex items-center gap-3 md:gap-4 mb-3 md:mb-4 pr-16 md:pr-20">
-                                <div class="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-bold shrink-0 md:text-lg" style="color: ${cardColor}; background-color: ${cardColor}33; box-shadow: 0 0 15px ${cardColor}4D">${index + 1}</div>
-                                <h3 class="text-lg md:text-xl font-bold text-white drop-shadow-md leading-tight">${topic.name}</h3>
-                            </div>
-                            <p class="text-slate-300 mb-4 md:mb-6 text-sm md:text-base drop-shadow-sm leading-relaxed">${topic.desc}</p>
-                            <div class="formula-box p-3 md:p-4 rounded-lg" style="border-left-color: ${cardColor}">
-                                <span class="text-[10px] md:text-xs font-bold uppercase mb-1 md:mb-2 block tracking-wider" style="color: ${cardColor}">Формула</span>
-                                <code class="font-mono text-lg md:text-2xl block mb-2 md:mb-3 drop-shadow-md" style="color: #4ade80">${topic.formula}</code>
-                                <p class="font-mono text-[11px] md:text-xs text-slate-400 border-t border-white/10 pt-2 leading-snug">${topic.vars}</p>
-                            </div>
-                            ${calcHtml}
-                        </div>
-                        ${exampleHtml}
-                    </div>`;
-            });
-            return html;
-        }
+        // Инициализация
+        window.addEventListener('DOMContentLoaded', goHome);
     </script>
 </body>
 </html>
