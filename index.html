@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PhysHub | Справочник, Задачи и Лаборатория</title>
     
+    <!-- Подключение библиотек -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Lora:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
     
@@ -25,34 +26,38 @@
     <style>
         body { background-color: #0b1120; color: #f8fafc; margin: 0; overflow: hidden; }
         
-        ::-webkit-scrollbar { width: 8px; }
+        /* Скроллбар */
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
 
         #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: 0; pointer-events: none; }
-        
+
+        /* Анимация переливания пасхалки */
         @keyframes shimmer { from { background-position: 200% center; } to { background-position: 0% center; } }
-        .animate-shimmer { background: var(--sahar-grad, linear-gradient(90deg, #94a3b8 0%, #f8fafc 50%, #94a3b8 100%)); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 4s linear infinite; cursor: pointer; transition: transform 0.2s; }
-        .animate-shimmer:hover { transform: scale(1.08); }
+        .animate-shimmer { 
+            background: var(--sahar-grad, linear-gradient(90deg, #94a3b8 0%, #f8fafc 50%, #94a3b8 100%)); 
+            background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+            animation: shimmer 3s linear infinite; cursor: pointer; transition: transform 0.2s; 
+        }
+        .animate-shimmer:hover { transform: scale(1.08) rotate(-2deg); }
 
-        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
-        .floating { animation: float 4s ease-in-out infinite; }
-
-        .glass-panel { background: rgba(17, 24, 39, 0.9); backdrop-filter: blur(20px); border-right: 1px solid rgba(255, 255, 255, 0.05); }
-        .glass-card { background: #151c2c; border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 1rem; transition: all 0.3s ease; position: relative; overflow: hidden; }
-        .glass-card:hover { border-color: rgba(59, 130, 246, 0.4); box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.25); transform: translateY(-2px); }
+        /* Плавные анимации UI */
+        .glass-panel { background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(20px); border-right: 1px solid rgba(255, 255, 255, 0.05); }
+        .glass-card { background: #151c2c; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1rem; transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .glass-card:hover { border-color: rgba(59, 130, 246, 0.4); box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.25); transform: translateY(-3px); }
         
-        .math-text { font-family: 'Lora', serif; font-size: 1.35rem; letter-spacing: 0.04em; }
+        .math-text { font-family: 'Lora', serif; font-size: 1.3rem; letter-spacing: 0.05em; }
         .fade-in { animation: fadeIn 0.4s ease-out forwards; opacity: 0; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         
-        .stage-3d { width: 220px; height: 220px; display: flex; justify-content: center; align-items: center; position: relative; margin: 0 auto; flex-shrink: 0; cursor: pointer; }
-        .stage-3d::before { content: ''; position: absolute; width: 130px; height: 130px; background: var(--glow-color, rgba(59, 130, 246, 0.35)); filter: blur(45px); border-radius: 50%; z-index: -1; pointer-events: none; transition: background 0.4s; }
+        /* 3D-контейнеры */
+        .model-3d-target { width: 100%; height: 100%; min-height: 180px; display: flex; justify-content: center; align-items: center; position: relative; z-index: 10; cursor: pointer;}
+        .model-3d-target::before { content: ''; position: absolute; width: 130px; height: 130px; background: var(--glow-color, rgba(59, 130, 246, 0.3)); filter: blur(45px); border-radius: 50%; z-index: -1; transition: background 0.5s; pointer-events: none; }
 
-        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=range] { -webkit-appearance: none; width: 100%; background: rgba(255,255,255,0.1); height: 5px; border-radius: 3px; outline: none; margin: 10px 0; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #3b82f6; cursor: pointer; transition: 0.2s; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--theme-color, #3b82f6); cursor: pointer; transition: 0.2s; }
         input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 
         .nav-item.active { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border-left: 3px solid #3b82f6; }
@@ -61,14 +66,15 @@
 </head>
 <body class="flex h-screen w-screen overflow-hidden selection:bg-brand-neon selection:text-white">
 
+    <!-- Фон частиц -->
     <div id="particles-js"></div>
 
-    <!-- Скрытый контейнер для 3D (перемещается по DOM) -->
+    <!-- Изолированный холст для 3D -->
     <div id="global-3d-wrapper" class="hidden">
-        <div id="model-3d-container" class="w-full h-full flex justify-center items-center pointer-events-auto"></div>
+        <div id="model-3d-container" class="w-full h-full flex justify-center items-center pointer-events-none"></div>
     </div>
 
-    <!-- БОКОВОЕ МЕНЮ (SIDEBAR) -->
+    <!-- БОКОВОЕ МЕНЮ -->
     <aside id="sidebar" class="w-64 md:w-72 flex-shrink-0 glass-panel flex flex-col h-full z-50 fixed md:relative -translate-x-full md:translate-x-0 transition-transform duration-300 shadow-2xl md:shadow-none">
         <div class="h-20 flex items-center px-6 border-b border-white/5 bg-brand-dark/50">
             <svg class="w-8 h-8 text-brand-neon mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
@@ -90,10 +96,6 @@
             <button id="nav-tasks" onclick="loadTasks()" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300"><span>📝</span> Решение задач</button>
             <button id="nav-quiz" onclick="startQuizScreen()" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-white/5 text-slate-300"><span>🧠</span> Блиц-тест (30)</button>
         </nav>
-
-        <div class="p-4 border-t border-white/5 text-center bg-black/20">
-            <span onclick="changeSaharColor()" class="font-mono text-xs font-bold tracking-[0.2em] animate-shimmer inline-block select-none">BY SAHAR²¹</span>
-        </div>
     </aside>
 
     <!-- ОСНОВНАЯ ЧАСТЬ -->
@@ -101,182 +103,158 @@
         
         <header class="h-20 flex-shrink-0 flex items-center justify-between px-4 md:px-8 border-b border-white/5 bg-[#0b1120]/80 backdrop-blur-md z-20">
             <div class="flex items-center gap-3 w-full max-w-2xl">
-                <button onclick="toggleSidebar()" class="md:hidden text-slate-300 hover:text-white p-2.5 bg-white/5 rounded-lg border border-white/10 shrink-0">
+                <button onclick="toggleSidebar()" class="md:hidden text-slate-300 hover:text-white p-2 bg-white/5 rounded-lg border border-white/10 shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
                 <div class="relative w-full">
-                    <input type="text" id="search-input" placeholder="Поиск по темам и формулам..." class="w-full bg-[#151c2c] border border-white/10 rounded-full py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-neon transition-colors">
+                    <input type="text" id="search-input" placeholder="Поиск по темам и формулам (например: Ньютон, Давление)..." class="w-full bg-[#151c2c] border border-white/10 rounded-full py-2.5 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-neon transition-colors">
                     <svg class="w-4 h-4 absolute left-3.5 top-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
-            </div>
-            <div class="hidden lg:flex items-center gap-4 ml-4 shrink-0">
-                <span onclick="changeSaharColor()" class="font-mono text-xs font-bold tracking-[0.2em] animate-shimmer select-none cursor-pointer">BY SAHAR²¹</span>
             </div>
         </header>
 
         <!-- СКРОЛЛИРУЕМАЯ ОБЛАСТЬ КОНТЕНТА -->
         <main class="flex-1 overflow-y-auto p-4 md:p-8 relative" id="main-scroll">
             
-            <!-- 1. ГЛАВНАЯ СТРАНИЦА -->
+            <!-- ГЛАВНАЯ СТРАНИЦА -->
             <div id="welcome-section" class="max-w-6xl mx-auto block fade-in pb-12">
-                <div class="bg-[#111827] border border-white/5 rounded-3xl p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 mb-8 relative shadow-2xl overflow-hidden">
+                <div class="bg-[#111827] border border-white/5 rounded-3xl p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 mb-8 relative shadow-2xl overflow-hidden">
                     <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-neon/10 blur-[120px] rounded-full pointer-events-none"></div>
                     
-                    <div class="max-w-xl relative z-10">
+                    <!-- ПАСХАЛКА В УГЛУ ГЛАВНОГО МЕНЮ -->
+                    <div class="absolute top-5 right-6 z-30 hidden md:block">
+                        <span onclick="changeSaharColor()" class="font-mono text-xs font-bold tracking-[0.2em] animate-shimmer drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">BY SAHAR²¹</span>
+                    </div>
+
+                    <div class="max-w-xl relative z-10 pt-4">
                         <span class="inline-block py-1 px-3 rounded-full bg-brand-neon/20 border border-brand-neon/30 text-brand-neon text-xs font-bold tracking-wider mb-4">ВЕРСИЯ 2.0</span>
-                        <h1 class="text-3xl md:text-5xl font-extrabold mb-4 leading-tight">Физика — <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">язык Вселенной</span></h1>
+                        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight">Физика — <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">язык Вселенной</span></h1>
                         <p class="text-slate-400 text-sm md:text-base mb-6 leading-relaxed">
-                            Фундаментальная наука о природе, изучающая простейшие и вместе с тем наиболее общие законы материального мира. Нажми на атом, чтобы изменить цвет!
+                            Фундаментальная наука о природе. Она изучает простейшие и наиболее общие законы материального мира. Нажми на атом, чтобы поменять цвет!
                         </p>
-                        <div class="flex flex-wrap gap-3">
-                            <button onclick="loadClass(9)" class="bg-brand-neon hover:bg-blue-500 text-white font-semibold py-2.5 px-6 rounded-full shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-transform hover:scale-105 text-sm">Начать изучение</button>
-                            <button onclick="loadLab()" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold py-2.5 px-6 rounded-full transition-colors text-sm">В лабораторию</button>
+                        <div class="flex flex-wrap gap-4">
+                            <button onclick="loadClass(9)" class="bg-brand-neon hover:bg-blue-500 text-white font-semibold py-3 px-8 rounded-full shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-transform hover:scale-105">Начать изучение</button>
+                            <button onclick="loadLab()" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold py-3 px-8 rounded-full transition-colors">В лабораторию</button>
+                            <!-- Мобильная пасхалка -->
+                            <span onclick="changeSaharColor()" class="md:hidden self-center font-mono text-xs font-bold tracking-[0.2em] animate-shimmer ml-2">BY SAHAR²¹</span>
                         </div>
                     </div>
-                    <!-- 3D Сцена на главной (С КЛИКОМ!) -->
-                    <div id="target-main" class="stage-3d floating" onclick="change3DColor()"></div>
+                    
+                    <!-- 3D Контейнер Главной страницы -->
+                    <div class="w-full md:w-1/2 h-48 md:h-72 relative z-10 model-3d-target" id="target-main" onclick="change3DColor()"></div>
                 </div>
 
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
                     <div onclick="loadClass(9)" class="glass-card p-5 border-t-2 border-t-brand-neon cursor-pointer">
-                        <div class="text-2xl mb-2">📚</div><h3 class="text-white font-bold text-base mb-1">База знаний</h3><p class="text-xs text-slate-400">Все темы с 7 по 11 класс.</p>
+                        <div class="text-3xl mb-2">📚</div><h3 class="text-white font-bold text-lg mb-1">База знаний</h3><p class="text-xs text-slate-400">Школьный курс (7-11).</p>
                     </div>
                     <div onclick="loadClass(8)" class="glass-card p-5 border-t-2 border-t-[#10b981] cursor-pointer">
-                        <div class="text-2xl mb-2">🧮</div><h3 class="text-white font-bold text-base mb-1">Калькулятор</h3><p class="text-xs text-slate-400">Встроенный расчет формул.</p>
+                        <div class="text-3xl mb-2">🧮</div><h3 class="text-white font-bold text-lg mb-1">Калькулятор</h3><p class="text-xs text-slate-400">Расчет прямо в формулах.</p>
                     </div>
                     <div onclick="loadLab()" class="glass-card p-5 border-t-2 border-t-[#8b5cf6] cursor-pointer">
-                        <div class="text-2xl mb-2">🔬</div><h3 class="text-white font-bold text-base mb-1">Лаборатория</h3><p class="text-xs text-slate-400">Интерактивные графики.</p>
+                        <div class="text-3xl mb-2">🔬</div><h3 class="text-white font-bold text-lg mb-1">Лаборатория</h3><p class="text-xs text-slate-400">Интерактивные опыты.</p>
                     </div>
                     <div onclick="startQuizScreen()" class="glass-card p-5 border-t-2 border-t-[#ec4899] cursor-pointer">
-                        <div class="text-2xl mb-2">🧠</div><h3 class="text-white font-bold text-base mb-1">30 вопросов</h3><p class="text-xs text-slate-400">Блиц-экзамен по физике.</p>
+                        <div class="text-3xl mb-2">🧠</div><h3 class="text-white font-bold text-lg mb-1">30 вопросов</h3><p class="text-xs text-slate-400">Блиц-экзамен по физике.</p>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 mb-5">
-                    <span class="text-yellow-400 text-xl">⚡</span><h2 class="text-xl font-bold">Популярные формулы</h2>
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="text-yellow-400 text-2xl drop-shadow-md">⚡</span><h2 class="text-2xl font-bold">Случайные формулы</h2>
                 </div>
-                <div id="popular-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+                <div id="popular-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
 
-            <!-- 2. СЕКЦИЯ ТЕМ (КЛАССЫ И ПОИСК) -->
+            <!-- СЕКЦИЯ ТЕМ (КЛАССЫ) -->
             <div id="content-section" class="max-w-6xl mx-auto hidden pb-12">
-                <div class="bg-[#111827] border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-8 shadow-xl">
-                    <div>
+                <div class="bg-[#111827] border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-8 shadow-xl overflow-hidden relative">
+                    <div class="relative z-10">
                         <span id="class-badge" class="inline-block py-1 px-3 rounded-full bg-brand-neon/20 text-brand-neon text-xs font-bold uppercase mb-3">Школьная программа</span>
-                        <h2 id="class-title" class="text-2xl md:text-4xl font-bold text-white mb-2">Раздел</h2>
+                        <h2 id="class-title" class="text-3xl md:text-4xl font-bold text-white mb-2">Раздел</h2>
                         <p class="text-slate-400 text-sm">Формулы, подробный разбор задач и умный калькулятор в каждой карточке.</p>
                     </div>
-                    <div id="target-content" class="stage-3d floating" onclick="change3DColor()"></div>
+                    <div class="w-full md:w-1/3 h-32 md:h-40 relative model-3d-target z-10" id="target-content" onclick="change3DColor()"></div>
                 </div>
                 <div id="class-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
             </div>
 
-            <!-- 3. СЕКЦИЯ ТЕСТА -->
+            <!-- СЕКЦИЯ ТЕСТА -->
             <div id="quiz-section" class="max-w-5xl mx-auto hidden pb-12">
-                <div class="bg-[#111827] border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-8 shadow-xl border-t-4 border-t-emerald-500">
-                    <div>
-                        <h2 class="text-2xl md:text-3xl font-bold mb-2 text-white">Блиц-тест по физике</h2>
-                        <p class="text-slate-400 text-sm">30 вопросов по всему школьному курсу (теория и задачи).</p>
+                <div class="bg-[#111827] border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-8 shadow-xl border-t-4 border-t-emerald-500 overflow-hidden relative">
+                    <div class="relative z-10">
+                        <h2 class="text-3xl font-bold mb-2 text-white">Экзамен по физике</h2>
+                        <p class="text-slate-400 text-sm">30 вопросов подряд без перемешивания.</p>
                     </div>
-                    <div id="target-quiz" class="stage-3d floating" onclick="change3DColor()"></div>
+                    <div class="w-full md:w-1/3 h-32 md:h-40 relative model-3d-target z-10" id="target-quiz" onclick="change3DColor()"></div>
                 </div>
-                <div class="glass-card p-6 md:p-8 border border-white/5">
-                    <div id="quiz-content" class="min-h-[260px] flex flex-col justify-center"></div>
+                <div class="glass-card p-6 md:p-10 border border-white/5">
+                    <div class="flex justify-end mb-4 border-b border-white/5 pb-4">
+                        <button onclick="goHome()" class="bg-white/5 hover:bg-white/10 px-4 py-2 rounded-lg text-slate-300 font-bold transition-colors">✕ Выйти из теста</button>
+                    </div>
+                    <div id="quiz-content" class="min-h-[300px] flex flex-col justify-center"></div>
                 </div>
             </div>
 
-            <!-- 4. СЕКЦИЯ ЗАДАЧ -->
+            <!-- СЕКЦИЯ ЗАДАЧ -->
             <div id="tasks-section" class="max-w-5xl mx-auto hidden pb-12">
-                <div class="bg-[#111827] border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-8 shadow-xl border-t-4 border-t-[#10b981]">
-                    <div>
-                        <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Решение задач</h2>
-                        <p class="text-slate-400 text-sm">Самостоятельный практикум: реши задачу, впиши ответ и проверь себя.</p>
+                <div class="bg-[#111827] border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-8 shadow-xl border-t-4 border-t-[#10b981] overflow-hidden relative">
+                    <div class="relative z-10">
+                        <h2 class="text-3xl font-bold text-white mb-2">Решение задач</h2>
+                        <p class="text-slate-400 text-sm">Считай, вводи числовой ответ и проверяй себя.</p>
                     </div>
-                    <div id="target-tasks" class="stage-3d floating" onclick="change3DColor()"></div>
+                    <div class="w-full md:w-1/3 h-32 md:h-40 relative model-3d-target z-10" id="target-tasks" onclick="change3DColor()"></div>
                 </div>
                 <div id="tasks-container" class="grid grid-cols-1 gap-6"></div>
             </div>
 
-            <!-- 5. СЕКЦИЯ ЛАБОРАТОРИИ -->
-            <div id="lab-section" class="max-w-6xl mx-auto hidden pb-12">
-                <div class="bg-[#111827] border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-8 shadow-xl border-t-4 border-t-[#8b5cf6]">
-                    <div>
-                        <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Виртуальная лаборатория</h2>
-                        <p class="text-slate-400 text-sm">Управляй параметрами и наблюдай за живыми графиками.</p>
+            <!-- СЕКЦИЯ ЛАБОРАТОРИИ (С РАБОЧЕЙ ФИЗИКОЙ) -->
+            <div id="lab-section" class="max-w-5xl mx-auto hidden pb-12">
+                <div class="bg-[#111827] border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-8 shadow-xl border-t-4 border-t-[#8b5cf6] overflow-hidden relative">
+                    <div class="relative z-10">
+                        <h2 class="text-3xl font-bold text-white mb-2">Виртуальная лаборатория</h2>
+                        <p class="text-slate-400 text-sm">Наблюдай за процессами в реальном времени. Все расчеты точны.</p>
                     </div>
-                    <div id="target-lab" class="stage-3d floating" onclick="change3DColor()"></div>
+                    <div class="w-full md:w-1/3 h-32 md:h-40 relative model-3d-target z-10" id="target-lab" onclick="change3DColor()"></div>
                 </div>
                 
-                <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                    <!-- Опыт 1: Кинематика автомобиля + График x(t) -->
-                    <div class="glass-card p-6 flex flex-col border-t-2 border-brand-neon">
-                        <h3 class="text-lg font-bold mb-4 text-brand-neon">🚗 Кинематика автомобиля</h3>
-                        <div class="relative w-full h-24 bg-black/40 border border-white/10 rounded-xl mb-4 overflow-hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Машинка -->
+                    <div class="glass-card p-6 flex flex-col border border-white/5 hover:border-[#8b5cf6]/50 transition-colors">
+                        <h3 class="text-xl font-bold mb-4 text-[#8b5cf6]">🚗 Кинематика автомобиля</h3>
+                        <div class="relative w-full h-32 bg-black/40 border border-white/10 rounded-xl mb-6 overflow-hidden">
                             <div class="absolute bottom-4 w-full border-b-2 border-dashed border-slate-600"></div>
-                            <div id="sim1-car" class="absolute bottom-4 left-0 w-10 h-5 bg-brand-neon rounded shadow-[0_0_15px_#3b82f6] flex items-center justify-center text-[10px] font-bold text-white"></div>
+                            <div id="sim1-car" class="absolute bottom-4 left-0 w-12 h-6 bg-brand-neon rounded shadow-[0_0_15px_#3b82f6] flex items-center justify-center text-[10px] font-bold text-white transition-transform duration-75">m</div>
                         </div>
-                        <div class="w-full h-36 mb-4 bg-black/20 rounded-xl p-2 border border-white/5">
-                            <canvas id="chart-sim1"></canvas>
+                        <div class="grid grid-cols-2 gap-4 mb-6 text-sm">
+                            <div><label class="text-slate-400 block mb-1">v₀: <span id="sim1-v0-val" class="text-white font-bold">0</span> м/с</label><input type="range" id="sim1-v0" min="-50" max="50" value="0" oninput="updateSim1UI()"></div>
+                            <div><label class="text-slate-400 block mb-1">a: <span id="sim1-a-val" class="text-white font-bold">10</span> м/с²</label><input type="range" id="sim1-a" min="-20" max="20" value="10" oninput="updateSim1UI()"></div>
                         </div>
-                        <div class="grid grid-cols-2 gap-4 mb-4 text-sm mt-auto">
-                            <div><label class="text-slate-400 block mb-1">v₀: <span id="sim1-v0-val" class="text-white font-bold">0</span> м/с</label><input type="range" id="sim1-v0" min="0" max="40" value="0" oninput="updateSim1UI()"></div>
-                            <div><label class="text-slate-400 block mb-1">a: <span id="sim1-a-val" class="text-white font-bold">4</span> м/с²</label><input type="range" id="sim1-a" min="-10" max="10" value="4" oninput="updateSim1UI()"></div>
+                        <div class="flex gap-3 mb-4">
+                            <button onclick="startSim1()" class="flex-1 bg-brand-neon hover:bg-blue-500 text-white font-semibold py-2.5 rounded-lg transition-colors shadow-lg">▶ Запуск</button>
+                            <button onclick="resetSim1()" class="flex-1 bg-white/10 hover:bg-white/20 text-white font-semibold py-2.5 rounded-lg transition-colors">Сброс</button>
                         </div>
-                        <div class="flex gap-3">
-                            <button onclick="startSim1()" class="flex-1 bg-brand-neon hover:bg-blue-500 text-white font-semibold py-2 rounded-lg transition-colors text-sm">▶ Запуск</button>
-                            <button onclick="resetSim1()" class="flex-1 bg-white/10 hover:bg-white/20 text-white font-semibold py-2 rounded-lg transition-colors text-sm">Сброс</button>
-                        </div>
-                    </div>
-
-                    <!-- Опыт 2: Свободное падение + График h(t) -->
-                    <div class="glass-card p-6 flex flex-col border-t-2 border-[#10b981]">
-                        <h3 class="text-lg font-bold mb-4 text-[#10b981]">🍎 Свободное падение</h3>
-                        <div class="flex gap-4 mb-4">
-                            <div class="relative w-20 h-40 bg-black/40 border border-white/10 rounded-xl overflow-hidden shrink-0">
-                                <div class="absolute bottom-0 w-full h-2 bg-emerald-600/60"></div>
-                                <div id="sim2-ball" class="absolute top-0 left-1/2 -translate-x-1/2 w-5 h-5 bg-red-500 rounded-full shadow-[0_0_15px_#ef4444]"></div>
-                            </div>
-                            <div class="flex-1 h-40 bg-black/20 rounded-xl p-2 border border-white/5">
-                                <canvas id="chart-sim2"></canvas>
-                            </div>
-                        </div>
-                        <div class="mb-4 text-sm mt-auto">
-                            <label class="text-slate-400 block mb-1">Высота (H): <span id="sim2-h-val" class="text-white font-bold">100</span> м</label>
-                            <input type="range" id="sim2-h" min="20" max="200" value="100" oninput="updateSim2UI()">
-                        </div>
-                        <div class="flex gap-3">
-                            <button onclick="startSim2()" class="flex-1 bg-[#10b981] hover:bg-emerald-500 text-white font-semibold py-2 rounded-lg transition-colors text-sm">⬇ Бросить</button>
-                            <button onclick="resetSim2()" class="flex-1 bg-white/10 hover:bg-white/20 text-white font-semibold py-2 rounded-lg transition-colors text-sm">Поднять</button>
+                        <div class="mt-auto p-4 bg-brand-dark/80 rounded-lg border border-white/5 font-mono text-sm text-brand-neon flex justify-between shadow-inner">
+                            <span>t: <span id="sim1-t">0.00</span> с</span><span>x: <span id="sim1-x">0.00</span> м</span><span>v: <span id="sim1-v">0.00</span> м/с</span>
                         </div>
                     </div>
 
-                    <!-- Опыт 3: Закон Ома (ВАХ) -->
-                    <div class="glass-card p-6 flex flex-col border-t-2 border-[#f59e0b]">
-                        <h3 class="text-lg font-bold mb-4 text-[#f59e0b]">⚡ Закон Ома (ВАХ)</h3>
-                        <div class="w-full h-40 mb-4 bg-black/20 rounded-xl p-2 border border-white/5">
-                            <canvas id="chart-sim3"></canvas>
+                    <!-- Падение мяча -->
+                    <div class="glass-card p-6 flex flex-col border border-white/5 hover:border-[#10b981]/50 transition-colors">
+                        <h3 class="text-xl font-bold mb-4 text-[#10b981]">🍎 Свободное падение</h3>
+                        <div class="relative w-full h-32 bg-black/40 border border-white/10 rounded-xl mb-6 overflow-hidden flex justify-center">
+                            <div class="absolute bottom-0 w-full h-3 bg-emerald-600/50"></div>
+                            <div id="sim2-ball" class="absolute top-0 w-6 h-6 bg-red-500 rounded-full shadow-[0_0_15px_#ef4444] transition-transform duration-75"></div>
                         </div>
-                        <div class="grid grid-cols-2 gap-4 mb-4 text-sm mt-auto">
-                            <div><label class="text-slate-400 block mb-1">Напр. U: <span id="sim3-u-val" class="text-white font-bold">100</span> В</label><input type="range" id="sim3-u" min="0" max="220" value="100" oninput="updateSim3()"></div>
-                            <div><label class="text-slate-400 block mb-1">Сопр. R: <span id="sim3-r-val" class="text-white font-bold">50</span> Ом</label><input type="range" id="sim3-r" min="10" max="100" value="50" oninput="updateSim3()"></div>
+                        <div class="mb-6 text-sm">
+                            <label class="text-slate-400 block mb-1">Высота (H): <span id="sim2-h-val" class="text-white font-bold">50</span> м</label>
+                            <input type="range" id="sim2-h" min="10" max="200" value="50" oninput="updateSim2UI()">
                         </div>
-                        <div class="p-3 bg-brand-dark/80 rounded-lg border border-white/5 font-mono text-sm text-[#f59e0b] text-center font-bold">
-                            Ток I = <span id="sim3-i-val" class="text-xl">2.00</span> А
+                        <div class="flex gap-3 mb-4">
+                            <button onclick="startSim2()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold py-2.5 rounded-lg transition-colors shadow-lg">⬇ Бросить</button>
+                            <button onclick="resetSim2()" class="flex-1 bg-white/10 hover:bg-white/20 text-white font-semibold py-2.5 rounded-lg transition-colors">Поднять</button>
                         </div>
-                    </div>
-
-                    <!-- Опыт 4: Математический маятник -->
-                    <div class="glass-card p-6 flex flex-col border-t-2 border-[#ec4899]">
-                        <h3 class="text-lg font-bold mb-4 text-[#ec4899]">⏳ Период маятника</h3>
-                        <div class="w-full h-40 mb-4 bg-black/20 rounded-xl p-2 border border-white/5">
-                            <canvas id="chart-sim4"></canvas>
-                        </div>
-                        <div class="mb-4 text-sm mt-auto">
-                            <label class="text-slate-400 block mb-1">Длина нити (l): <span id="sim4-l-val" class="text-white font-bold">1.0</span> м</label>
-                            <input type="range" id="sim4-l" min="0.1" max="5" step="0.1" value="1" oninput="updateSim4()">
-                        </div>
-                        <div class="p-3 bg-brand-dark/80 rounded-lg border border-white/5 font-mono text-sm text-[#ec4899] text-center font-bold">
-                            Период T = <span id="sim4-t-val" class="text-xl">2.01</span> с
+                        <div class="mt-auto p-4 bg-brand-dark/80 rounded-lg border border-white/5 font-mono text-sm text-emerald-400 flex justify-between shadow-inner">
+                            <span>Время: <span id="sim2-t">0.00</span> с</span><span>Высота: <span id="sim2-cur-h">50.00</span> м</span>
                         </div>
                     </div>
                 </div>
@@ -285,9 +263,9 @@
         </main>
     </div>
 
-    <!-- СКРИПТЫ -->
+    <!-- ИЗОЛИРОВАННЫЙ БЛОК СКРИПТОВ -->
     <script>
-        // --- 1. ПАСХАЛКА ---
+        // --- 1. ПАСХАЛКА ЦВЕТОВ ---
         const saharColors = [
             'linear-gradient(90deg, #94a3b8 0%, #f8fafc 50%, #94a3b8 100%)', 
             'linear-gradient(90deg, #0ea5e9 0%, #ec4899 50%, #0ea5e9 100%)', 
@@ -326,7 +304,7 @@
                 ]
             },
             8: {
-                title: "8 класс: Теплота, Ток",
+                title: "8 класс: Теплота, Ток, Оптика",
                 topics: [
                     { name: "Нагрев и охлаждение", formula: "Q = c · m · dt", desc: "Кол-во теплоты.", vars: "c-уд. теплоемкость", example: { dano: "c = 4200, m = 2, dt = 50", sol: "Q = 4200 * 2 * 50", ans: "420000 Дж" }, calc: { vars: [{id:'c',name:'c'},{id:'m',name:'m'},{id:'t',name:'dt'}], expr:'c*m*t', unit:'Дж' } },
                     { name: "Сгорание топлива", formula: "Q = q · m", desc: "Топливо.", vars: "q-уд. сгорания", example: { dano: "q = 44000000, m = 2", sol: "Q = 44000000 * 2", ans: "88 МДж" }, calc: { vars: [{id:'q',name:'q'},{id:'m',name:'m'}], expr:'q*m', unit:'Дж' } },
@@ -359,19 +337,19 @@
                     { name: "2 закон Ньютона", formula: "F = m · a", desc: "Главный закон.", vars: "Сила и ускорение", example: { dano: "m = 5, a = 2", sol: "F = 5 * 2", ans: "10 Н" }, calc: { vars: [{id:'m',name:'m'},{id:'a',name:'a'}], expr:'m*a', unit:'Н' } },
                     { name: "3 закон Ньютона", formula: "F1 = -F2", desc: "Взаимодействие.", vars: "Действие = противодействию", example: { dano: "Я давлю с силой 50 Н", sol: "Стена давит в ответ", ans: "50 Н" } },
                     { name: "Свободное падение", formula: "h = g · t² / 2", desc: "Вниз.", vars: "g=9.8", example: { dano: "t = 3", sol: "h = 9.8 * 9 / 2", ans: "44.1 м" }, calc: { vars: [{id:'t',name:'t'}], expr:'9.8*t*t/2', unit:'м' } },
-                    { name: "Вес с ускорением", formula: "P = m · (g ± a)", desc: "Перегрузка.", vars: "В лифте", example: { dano: "m=50, a=2 (вверх)", sol: "P = 50 * (9.8 + 2)", ans: "590 Н" }, calc: { vars: [{id:'m',name:'m'},{id:'a',name:'a'}], expr:'m*(9.8+a)', unit:'Н' } },
+                    { name: "Вес тела с ускор.", formula: "P = m · (g ± a)", desc: "Перегрузка.", vars: "В лифте", example: { dano: "m=50, a=2 (вверх)", sol: "P = 50 * (9.8 + 2)", ans: "590 Н" }, calc: { vars: [{id:'m',name:'m'},{id:'a',name:'a'}], expr:'m*(9.8+a)', unit:'Н' } },
                     { name: "Центростремит.", formula: "a_ц = v² / R", desc: "По кругу.", vars: "R-радиус", example: { dano: "v=10, R=2", sol: "a = 100 / 2", ans: "50 м/с²" }, calc: { vars: [{id:'v',name:'v'},{id:'r',name:'R'}], expr:'v*v/r', unit:'м/с²' } },
                     { name: "Гравитация", formula: "F = G · m1 · m2 / R²", desc: "Тяготение.", vars: "G=6.67e-11", example: { dano: "m1=m2=1e5, R=10", sol: "F = 6.67e-11 * 1e10 / 100", ans: "6.67 мН" }, calc: { vars: [{id:'m1',name:'m1'},{id:'m2',name:'m2'},{id:'r',name:'R'}], expr:'6.67e-11*m1*m2/(r*r)', unit:'Н' } },
-                    { name: "Импульс", formula: "p = m · v", desc: "Движение.", vars: "Вектор", example: { dano: "m = 1000, v = 20", sol: "p = 1000 * 20", ans: "20000 кг·м/с" }, calc: { vars: [{id:'m',name:'m'},{id:'v',name:'v'}], expr:'m*v', unit:'-' } },
+                    { name: "Импульс", formula: "p = m · v", desc: "Количество движения.", vars: "Вектор", example: { dano: "m = 1000, v = 20", sol: "p = 1000 * 20", ans: "20000 кг·м/с" }, calc: { vars: [{id:'m',name:'m'},{id:'v',name:'v'}], expr:'m*v', unit:'-' } },
                     { name: "ЗСИ", formula: "m1·v1 + m2·v2 = const", desc: "Столкновения.", vars: "Замкнутая система", example: { dano: "Неупругий удар", sol: "Импульс до = импульсу после", ans: "Уравнение" } },
                     { name: "Мат. маятник", formula: "T = 2π√(l / g)", desc: "Период.", vars: "Не зависит от массы", example: { dano: "l = 1 м, g = 9.8", sol: "T = 2*3.14*√(1/9.8)", ans: "2.01 с" }, calc: { vars: [{id:'l',name:'l'}], expr:'2*Math.PI*Math.sqrt(l/9.8)', unit:'с' } }
                 ]
             },
             10: {
-                title: "10 класс: МКТ и Термодинамика",
+                title: "10 класс: МКТ",
                 topics: [
                     { name: "Кол-во вещества", formula: "v = m / M", desc: "Моли.", vars: "M-молярная масса", example: { dano: "m=36 г, M=18 г/моль", sol: "v = 36 / 18", ans: "2 моль" }, calc: { vars: [{id:'m',name:'m'},{id:'M',name:'M'}], expr:'m/M', unit:'моль' } },
-                    { name: "Основное МКТ", formula: "p = 1/3 · n · m0 · v²", desc: "Давление.", vars: "n-концентрация", example: { dano: "В задаче дана энергия", sol: "p = 2/3 n Ek", ans: "Уравнение" } },
+                    { name: "Основное МКТ", formula: "p = 1/3 · n · m0 · v²", desc: "Давление газа.", vars: "n-концентрация", example: { dano: "В задаче дана энергия", sol: "p = 2/3 n Ek", ans: "Уравнение" } },
                     { name: "Менделеев-К.", formula: "p · V = (m/M) · R · T", desc: "Ид. газ.", vars: "R=8.31", example: { dano: "m=M, T=300, V=0.083", sol: "p = 8.31*300/0.083", ans: "30000 Па" }, calc: { vars: [{id:'n',name:'моли'},{id:'t',name:'T'},{id:'v',name:'V'}], expr:'n*8.31*t/v', unit:'Па' } },
                     { name: "Изотерма", formula: "p1 · V1 = p2 · V2", desc: "T=const.", vars: "Бойль-Мариотт", example: { dano: "p1=100, V1=2, V2=1", sol: "p2 = 100 * 2 / 1", ans: "200" } },
                     { name: "Изобара", formula: "V1 / T1 = V2 / T2", desc: "p=const.", vars: "Гей-Люссак", example: { dano: "V1=2, T1=300, T2=600", sol: "V2 = 2 * 600 / 300", ans: "4" } },
@@ -390,102 +368,62 @@
                 topics: [
                     { name: "Сила Ампера", formula: "F_А = I · B · l", desc: "Магнит и ток.", vars: "B-индукция", example: { dano: "I=2, B=0.1, l=1", sol: "F = 2*0.1*1", ans: "0.2 Н" }, calc: { vars: [{id:'i',name:'I'},{id:'b',name:'B'},{id:'l',name:'l'}], expr:'i*b*l', unit:'Н' } },
                     { name: "Сила Лоренца", formula: "F_Л = q · v · B", desc: "На заряд.", vars: "В поле", example: { dano: "q=1, v=10, B=2", sol: "F = 1*10*2", ans: "20 Н" }, calc: { vars: [{id:'q',name:'q'},{id:'v',name:'v'},{id:'b',name:'B'}], expr:'q*v*b', unit:'Н' } },
-                    { name: "Радиус орбиты", formula: "r = m · v / (q · B)", desc: "Частица.", vars: "Следствие", example: { dano: "-", sol: "-", ans: "-" } },
                     { name: "Магнитный поток", formula: "Ф = B · S", desc: "Линии.", vars: "Через контур", example: { dano: "B=0.2, S=0.5", sol: "Ф = 0.2 * 0.5", ans: "0.1 Вб" }, calc: { vars: [{id:'b',name:'B'},{id:'s',name:'S'}], expr:'b*s', unit:'Вб' } },
                     { name: "ЭДС Индукции", formula: "E = dФ / dt", desc: "Фарадей.", vars: "Ток", example: { dano: "dФ=0.4, dt=2", sol: "E = 0.4 / 2", ans: "0.2 В" }, calc: { vars: [{id:'df',name:'dФ'},{id:'dt',name:'dt'}], expr:'df/dt', unit:'В' } },
                     { name: "Самоиндукция", formula: "E = L · dI / dt", desc: "Катушка.", vars: "L-Генри", example: { dano: "L=2, dI=5, dt=1", sol: "E = 2 * 5 / 1", ans: "10 В" }, calc: { vars: [{id:'l',name:'L'},{id:'di',name:'dI'},{id:'dt',name:'dt'}], expr:'l*di/dt', unit:'В' } },
                     { name: "Энергия поля", formula: "W = L · I² / 2", desc: "Магнитного.", vars: "Внутри катушки", example: { dano: "L=2, I=3", sol: "W = 2 * 9 / 2", ans: "9 Дж" }, calc: { vars: [{id:'l',name:'L'},{id:'i',name:'I'}], expr:'l*i*i/2', unit:'Дж' } },
                     { name: "Томсон", formula: "T = 2π√(L · C)", desc: "Контур.", vars: "Колебания", example: { dano: "L=1 Гн, C=1 мкФ", sol: "T = 2 * 3.14 * √(1 * 1e-6)", ans: "0.006 с" } },
-                    { name: "Трансформатор", formula: "k = U1 / U2", desc: "Напряжение.", vars: "Коэффициент", example: { dano: "U1=220, U2=11", sol: "k = 220 / 11", ans: "20" }, calc: { vars: [{id:'u1',name:'U1'},{id:'u2',name:'U2'}], expr:'u1/u2', unit:'-' } },
                     { name: "Тонкая линза", formula: "1/F = 1/d + 1/f", desc: "Оптика.", vars: "Фокус", example: { dano: "F=10, d=30", sol: "1/f = 1/10 - 1/30", ans: "15 см" } },
-                    { name: "Опт. сила", formula: "D = 1 / F", desc: "Диоптрии.", vars: "F в метрах", example: { dano: "F=0.5", sol: "D = 1 / 0.5", ans: "2 дптр" }, calc: { vars: [{id:'f',name:'F'}], expr:'1/f', unit:'дптр' } },
                     { name: "Энергия фотона", formula: "E = h · v", desc: "Свет.", vars: "h = 6.63e-34", example: { dano: "v = 5e14 Гц", sol: "E = 6.63e-34 * 5e14", ans: "3.3e-19 Дж" }, calc: { vars: [{id:'n',name:'Частота'}], expr:'6.63e-34*n', unit:'Дж' } },
-                    { name: "Фотоэффект", formula: "h · v = A + E_к", desc: "Эйнштейн.", vars: "Выбивание электрона", example: { dano: "Свет 3 эВ, Работа 2 эВ", sol: "E = 3 - 2", ans: "1 эВ" } },
                     { name: "Дефект масс", formula: "E = m · c²", desc: "Ядро.", vars: "1 аем = 931.5 МэВ", example: { dano: "m = 1 а.е.м.", sol: "E = 1 * 931.5", ans: "931.5 МэВ" }, calc: { vars: [{id:'m',name:'масса'}], expr:'m*931.5', unit:'МэВ' } }
                 ]
             }
         };
 
-        // --- БАЗА ЗАДАЧ ---
+        // --- 3. БАЗА ЗАДАЧ ---
         const tasksData = [
-            { q: "Автомобиль 1500 кг разгоняется с ускорением 2 м/с². Чему равна сила тяги (трения нет)?", hint: "F = m * a", ans: 3000, unit: "Н" },
-            { q: "Давление мальчика весом 400 Н, если площадь подошв 0.04 м²?", hint: "p = F / S", ans: 10000, unit: "Па" },
-            { q: "Работа подъемника: груз 500 Н на высоту 4 м.", hint: "A = F * s", ans: 2000, unit: "Дж" },
-            { q: "Сопротивление утюга при 220 В и токе 4 А?", hint: "R = U / I", ans: 55, unit: "Ом" },
-            { q: "Высота падения без нач. скорости ровно за 3 с (g=10).", hint: "h = g * t² / 2", ans: 45, unit: "м" }
+            { q: "Автомобиль массой 1500 кг разгоняется с ускорением 2 м/с². Чему равна сила тяги двигателя (трением пренебречь)?", hint: "Второй закон Ньютона: F = m · a", ans: 3000, unit: "Н" },
+            { q: "Какое давление на пол оказывает мальчик весом 400 Н, если площадь подошв его обуви 0.04 м²?", hint: "Давление твердых тел: p = F / S", ans: 10000, unit: "Па" },
+            { q: "Найди механическую работу, которую совершает подъемник, поднимая груз весом 500 Н на высоту 4 м.", hint: "Работа: A = F · s", ans: 2000, unit: "Дж" },
+            { q: "Чему равно сопротивление спирали утюга, если при напряжении 220 В сила тока равна 4 А?", hint: "Закон Ома: R = U / I", ans: 55, unit: "Ом" },
+            { q: "Тело свободно падает с высоты без начальной скорости ровно 3 секунды. С какой высоты оно упало? (Принять g = 10 м/с²)", hint: "Свободное падение: h = (g · t²) / 2", ans: 45, unit: "м" }
         ];
 
-        // --- ТЕСТ 30 ВОПРОС ---
+        // --- 4. ТЕСТ ---
         const allQuizQuestions = [
-            { q: "1. Единица силы тока?", options: ["Вольт", "Ватт", "Ампер", "Джоуль"], ans: 2 },
-            { q: "2. Второй закон Ньютона?", options: ["F = m*g", "F = m*a", "p = m*v", "A = F*s"], ans: 1 },
-            { q: "3. Ускорение свободного падения на Земле?", options: ["9.8 м/с²", "3.14 м/с²", "1.6 м/с²", "100 м/с²"], ans: 0 },
-            { q: "4. Сила выталкивающая из жидкости?", options: ["Тяжести", "Трения", "Упругости", "Архимедова"], ans: 3 },
-            { q: "5. Закон Ома для цепи?", options: ["P = U*I", "Q = I²*R*t", "I = U / R", "C = q / U"], ans: 2 },
-            { q: "6. Масса 3 кг, a=4 м/с². Сила?", options: ["12 Н", "7 Н", "0.75 Н", "1.33 Н"], ans: 0 },
-            { q: "7. Механическая работа?", options: ["A = F*s", "N = A / t", "M = F*l", "p = F / S"], ans: 0 },
-            { q: "8. Плотность?", options: ["ρ = m / V", "ρ = V / m", "ρ = m*V", "ρ = m*g"], ans: 0 },
-            { q: "9. Третий закон Ньютона?", options: ["v = const", "Действие = противодействию", "F = m*a", "Падают одинаково"], ans: 1 },
-            { q: "10. Частица НЕ в ядре?", options: ["Протон", "Нейтрон", "Электрон", "Входят все"], ans: 2 },
-            { q: "11. Единицы давления?", options: ["Ньютоны", "Паскали", "Джоули", "Ватты"], ans: 1 },
-            { q: "12. Менделеев-Клапейрон?", options: ["Q = c*m*Δt", "p*V = (m/M)*R*T", "F = G*(m1*m2)/R²", "E = m*c²"], ans: 1 },
-            { q: "13. 220 В, 22 Ом. Ток?", options: ["10 А", "20 А", "4840 А", "0.1 А"], ans: 0 },
-            { q: "14. Энергия фотона?", options: ["E = m*c²", "E = m*g*h", "E = h*ν", "E = m*v²/2"], ans: 2 },
-            { q: "15. Единица мощности?", options: ["Паскаль", "Джоуль", "Ватт", "Вольт"], ans: 2 },
-            { q: "16. ЗСИ?", options: ["m1*v1 + m2*v2 = const", "E = const", "Q1 + Q2 = 0", "F = m*a"], ans: 0 },
-            { q: "17. Скорость света?", options: ["300 км/с", "300 000 км/с", "340 м/с", "0"], ans: 1 },
-            { q: "18. Изотермический процесс при пост...", options: ["Массе", "Давлении", "Температуре", "Объеме"], ans: 2 },
-            { q: "19. Единица сопротивления?", options: ["Ом", "Ампер", "Кулон", "Генри"], ans: 0 },
-            { q: "20. Измеряет напряжение?", options: ["Амперметр", "Вольтметр", "Барометр", "Динамометр"], ans: 1 },
-            { q: "21. Разложение света в радугу?", options: ["Отражение", "Преломление", "Дисперсия", "Дифракция"], ans: 2 },
-            { q: "22. Твердое в газ?", options: ["Плавление", "Сублимация", "Конденсация", "Кипение"], ans: 1 },
-            { q: "23. Кин. энергия?", options: ["m*g*h", "m*c²", "m*v² / 2", "k*x² / 2"], ans: 2 },
-            { q: "24. Измеряет атм. давление?", options: ["Манометр", "Барометр", "Ареометр", "Термометр"], ans: 1 },
-            { q: "25. Магнитное поле создается...", options: ["Зарядами", "Движ. зарядами", "Нейтронами", "Массой"], ans: 1 },
-            { q: "26. Груз 100 Н на 2 м. Работа?", options: ["50 Дж", "200 Дж", "102 Дж", "0 Дж"], ans: 1 },
-            { q: "27. Математический маятник зависит от...", options: ["Длины", "Массы", "Жесткости", "Амплитуды"], ans: 0 },
-            { q: "28. Плюс в ядре?", options: ["Протон", "Нейтрон", "Электрон", "Фотон"], ans: 0 },
-            { q: "29. Открыл ЭМИ?", options: ["Ньютон", "Эйнштейн", "Фарадей", "Резерфорд"], ans: 2 },
-            { q: "30. Сила Лоренца?", options: ["F = I*B*l", "F = q*v*B", "F = m*a", "F = m*g"], ans: 1 }
+            { q: "1. В каких единицах измеряется сила электрического тока?", options: ["Вольт", "Ватт", "Ампер", "Джоуль"], ans: 2 },
+            { q: "2. Какая формула выражает Второй закон Ньютона?", options: ["F = m · g", "F = m · a", "p = m · v", "A = F · s"], ans: 1 },
+            { q: "3. Чему примерно равно ускорение свободного падения на Земле?", options: ["9.8 м/с²", "3.14 м/с²", "1.6 м/с²", "100 м/с²"], ans: 0 },
+            { q: "4. Какая сила выталкивает погруженное тело из жидкости?", options: ["Сила тяжести", "Сила трения", "Сила упругости", "Архимедова сила"], ans: 3 },
+            { q: "5. Закон Ома для участка цепи:", options: ["P = U · I", "Q = I² · R · t", "I = U / R", "C = q / U"], ans: 2 },
+            { q: "6. Тело массой 3 кг движется с ускорением 4 м/с². Чему равна сила?", options: ["12 Н", "7 Н", "0.75 Н", "1.33 Н"], ans: 0 },
+            { q: "7. Как вычисляется механическая работа?", options: ["A = F · s", "N = A / t", "M = F · l", "p = F / S"], ans: 0 },
+            { q: "8. Формула плотности вещества:", options: ["ρ = m / V", "ρ = V / m", "ρ = m · V", "ρ = m · g"], ans: 0 },
+            { q: "9. В чем суть Третьего закона Ньютона?", options: ["v = const", "Действие равно противодействию", "F = m · a", "Падают одинаково"], ans: 1 },
+            { q: "10. Какая частица НЕ входит в состав атомного ядра?", options: ["Протон", "Нейтрон", "Электрон", "Входят все"], ans: 2 },
+            { q: "11. В каких единицах в СИ измеряется давление?", options: ["Ньютоны", "Паскали", "Джоули", "Ватты"], ans: 1 },
+            { q: "12. Уравнение Менделеева — Клапейрона:", options: ["Q = c·m·Δt", "p·V = (m/M)·R·T", "F = G(m1m2)/R²", "E = m·c²"], ans: 1 },
+            { q: "13. Напряжение 220 В, сопротивление 22 Ом. Чему равен ток?", options: ["10 А", "20 А", "4840 А", "0.1 А"], ans: 0 },
+            { q: "14. Формула энергии фотона:", options: ["E = m · c²", "E = m · g · h", "E = h · ν", "E = m · v² / 2"], ans: 2 },
+            { q: "15. Единица измерения мощности:", options: ["Паскаль", "Джоуль", "Ватт", "Вольт"], ans: 2 },
+            { q: "16. Закон сохранения импульса:", options: ["m1·v1 + m2·v2 = const", "E = const", "Q1 + Q2 = 0", "F = m · a"], ans: 0 },
+            { q: "17. Скорость света в вакууме:", options: ["300 км/с", "300 000 км/с", "340 м/с", "3000 км/с"], ans: 1 },
+            { q: "18. Изотермический процесс протекает при постоянной...", options: ["Массе", "Давлении", "Температуре", "Объеме"], ans: 2 },
+            { q: "19. Единица электрического сопротивления:", options: ["Ом", "Ампер", "Кулон", "Генри"], ans: 0 },
+            { q: "20. Каким прибором измеряют напряжение?", options: ["Амперметр", "Вольтметр", "Барометр", "Динамометр"], ans: 1 },
+            { q: "21. Разложение белого света в спектр:", options: ["Отражение", "Преломление", "Дисперсия", "Дифракция"], ans: 2 },
+            { q: "22. Переход вещества из твердого состояния в газообразное:", options: ["Плавление", "Сублимация", "Конденсация", "Кипение"], ans: 1 },
+            { q: "23. Формула кинетической энергии тела:", options: ["mgh", "mc²", "(mv²) / 2", "(kx²) / 2"], ans: 2 },
+            { q: "24. Прибор для измерения атмосферного давления:", options: ["Манометр", "Барометр", "Ареометр", "Термометр"], ans: 1 },
+            { q: "25. Магнитное поле порождается...", options: ["Покоящимися зарядами", "Движущимися зарядами", "Нейтронами", "Любой массой"], ans: 1 },
+            { q: "26. Груз 100 Н равномерно подняли на 2 м. Работа?", options: ["50 Дж", "200 Дж", "102 Дж", "0 Дж"], ans: 1 },
+            { q: "27. Период математического маятника зависит от...", options: ["Длины нити и g", "Массы груза", "Жесткости", "Амплитуды"], ans: 0 },
+            { q: "28. Положительно заряженная частица в ядре атома:", options: ["Протон", "Нейтрон", "Электрон", "Фотон"], ans: 0 },
+            { q: "29. Кто открыл явление электромагнитной индукции?", options: ["Ньютон", "Эйнштейн", "Фарадей", "Резерфорд"], ans: 2 },
+            { q: "30. Формула силы Лоренца:", options: ["F = IBl", "F = qvB sin(α)", "F = ma", "F = mg"], ans: 1 }
         ];
 
-        // --- ГРАФИКИ (CHART.JS) ---
-        let chart1, chart2, chart3, chart4;
-        function initCharts() {
-            Chart.defaults.color = '#94a3b8';
-            Chart.defaults.scale.grid.color = 'rgba(255,255,255,0.05)';
-            const cOpts = { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } } };
-
-            if(chart1) chart1.destroy();
-            chart1 = new Chart(document.getElementById('chart-sim1').getContext('2d'), {
-                type: 'line',
-                data: { datasets: [{ data: [], borderColor: '#3b82f6', tension: 0.4 }, { type: 'scatter', data: [], backgroundColor: '#ef4444', pointRadius: 5 }] },
-                options: { ...cOpts, scales: { x: { type: 'linear', title: { display: true, text: 'Время t (с)' } }, y: { title: { display: true, text: 'Путь x (м)' } } } }
-            });
-
-            if(chart2) chart2.destroy();
-            chart2 = new Chart(document.getElementById('chart-sim2').getContext('2d'), {
-                type: 'line',
-                data: { datasets: [{ data: [], borderColor: '#10b981', tension: 0.4 }, { type: 'scatter', data: [], backgroundColor: '#ef4444', pointRadius: 5 }] },
-                options: { ...cOpts, scales: { x: { type: 'linear', title: { display: true, text: 'Время t (с)' } }, y: { title: { display: true, text: 'Высота h (м)' } } } }
-            });
-
-            if(chart3) chart3.destroy();
-            chart3 = new Chart(document.getElementById('chart-sim3').getContext('2d'), {
-                type: 'line',
-                data: { datasets: [{ data: [], borderColor: '#f59e0b' }, { type: 'scatter', data: [], backgroundColor: '#ef4444', pointRadius: 5 }] },
-                options: { ...cOpts, scales: { x: { type: 'linear', title: { display: true, text: 'Напряжение U (В)' } }, y: { title: { display: true, text: 'Сила тока I (А)' } } } }
-            });
-
-            if(chart4) chart4.destroy();
-            chart4 = new Chart(document.getElementById('chart-sim4').getContext('2d'), {
-                type: 'line',
-                data: { datasets: [{ data: [], borderColor: '#8b5cf6', tension: 0.4 }, { type: 'scatter', data: [], backgroundColor: '#ef4444', pointRadius: 5 }] },
-                options: { ...cOpts, scales: { x: { type: 'linear', title: { display: true, text: 'Длина нити l (м)' } }, y: { title: { display: true, text: 'Период T (с)' } } } }
-            });
-        }
-
-        // --- УПРАВЛЕНИЕ UI И НАВИГАЦИЯ ---
+        // --- 5. УПРАВЛЕНИЕ НАВИГАЦИЕЙ ---
         const sidebar = document.getElementById('sidebar');
         function toggleSidebar() { sidebar.classList.toggle('-translate-x-full'); }
         function closeSidebarOnMobile() { if (window.innerWidth < 768) { sidebar.classList.add('-translate-x-full'); } }
@@ -499,7 +437,7 @@
         function move3DTo(targetId) {
             const wrapper = document.getElementById('global-3d-wrapper');
             const target = document.getElementById(targetId);
-            if(target && wrapper.parentNode !== target) {
+            if (target && wrapper.parentNode !== target) {
                 target.appendChild(wrapper);
                 wrapper.classList.remove('hidden');
             }
@@ -519,10 +457,10 @@
             let shuffled = allTopics.sort(() => 0.5 - Math.random()).slice(0, 6);
             let html = '';
             shuffled.forEach((t, i) => {
-                html += `<div class="glass-card p-6 flex flex-col justify-between hover:border-brand-neon hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all cursor-default fade-in" style="animation-delay: ${i*0.05}s">
-                    <h3 class="text-sm font-bold text-white mb-4 line-clamp-1">${t.name}</h3>
-                    <div class="flex-1 flex items-center justify-center py-4 border-y border-white/5 bg-black/20 my-2 rounded"><span class="math-text text-brand-neon text-center w-full break-words">${t.formula}</span></div>
-                    <p class="text-xs text-slate-400 mt-3 mb-4 line-clamp-2">${t.desc}</p>
+                html += `<div onclick="loadClass(${t.grade})" class="glass-card p-6 flex flex-col justify-between cursor-pointer fade-in" style="animation-delay: ${i*0.04}s">
+                    <h3 class="text-sm font-bold text-white mb-3">${t.name}</h3>
+                    <div class="flex-1 flex items-center justify-center py-4 px-2 border-y border-white/5 bg-black/20 my-2 rounded-lg"><span class="math-text text-brand-neon text-center">${t.formula}</span></div>
+                    <p class="text-xs text-slate-400 mt-3 mb-4">${t.desc}</p>
                     <div class="mt-auto"><span class="bg-brand-neon/20 border border-brand-neon/30 text-brand-neon px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">${t.grade} класс</span></div>
                 </div>`;
             });
@@ -544,9 +482,10 @@
                 let calcHtml = '';
                 if (t.calc) {
                     let inputs = t.calc.vars.map(v => `<input type="number" placeholder="${v.name}" data-var="${v.id}" class="calc-input bg-brand-dark border border-white/10 rounded-lg px-3 py-2 text-white text-sm outline-none focus:border-brand-neon transition-colors">`).join('');
-                    calcHtml = `<div class="mt-5 border-t border-white/5 pt-4"><button onclick="this.nextElementSibling.classList.toggle('hidden')" class="flex items-center gap-2 text-xs font-bold text-brand-neon bg-brand-neon/10 px-4 py-2.5 rounded-lg border border-brand-neon/20 hover:bg-brand-neon/20 transition-colors w-full justify-center">🧮 Умный калькулятор</button><div class="hidden mt-3 p-4 bg-black/40 rounded-xl border border-white/5"><div class="grid grid-cols-2 gap-3 mb-3">${inputs}</div><button onclick="calcResult(this, '${t.calc.expr}')" class="w-full bg-brand-neon hover:bg-blue-500 text-white font-bold py-2 rounded-lg text-sm transition-colors mb-2 shadow-lg shadow-blue-500/20">Рассчитать</button><div class="text-sm font-bold text-center mt-2">Ответ: <span class="calc-result text-brand-neon text-lg">...</span> <span class="text-xs text-slate-500">${t.calc.unit}</span></div></div></div>`;
+                    calcHtml = `<div class="mt-5 border-t border-white/5 pt-4"><button onclick="this.nextElementSibling.classList.toggle('hidden')" class="flex items-center gap-2 text-xs font-bold text-brand-neon bg-brand-neon/10 px-4 py-2.5 rounded-lg border border-brand-neon/20 hover:bg-brand-neon/20 transition-colors w-full justify-center">🧮 Открыть умный калькулятор</button><div class="hidden mt-3 p-4 bg-black/40 rounded-xl border border-white/5"><div class="grid grid-cols-2 gap-3 mb-3">${inputs}</div><button onclick="calcResult(this, '${t.calc.expr}')" class="w-full bg-brand-neon hover:bg-blue-500 text-white font-bold py-2 rounded-lg text-sm transition-colors mb-2">Посчитать</button><div class="text-sm font-bold text-center mt-2">Результат: <span class="calc-result text-brand-neon text-lg">...</span> <span class="text-xs text-slate-400">${t.calc.unit}</span></div></div></div>`;
                 }
-                html += `<div class="glass-card p-6 md:p-8 fade-in flex flex-col justify-between" style="animation-delay: ${i*0.03}s">
+
+                html += `<div class="glass-card p-6 fade-in flex flex-col justify-between" style="animation-delay: ${i*0.03}s">
                         <div>
                             <div class="flex justify-between items-start mb-3"><h3 class="text-lg font-bold text-white">${t.name}</h3><span class="text-slate-500 font-mono text-xs">#${i+1}</span></div>
                             <p class="text-slate-400 text-sm mb-5">${t.desc}</p>
@@ -584,10 +523,14 @@
             });
             document.getElementById('tasks-container').innerHTML = html;
         }
+
         function checkTask(idx, correct) {
             const input = document.getElementById(`task-ans-${idx}`); const resDiv = document.getElementById(`task-res-${idx}`);
-            if(parseFloat(input.value) === correct) { resDiv.innerHTML = "✅ <b>Правильно!</b>"; resDiv.className = "mt-3 p-3 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-sm block fade-in"; }
-            else { resDiv.innerHTML = "❌ <b>Неверно.</b>"; resDiv.className = "mt-3 p-3 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30 text-sm block fade-in"; }
+            if(parseFloat(input.value) === correct) {
+                resDiv.innerHTML = "✅ <b>Правильно!</b> Задача решена верно."; resDiv.className = "mt-3 p-3 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-sm block fade-in";
+            } else {
+                resDiv.innerHTML = "❌ <b>Неверно.</b> Проверьте расчеты по подсказке."; resDiv.className = "mt-3 p-3 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30 text-sm block fade-in";
+            }
         }
 
         // --- ПОИСК ---
@@ -645,75 +588,89 @@
             document.getElementById('quiz-content').innerHTML = `<div class="text-center py-8 fade-in"><div class="text-6xl mb-4">🎓</div><h4 class="text-2xl text-white font-extrabold mb-3">Тест завершен</h4><p class="text-4xl text-emerald-400 font-black mb-4">${qScore} / 30</p><p class="text-slate-300 text-sm mb-8">${msg}</p><button onclick="goHome()" class="px-8 py-3 bg-brand-neon text-white font-bold rounded-full text-sm">На главную</button></div>`;
         }
 
-        // --- ЛАБОРАТОРИЯ (СИМУЛЯЦИИ + ГРАФИКИ) ---
-        let sim1 = { run: false, x: 0, v: 0, a: 4, t: 0, lastTime: 0, req: null };
-        let sim2 = { run: false, h: 100, curH: 100, t: 0, lastTime: 0, req: null };
+        // --- ЛАБОРАТОРИЯ (ЖЕСТКАЯ МАТЕМАТИКА ЧЕРЕЗ SETINTERVAL) ---
+        let sim1 = { run: false, interval: null, x: 0, v: 0, a: 10, v0: 0, t: 0 };
+        let sim2 = { run: false, interval: null, h: 50, curH: 50, t: 0 };
 
         function loadLab() {
             hideAll(); closeSidebarOnMobile(); document.getElementById('lab-section').classList.remove('hidden'); 
             document.getElementById('nav-lab').classList.add('active');
             move3DTo('target-lab'); spawn3DModel('lab'); document.getElementById('main-scroll').scrollTo(0,0);
-            initCharts(); resetSim1(); resetSim2(); updateSim3(); updateSim4();
+            resetSim1(); resetSim2();
         }
-        function stopAllSims() { sim1.run = false; if(sim1.req) cancelAnimationFrame(sim1.req); sim2.run = false; if(sim2.req) cancelAnimationFrame(sim2.req); }
+        function stopAllSims() {
+            sim1.run = false; clearInterval(sim1.interval);
+            sim2.run = false; clearInterval(sim2.interval);
+        }
 
         function updateSim1UI() {
-            if(!sim1.run) { sim1.v = parseFloat(document.getElementById('sim1-v0').value); sim1.a = parseFloat(document.getElementById('sim1-a').value); document.getElementById('sim1-v0-val').innerText = sim1.v; document.getElementById('sim1-a-val').innerText = sim1.a; drawSim1(); updateChart1(); }
+            if(!sim1.run) {
+                sim1.v0 = parseFloat(document.getElementById('sim1-v0').value);
+                sim1.a = parseFloat(document.getElementById('sim1-a').value);
+                document.getElementById('sim1-v0-val').innerText = sim1.v0;
+                document.getElementById('sim1-a-val').innerText = sim1.a;
+            }
         }
-        function resetSim1() { sim1.run = false; if(sim1.req) cancelAnimationFrame(sim1.req); sim1.t = 0; sim1.x = 0; updateSim1UI(); }
-        function startSim1() { if(sim1.run) return; sim1.run = true; sim1.lastTime = performance.now(); sim1.req = requestAnimationFrame(loopSim1); }
-        function loopSim1(now) {
-            if(!sim1.run) return; let dt = (now - sim1.lastTime)/1000; sim1.lastTime = now; if(dt>0.1) dt=0.016;
-            sim1.t += dt; sim1.v += sim1.a * dt; sim1.x += sim1.v * dt; drawSim1(); updateChart1Point();
-            if(sim1.x > 100 || sim1.x < -10) { sim1.run = false; } else { sim1.req = requestAnimationFrame(loopSim1); }
+        function resetSim1() {
+            sim1.run = false; clearInterval(sim1.interval);
+            sim1.t = 0; sim1.x = 0; sim1.v = parseFloat(document.getElementById('sim1-v0').value);
+            updateSim1UI(); drawSim1();
+        }
+        function startSim1() {
+            if (sim1.run) return;
+            sim1.run = true;
+            sim1.v0 = parseFloat(document.getElementById('sim1-v0').value);
+            sim1.a = parseFloat(document.getElementById('sim1-a').value);
+            clearInterval(sim1.interval);
+            sim1.interval = setInterval(() => {
+                sim1.t += 0.02; // 20 мс
+                sim1.v = sim1.v0 + sim1.a * sim1.t;
+                sim1.x = sim1.v0 * sim1.t + 0.5 * sim1.a * sim1.t * sim1.t;
+                if (sim1.x > 100 || sim1.x < -10) { sim1.run = false; clearInterval(sim1.interval); }
+                drawSim1();
+            }, 20);
         }
         function drawSim1() {
-            let box = document.getElementById('sim1-car'); let px = (sim1.x / 100) * 88; if(px > 88) px=88; if(px < 0) px=0;
-            box.style.left = px + '%'; document.getElementById('sim1-t').innerText = sim1.t.toFixed(2); document.getElementById('sim1-x').innerText = sim1.x.toFixed(2); document.getElementById('sim1-v').innerText = sim1.v.toFixed(2);
+            let box = document.getElementById('sim1-car');
+            let px = (sim1.x / 100) * 85; if(px > 85) px = 85; if(px < 0) px = 0;
+            box.style.transform = `translateX(${px * 3.5}px)`; // Двигаем через трансформ для плавности
+            document.getElementById('sim1-t').innerText = sim1.t.toFixed(2);
+            document.getElementById('sim1-x').innerText = sim1.x.toFixed(2);
+            document.getElementById('sim1-v').innerText = sim1.v.toFixed(2);
         }
-        function updateChart1() {
-            let pts = []; for(let t=0; t<=10; t+=0.5) pts.push({x: t, y: sim1.v*t + 0.5*sim1.a*t*t});
-            if(chart1) { chart1.data.datasets[0].data = pts; chart1.data.datasets[1].data = [{x: 0, y: 0}]; chart1.update(); }
-        }
-        function updateChart1Point() { if(chart1) { chart1.data.datasets[1].data = [{x: sim1.t, y: sim1.x}]; chart1.update(); } }
 
         function updateSim2UI() {
-            if(!sim2.run) { sim2.h = parseFloat(document.getElementById('sim2-h').value); sim2.curH = sim2.h; document.getElementById('sim2-h-val').innerText = sim2.h; drawSim2(); updateChart2(); }
+            if(!sim2.run) {
+                sim2.h = parseFloat(document.getElementById('sim2-h').value);
+                sim2.curH = sim2.h;
+                document.getElementById('sim2-h-val').innerText = sim2.h;
+                drawSim2();
+            }
         }
-        function resetSim2() { sim2.run = false; if(sim2.req) cancelAnimationFrame(sim2.req); sim2.t = 0; updateSim2UI(); }
-        function startSim2() { if(sim2.run) return; sim2.run = true; sim2.lastTime = performance.now(); sim2.req = requestAnimationFrame(loopSim2); }
-        function loopSim2(now) {
-            if(!sim2.run) return; let dt = (now - sim2.lastTime)/1000; sim2.lastTime = now; if(dt>0.1) dt=0.016;
-            sim2.t += dt; let drop = (9.8 * sim2.t * sim2.t) / 2; sim2.curH = sim2.h - drop;
-            if(sim2.curH <= 0) { sim2.curH = 0; sim2.run = false; } drawSim2(); updateChart2Point();
-            if(sim2.run) sim2.req = requestAnimationFrame(loopSim2);
+        function resetSim2() {
+            sim2.run = false; clearInterval(sim2.interval);
+            sim2.t = 0; updateSim2UI();
+        }
+        function startSim2() {
+            if (sim2.run) return;
+            sim2.run = true;
+            clearInterval(sim2.interval);
+            sim2.interval = setInterval(() => {
+                sim2.t += 0.02; // 20 мс
+                sim2.curH = sim2.h - (0.5 * 9.8 * sim2.t * sim2.t);
+                if (sim2.curH <= 0) { sim2.curH = 0; sim2.run = false; clearInterval(sim2.interval); }
+                drawSim2();
+            }, 20);
         }
         function drawSim2() {
-            let ball = document.getElementById('sim2-ball'); let percentY = ((sim2.h - sim2.curH) / 200) * 100; if(percentY > 80) percentY = 80;
-            ball.style.top = percentY + '%'; document.getElementById('sim2-t').innerText = sim2.t.toFixed(2); document.getElementById('sim2-cur-h').innerText = sim2.curH.toFixed(2);
-        }
-        function updateChart2() {
-            let pts = []; let tMax = Math.sqrt(2*sim2.h/9.8);
-            for(let t=0; t<=tMax; t+=tMax/10) pts.push({x: t, y: sim2.h - 9.8*t*t/2});
-            if(chart2) { chart2.data.datasets[0].data = pts; chart2.data.datasets[1].data = [{x: 0, y: sim2.h}]; chart2.update(); }
-        }
-        function updateChart2Point() { if(chart2) { chart2.data.datasets[1].data = [{x: sim2.t, y: sim2.curH}]; chart2.update(); } }
-
-        function updateSim3() {
-            let u = parseFloat(document.getElementById('sim3-u').value); let r = parseFloat(document.getElementById('sim3-r').value);
-            document.getElementById('sim3-u-val').innerText = u; document.getElementById('sim3-r-val').innerText = r; document.getElementById('sim3-i-val').innerText = (u/r).toFixed(2);
-            let pts = []; for(let v=0; v<=220; v+=20) pts.push({x: v, y: v/r});
-            if(chart3) { chart3.data.datasets[0].data = pts; chart3.data.datasets[1].data = [{x: u, y: u/r}]; chart3.update(); }
+            let ball = document.getElementById('sim2-ball');
+            let percentY = ((sim2.h - sim2.curH) / 200) * 100; if (percentY > 80) percentY = 80;
+            ball.style.transform = `translateY(${percentY * 1.5}px)`; // Плавное движение вниз
+            document.getElementById('sim2-t').innerText = sim2.t.toFixed(2);
+            document.getElementById('sim2-cur-h').innerText = sim2.curH.toFixed(2);
         }
 
-        function updateSim4() {
-            let l = parseFloat(document.getElementById('sim4-l').value); document.getElementById('sim4-l-val').innerText = l.toFixed(1);
-            let T = 2 * Math.PI * Math.sqrt(l / 9.8); document.getElementById('sim4-t-val').innerText = T.toFixed(2);
-            let pts = []; for(let len=0.1; len<=5; len+=0.5) pts.push({x: len, y: 2*Math.PI*Math.sqrt(len/9.8)});
-            if(chart4) { chart4.data.datasets[0].data = pts; chart4.data.datasets[1].data = [{x: l, y: T}]; chart4.update(); }
-        }
-
-        // --- НАДЕЖНЫЙ 3D-ДВИЖОК ---
+        // --- 6. НАДЕЖНЫЙ 3D-ДВИЖОК ---
         let scene, camera, renderer, currentMesh, pointLight;
         let targetRotX = 0, targetRotY = 0;
         let atomElectrons = [];
@@ -727,14 +684,16 @@
             if (scene) return;
             const container = document.getElementById('model-3d-container');
             scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000); camera.position.z = 6;
+            camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+            camera.position.z = 5.5;
             renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
             renderer.setSize(220, 220);
-            container.innerHTML = '';
             container.appendChild(renderer.domElement);
 
-            pointLight = new THREE.PointLight(0x3b82f6, 2.5, 100); pointLight.position.set(5, 5, 5);
-            scene.add(pointLight); scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+            pointLight = new THREE.PointLight(0x3b82f6, 2.5, 100);
+            pointLight.position.set(5, 5, 5);
+            scene.add(pointLight);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
             requestAnimationFrame(animate3D);
         }
 
@@ -746,9 +705,31 @@
             }
             atomElectrons.forEach(el => {
                 el.angle += el.speed;
-                el.mesh.position.set(Math.cos(el.angle) * 2.1, Math.sin(el.angle) * 2.1, 0);
+                el.mesh.position.set(Math.cos(el.angle) * 1.9, Math.sin(el.angle) * 1.9, 0);
             });
             if (renderer && scene && camera) renderer.render(scene, camera);
+        }
+
+        const atomColors = [0x3b82f6, 0x10b981, 0x8b5cf6, 0xec4899, 0xf59e0b];
+        let atomColorIdx = 0;
+        function change3DColor() {
+            atomColorIdx = (atomColorIdx + 1) % atomColors.length;
+            let hex = atomColors[atomColorIdx];
+            if(pointLight) pointLight.color.setHex(hex);
+            document.documentElement.style.setProperty('--glow-color', '#' + hex.toString(16).padStart(6, '0') + '55');
+            
+            if(currentMesh) {
+                currentMesh.children.forEach(child => {
+                    if(child.type === 'Mesh' && child.material) {
+                        child.material.color.setHex(hex);
+                        if(child.material.emissive) child.material.emissive.setHex(hex);
+                    } else if(child.type === 'Group') {
+                        child.children.forEach(sub => {
+                            if(sub.material && sub.material.transparent) sub.material.color.setHex(hex);
+                        });
+                    }
+                });
+            }
         }
 
         function spawn3DModel(type) {
@@ -762,31 +743,44 @@
             currentMesh = new THREE.Group();
 
             if (type === 'main') {
-                let nuc = new THREE.Mesh(new THREE.SphereGeometry(0.55, 16, 16), new THREE.MeshStandardMaterial({ color: colorHex, wireframe: true, emissive: colorHex, emissiveIntensity: 0.8 }));
-                nuc.name = 'nuc';
+                let nuc = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.5, 16, 16),
+                    new THREE.MeshStandardMaterial({ color: colorHex, wireframe: true, emissive: colorHex, emissiveIntensity: 0.8 })
+                );
                 currentMesh.add(nuc);
 
                 for (let i = 0; i < 3; i++) {
                     let orbitGroup = new THREE.Group();
-                    orbitGroup.rotation.x = (i * Math.PI) / 3 + 0.4; orbitGroup.rotation.y = (i * Math.PI) / 4;
-                    orbitGroup.add(new THREE.Mesh(new THREE.TorusGeometry(2.1, 0.02, 8, 50), new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.45 })));
-                    let elMesh = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 12), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+                    orbitGroup.rotation.x = (i * Math.PI) / 3 + 0.4;
+                    orbitGroup.rotation.y = (i * Math.PI) / 4;
+
+                    let ring = new THREE.Mesh(
+                        new THREE.TorusGeometry(1.9, 0.02, 8, 50),
+                        new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.4 })
+                    );
+                    orbitGroup.add(ring);
+
+                    let elMesh = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.12, 12, 12),
+                        new THREE.MeshBasicMaterial({ color: 0x38bdf8 })
+                    );
                     orbitGroup.add(elMesh);
                     atomElectrons.push({ mesh: elMesh, angle: i * 2, speed: 0.03 + i * 0.008 });
                     currentMesh.add(orbitGroup);
                 }
             } else {
                 let geo;
-                if (type === 7) geo = new THREE.BoxGeometry(2.1, 2.1, 2.1);
-                else if (type === 8) geo = new THREE.TorusGeometry(1.3, 0.45, 16, 40);
-                else if (type === 9) geo = new THREE.ConeGeometry(1.6, 2.5, 16);
-                else if (type === 10) geo = new THREE.SphereGeometry(1.7, 16, 16);
-                else if (type === 11) geo = new THREE.TorusKnotGeometry(1.05, 0.32, 64, 16);
-                else if (type === 'lab') geo = new THREE.TorusKnotGeometry(1.15, 0.35, 80, 16);
-                else if (type === 'tasks') geo = new THREE.OctahedronGeometry(1.9, 0);
-                else geo = new THREE.DodecahedronGeometry(1.8, 0);
+                if (type === 7) geo = new THREE.BoxGeometry(1.8, 1.8, 1.8);
+                else if (type === 8) geo = new THREE.TorusGeometry(1.2, 0.4, 16, 40);
+                else if (type === 9) geo = new THREE.ConeGeometry(1.4, 2.2, 16);
+                else if (type === 10) geo = new THREE.SphereGeometry(1.5, 16, 16);
+                else if (type === 11) geo = new THREE.TorusKnotGeometry(0.9, 0.28, 64, 16);
+                else if (type === 'lab') geo = new THREE.TorusKnotGeometry(1.0, 0.3, 80, 16);
+                else if (type === 'tasks') geo = new THREE.OctahedronGeometry(1.7, 0);
+                else geo = new THREE.DodecahedronGeometry(1.5, 0);
 
-                currentMesh.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: colorHex, wireframe: true, emissive: colorHex, emissiveIntensity: 0.7 })));
+                let mat = new THREE.MeshStandardMaterial({ color: colorHex, wireframe: true, emissive: colorHex, emissiveIntensity: 0.7 });
+                currentMesh.add(new THREE.Mesh(geo, mat));
             }
 
             pointLight.color.setHex(colorHex);
@@ -794,7 +788,10 @@
             scene.add(currentMesh);
         }
 
-        window.addEventListener('DOMContentLoaded', () => { init3D(); goHome(); });
+        window.addEventListener('DOMContentLoaded', () => {
+            init3D();
+            goHome();
+        });
     </script>
 </body>
 </html>
